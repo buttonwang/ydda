@@ -1,0 +1,215 @@
+	#{extends 'main.html'/}
+	<div class="l-clear"></div>
+        <div id="navtab1"  style="width:98%;border:1px solid #A3C0E8; ">
+            <table >
+                <tr>
+                    <td colspan="3"><div style="margin-top:10px" id="queryDiv"> &nbsp;&nbsp;<b>查询条件:</b>
+                            &nbsp;&nbsp;科室搜索：&nbsp;&nbsp<input id="deptQuery" name="deptQuery" type="text" value="" size="13" onkeydown="EnterPress(event,3)"/>
+                            &nbsp;&nbsp;用户名检索：<input id="nameQuery" name="nameQuery" type="text" value="" size="13" onkeydown="EnterPress(event,1)"/> 
+                            &nbsp;&nbsp;姓名检索：&nbsp;&nbsp<input id="realNameQuery" name="realNameQuery" type="text" value="" size="13" onkeydown="EnterPress(event,2)"/>
+                        </br><br/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3"><div id="maingrid1" style="margin-top:1px"></div></td>            
+                   
+                </tr>
+                <tr>
+                    <td><div id="maingrid2" style="margin-top:1px"></div> </td>
+                    <td align="center">
+                        &nbsp;<input type="button" value="增加" onclick="add()"/>
+                        &nbsp;&nbsp;
+                        &nbsp;<input type="button" value="删除" onclick="remove()"/>
+                    </td>
+                    <td> <div id="maingrid3" style="margin-top:1px"></div></td>
+                </tr>
+               
+           </table>
+        
+        </div>
+        <br />
+  
+    <div style="display:none;"></div>
+    <div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+    
+    <script type="text/javascript">
+    
+    var manager, user_grid,griding,grided;
+    $(function () {
+         /* 
+        var categorys = [{ id: 1, name: '医师' }, { id: 2, name: '护士'},
+                         { id: 3, name: '医技人员' }, { id: 4, name: '其他'}];
+       */
+           
+        function f_initGrid() 
+        {
+            user_grid = manager = $("#maingrid1").ligerGrid({
+            columns: [
+            { display: '编号', name: 'id', width: 50, type: 'int' },
+            { display: '用户名', name: 'name', width: 120, type: 'textarea' }, 
+            { display: '姓名', name: 'realName', width: 120, type: 'textarea' } ,
+            { display: '科室', name: 'dept', width: 120, type: 'string',
+                render: function (item)
+                {
+                	if (item.dept) return item.dept.name;
+                	return '';
+                }
+        
+            }, 
+            { display: '专业类别', name: 'IdentType', width: 120, type: 'textarea',
+            render: function(item)
+            {
+                if(item.IdentType) return item.IdentType;
+                return '';
+            }
+              /*
+             render: function (item)
+                {                                        
+                  for (var i = 0; i < categorys.length; i++) {          
+                      if (item.category == categorys[i].id)
+                          //if (item.category == categorys[i].name)
+                      return categorys[i].name;          
+                  };                   
+                  return '';
+                }
+            */
+            } 
+            
+            ],
+            url: "/users/json",  method: "GET", height:"300", title:"用户列表",     
+            width: '100%', pageSize:"30",onSelectRow:showModes
+           
+            });   
+                
+             griding = manager = $("#maingrid2").ligerGrid({
+            columns: [
+            { display: '编号', name: '1', width: 50, type: 'int' },
+            { display: '角色名称', name: '2', width: 160, type: 'textarea' },
+            { display: '备注', name: '3', width: 100, type: 'textarea' },
+            { display: '用户代码', name: '0', width: 100, type: 'hidden' }
+         
+            
+            ],
+                       
+            width: '100%',height:"240",title:"未授权角色列表"     
+          
+           });         
+
+             grided = manager = $("#maingrid3").ligerGrid({
+            columns: [
+            { display: '编号', name: '1', width: 50, type: 'int' },
+            { display: '角色名称', name: '2', width: 160, type: 'textarea' },
+            { display: '备注', name: '3', width: 100, type: 'textarea' },
+            { display: '用户代码', name: '0', width: 100, type: 'hidden' }
+          
+            ],
+            height:"240",                    
+            width: '100%',title:"已授权角色列表"    
+        	});              
+        }
+        
+        f_initGrid();
+           
+	})
+         function showModes()
+         {
+            var  row = user_grid.getSelectedRow();
+         
+                    var url = "getRoling/?id="+row.id+'&pageSize=50' ;
+                    $.getJSON(
+                    url,              
+                    function(jsondata) {    
+                        griding.setOptions({ data: jsondata }); 
+                        griding.loadData();
+                    });
+               
+                    var url = "getRoled/?id="+row.id+'&pageSize=50' ;
+                    $.getJSON(
+                    url,              
+                    function(jsondata) {    
+                    grided.setOptions({ data: jsondata }); 
+                    grided.loadData();
+                    }); 
+        }
+      
+        function add()
+        {
+             var  row = griding.getSelectedRow();
+             if (!row) { alert('请选择行'); return; }
+            // row[0] 用户代码  row[1] 角色代码
+                $.ajax({
+                  loading: '正在保存数据中...',
+                  type: 'POST',
+                  url: 'adduserr',                  
+                  data: {userid:row[0],id:row[1]},
+                  
+                  success: function ()
+                  {            
+                      LG.tip('增加成功!');
+                      showModes();
+                  },
+                  error: function (message)
+                  {
+                      LG.tip(message);
+                  }
+              });
+        }
+        function remove()
+        {
+             var  row=grided.getSelectedRow();
+             if (!row) { alert('请选择行'); return; }
+            // row[0] 用户代码  row[1] 角色代码
+                $.ajax({
+                  loading: '正在删除数据中...',
+                  type: 'DELETE',
+                  url: 'deluserr',                  
+                  data: {userid:row[0],id:row[1]},
+                  success: function ()
+                  {
+                           LG.tip('删除成功!');
+                           showModes();
+                  },
+                  error: function (message)
+                  {
+                      LG.tip(message);
+                  }
+              });
+            
+        }
+              
+        //根据用户名、姓名、科室查询
+         function EnterPress(event,type){             //IE8支持此方法
+        if(event.keyCode==13){    //回车键作为执行查询操作
+            var name="";
+            if(type==1){
+                name=$("#nameQuery").val(); 
+            }else if(type==2) {
+                name=$("#realNameQuery").val(); 
+            } else{
+                name=$("#deptQuery").val(); 
+            }                
+             $.ajax({
+                        loading: '正在查询中...',
+                        type: 'POST',
+                        url: '/queryjson',                  
+                        data: {name:name,type:type},
+                        success: function (jsondata)
+                        {
+                            if(jsondata!=null){
+                                user_grid.setOptions({ data: jsondata }); 
+                                user_grid.loadData();  
+                                
+                            } else{
+                                LG.tip("查询无结果!");
+                            }                  
+                           // LG.tip('保存成功!');
+                        },
+                        error: function (message)
+                        {
+                            LG.tip(message);                 
+                        }
+                    });
+        }
+    }  
+    </script>

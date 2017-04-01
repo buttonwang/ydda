@@ -1,0 +1,211 @@
+	#{extends 'main.html'/}
+	<div class="l-clear"></div>
+    <div id="maingrid" style="margin-top:1px"></div> <br />
+    <div style="display:none;"></div>
+    <div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+    
+    <script type="text/javascript">
+    $(function () {     
+        var manager, grid;
+
+        function f_initGrid()
+        {
+         	grid = manager = $("#maingrid").ligerGrid({
+            columns: [
+            { display: '序号', name: 'orderNum', width: 100,  type: 'int' },
+            { display: '项目', name: 'title', width: 450, type: 'textarea' }
+            ],
+            url: "checklists/leafjson",  method: "GET",
+            groupColumnName: 'parentTitle', groupColumnDisplay: '考评主项', alternatingRow:false,
+            detail: { onShowDetail: f_showNote, height:'auto' },
+            width: '100%', pageSize: 50,
+            toolbar: { items: [
+                { text: '记事', click: addRow, icon: 'add' },
+                { line: true },
+                { text: '修改', click: modifyRow, icon: 'modify' },
+                { line: true },
+                { text: '删除', click: deleteRow, icon: 'delete' }
+                ] }
+        	});
+        }
+        
+        f_initGrid();
+        
+        function f_reload() {
+          grid.loadData();
+        }
+        
+        function getSelected()
+        { 
+            var row = manager.getSelectedRow();
+            if (!row) { alert('请选择行'); return; }
+            alert(JSON.stringify(row));
+        }
+        
+        function getData()
+        { 
+            var data = manager.getData();
+            alert(JSON.stringify(data));
+        }
+        
+        function addRow()
+        {
+        	var selected = grid.getSelected();
+            if (!selected) { LG.tip('请选择考评项目!'); return }
+            
+        	showDetail({
+                checkListId: selected.id,                
+                checkListtitle: selected.title                  
+            }, false);
+        }
+        
+        function modifyRow()
+        {         
+            var selected = grid.getSelected();
+            if (!selected) { LG.tip('请选择行!'); return }
+            
+            var parent = grid.getParent(selected);
+           
+            showDetail({   
+                checkListId: selected.id,                
+                checkListtitle: selected.title                  
+            }, false);
+        }
+        
+        function deleteRow()
+        {
+            jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
+            		if (confirm) f_delete(); });
+        }
+        
+        function f_delete() {
+          var selected = grid.getSelected();
+          if (selected) {
+              $.ajax({
+            	  url: 'checklist/' + selected.id,
+                  type: 'DELETE',                  
+                  loading: '正在删除中...',                  
+                  success: function () {
+                      //LG.showSuccess('删除成功');
+                      LG.tip('删除成功!');
+                      f_reload();
+                  },
+                  error: function (message) {
+                      LG.showError(message);
+                  }
+              });
+          }
+          else {
+              LG.tip('请选择行!');
+          }
+        }
+        
+	    var detailWin = null, curentData = null, currentIsAddNew;
+	    var mainform = $("#mainform");
+	    
+	    function showDetail(data, isAddNew)
+	    {
+          currentData = data;
+          currentIsAddNew = isAddNew;
+          if (detailWin)
+          {
+              detailWin.show(); 
+          }
+          else
+          {
+              //创建表单结构
+              
+              mainform.ligerForm({
+                  inputWidth: 280,
+                  fields: [
+         			{ name: "note.id", type: "hidden" },
+         			{ name: "note.checkList.id", type: "hidden" },
+         			{ name: "note.approveLevel", type: "hidden" },
+         			{ display: "考评项目", name: "checkListTitle", newline: false, 
+         			  labelWidth: 100, width: 220, space: 30, type: "text"},
+         			{ display: "记事日期", name: "note.noteDate", newline: true, 
+		              labelWidth: 100, width: 220, space: 30, type: "date", 
+		              validate: { required: true, maxlength: 50} },		            
+         			{ display: "内容", name: "note.content", newline: true, 
+                	  labelWidth: 100, width: 220, space: 30, type: "textarea" } ],         			
+                  toJSON: JSON2.stringify
+              });
+
+              detailWin = $.ligerDialog.open({
+                  target: $("#detail"),
+                  width: 300, height: 300, top:80,
+                  buttons: [
+                  { text: '确定', onclick: function () { save(); } },
+                  { text: '取消', onclick: function () { detailWin.hide(); } }
+                  ]
+              });
+          }
+          
+          if (currentData)
+          {    	  
+        	  $("[name$=id]").val(currentData.id)
+        	  $("#checkListTitle").val(currentData.checkListtitle);
+              $("[name$='checkList.id']").val(currentData.checkListId);
+              $("[name$=noteDate]").val(currentData.noteDate);        
+              $("[name$=content]").val(currentData.content);                
+              $("[name$=content]").focus();
+          }
+          
+          $("#checkListTitle").ligerGetTextBoxManager().setDisabled();
+          
+          function save()
+          {
+              $("#mainform").validate();
+             
+              $.ajax({
+                  loading: '正在保存数据中...',
+                  type: 'POST',
+                  url: 'note',                  
+                  data: $("#mainform").serialize(),
+                  success: function ()
+                  {
+                	  detailWin.hide();
+                      grid.loadData();
+                      LG.tip('保存成功!');
+                  },
+                  error: function (message)
+                  {
+                      LG.tip(message);
+                  }
+              });
+          }
+        }
+	    
+	    //显示考评项目下的记事
+        function f_showNote(row, detailPanel,callback)
+        {
+            var grid = document.createElement('div'); 
+            var detailGrid;
+            $(detailPanel).append(grid);
+            
+            $.getJSON('notes/checkjson',
+            	{id: row.id},
+            	function(jsondata) {
+            		if (jsondata.Total>0) {
+            			detailGrid = $(grid).css('margin',6).ligerGrid({
+		                columns:
+			                [
+			                { display: '记事日期', name: 'noteDate',type:'float' },
+			                { display: '事项', name: 'content', width: 300, type:'float' },
+			                { display: '审批状态', name: 'approveLevelName' }
+			                ], isScroll: false, showToggleColBtn: false, width: '90%',
+							pageSize: 20, data: jsondata,
+			                showTitle: true, columnWidth: 100,
+			                onAfterShowData: callback,frozen:false                                
+		            	});
+            			//detailGrid.setOptions({ data: jsondata }); 
+						//detailGrid.loadData();
+					} else {
+						$(grid).remove();
+						$(detailPanel).append($('<div>此考评项目没有记事</div>').css('margin', 20));						
+					}
+				}
+			);
+        }
+	})
+  </script>

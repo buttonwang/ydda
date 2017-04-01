@@ -1,0 +1,187 @@
+
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                                       Application.index
+GET     /hello                                  Application.sayHello 
+# Login 
+GET    /login                                   Application.login
+POST   /login                                   Application.authenticate
+GET	   /logout									Application.logout
+
+# Base
+GET    /usertree                                Application.userTree
+GET    /deptt                                   Application.deptT
+GET    /usert                                   Application.userT
+
+POST   /upload                                  Users.upload
+# Notes
+
+GET     /notes                           		Notes.index
+GET     /notes/json                        		Notes.json
+GET     /notes/checkalljson                     Notes.checkalljson
+GET     /notes/checkjson			            Notes.checkjson
+GET     /notes/simplejson                 		Notes.simplejson
+DELETE  /note/{<[0-9]+>id}		            	Notes.delete
+POST	/note						            Notes.save
+POST	/note/modify					        Notes.modify
+
+GET     /notes/approve					        Notes.approve
+GET     /notes/approvejson              		Notes.approvejson
+GET     /notes/approve/{<[0-9]+>id}		        Notes.approveconfirm
+GET     /notes/approvemulti       	            Notes.approvemulti
+POST    /notes/approvefail	                    Notes.approvefailsave
+
+GET     /notes/query                           	Notes.query
+POST    /notes/filejson                         Notes.filejson
+GET     /notes/expor_approve_excel/             Notes.exporApprove
+
+# Checks
+GET	    /checks                                 Checks.index
+GET	    /checks/resultcount                     Checks.resultcount 
+POST	    /checks/resultcountjson             Checks.resultcountjson
+GET	    /checks/resultdetail                    Checks.resultdetail 
+POST	    /checks/resultdetailjson            Checks.resultdetailjson
+GET	    /checks/commenddetail                   Checks.commenddetail 
+POST	    /checks/commendcount                Checks.commendcount 
+POST	    /checks/commenddetailjson           Checks.commenddetailjson 
+POST	    /checks/commendcountjson            Checks.commendcountjson 
+
+GET	    /checks/redpacketdetail                 Checks.redpacketdetail 
+GET	    /checks/redpacketcount                  Checks.redpacketcount 
+POST	    /checks/redpacketdetailjson         Checks.redpacketdetailjson 
+POST	    /checks/redpacketcountjson          Checks.redpacketcountjson 
+
+
+GET	    /checks/onevotekillcount                Checks.onevotekillcount 
+GET	    /checks/onevotekilldetail               Checks.onevotekilldetail
+POST	    /checks/onevotekilljson             Checks.onevotekilljson
+
+POST	    /check_self                         Checks.checkself
+POST	    /check_dept                         Checks.checkdept
+#POST	    /check_peo                          Checks.checkpeo
+
+POST	    /check_com                          Checks.checkcom
+POST	    /check_complex                      Checks.checkcomplex
+POST	    /check_remark                       Checks.checkremark
+GET	    /check_self/                            Checks.selfhistory
+GET	    /check_dept/                            Checks.depthistory
+#GET	    /check_peo/                         Checks.peohistory
+GET	    /check_archiveqt/                       Checks.qthistory
+GET	    /check_qt/                              Checks.getQitaPingtai
+GET	    /check_com/                             Checks.comhistory
+GET	    /check_com_grade/                       Checks.com_grade_history
+GET	    /check_complex/                         Checks.complexhistory
+GET	    /check_remark/                          Checks.remarkhistory
+GET	    /check_record/                          Checks.recordhistory
+
+GET	    /check_hospital/                        Checks.hospital
+GET	    /checkautoscore/                        Checks.getAutoScore
+GET     /check_getHaveVoteKill/                 Checks.getHaveVoteKill
+GET     /check_export_excel/                    Checks.exportExcel
+POST	/arsave                                 Checks.arsave
+
+                              
+
+# Depts
+GET     /depts                              	Depts.index
+GET     /depts/json                         	Depts.json
+DELETE  /dept/{<[0-9]+>id}		                Depts.delete
+POST	/dept					                Depts.save
+POST	/depts/findAll	                        Depts.findAll						
+
+#warrant
+GET       /roles                              	Roles.index
+GET       /role/warrant                         Roles.warrant
+POST      /roles/json                           Roles.json
+POST      /role                                 Roles.save
+DELETE  /role/{<[0-9]+>id}		                Roles.delete
+GET     /role/getRoling/                        Roles.getRolingByUser
+GET     /role/getRoled/                         Roles.getRoledByUser
+POST    /role/adduserr                          Roles.addUserRole
+DELETE  /role/deluserr                          Roles.delUserRole
+ 
+
+
+GET      /modules                              	Modules.index
+POST     /modules/json                          Modules.json
+POST     /module                                Modules.save
+DELETE   /module/{<[0-9]+>id}		            Modules.delete
+GET      /module/warrant                        Modules.warrant
+
+GET     /module/getModing/                      Modules.getModingByRole
+GET     /module/getModed/                       Modules.getModedByRole
+POST    /module/addrolem                        Modules.addRoleModule
+DELETE  /module/delrolem                        Modules.delRoleModule
+GET     /module/showMod                         Modules.showModuleByUser
+ 
+# Users
+GET     /users                              	  Users.index
+GET     /users/json                         	  Users.json
+DELETE  /user/{<[0-9]+>id}		                  Users.delete
+POST	/user					                  Users.save
+POST    /queryuser                                Users.queryUser
+POST    /queryjson                                Users.queryjson
+#POST    /querydeptjson                           Users.querydeptjson
+GET    /user/findLogin                            Users.findLogin
+GET   /upload                                     Users.upload
+
+GET    /user/findLogin                            Users.findLogin
+GET    /users/multiRow                            Users.multiRow
+
+GET    /user/findLoginr                           Users.findLoginr
+POST  /user/resetpass/{<[0-9]+>id}		          Users.resetPass
+
+# CheckLists
+GET     /checklists                             Checklists.index
+GET     /checklists/json                        Checklists.json
+GET     /checklists/leafjson                    Checklists.leafjson
+GET     /checklists/simplejson                  Checklists.simplejson
+DELETE     /checklist/{<[0-9]+>id}	            Checklists.delete
+POST	/checklist								Checklists.save
+
+# CheckMethods
+GET     /checkmethods                           CheckMethods.index
+GET     /checkmethods/checkjson                 CheckMethods.checkjson
+GET     /checkmethods/findMthod                 CheckMethods.findMthod
+POST    /checkmethod                            CheckMethods.save
+DELETE  /checkmethod/{<[0-9]+>id}		  		CheckMethods.delete
+
+# AjustLists
+GET     /adjustlists                            Adjustlists.index
+POST    /adjustlists/findadjust                 Adjustlists.findAdjust
+POST    /adjustlists/findgoods                  Adjustlists.findGoods
+
+GET     /adjustlists/json                       Adjustlists.json
+DELETE  /adjustlist/{<[0-9]+>id}		        Adjustlists.delete
+POST	/adjustlist							    Adjustlists.save
+
+
+# Grades
+GET     /grades                              	Grades.index
+GET     /grades/json                         	Grades.json
+DELETE  /grade/{<[0-9]+>id}		                Grades.delete
+POST	/grade									Grades.save
+
+# VoteKills
+GET     /votekills                              VoteKills.index
+GET     /votekills/json                         VoteKills.json
+DELETE  /votekill/{<[0-9]+>id}		            VoteKills.delete
+POST	/votekill								VoteKills.save
+POST	/votekills/findAll	                    VoteKills.findAll
+POST	/votekills/findgoods	                VoteKills.findGoods	
+
+
+# Ignore favicon requests
+GET     /favicon.ico                            404
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                staticDir:public
+
+# Approves
+GET     /approvejson/json             			ApproveJson.json
+
+# Catch all
+*       /{controller}/{action}                  {controller}.{action}

@@ -1,0 +1,263 @@
+  #{extends 'main.html'/}
+  <div class="l-clear"></div>
+    <div id="maingrid" style="margin-top:1px"></div> <br />
+    <div style="display:none;"></div>
+    <div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+    
+    <script type="text/javascript">
+    $(function () {
+        var typeData = [{ type: 1, text: '奖励' }, { type: 2, text: '惩罚'}];
+        var targetData = [{ type: 0, text: '全部' }, { type: 1, text: '科室' }, { type: 2, text: '个人'}];
+        var syncData = [{ type: 0, text: '不同步' }, { type: 1, text: '同步奖惩' }, { type: 2, text: '选择奖惩'}];
+
+        var manager, grid;
+
+        function f_initGrid()
+        {
+          grid = manager = $("#maingrid").ligerGrid({
+            columns: [            
+            { display: '序号', name: 'orderNum', width: 50,  type: 'text' },
+            { display: '项目', name: 'title', width: 200, type: 'textarea' },         
+            { display: '类型', name: 'type', width: 50, type:'int',
+                editor: { type: 'select', data: typeData, valueColumnName: 'type' },
+                render: function (item)
+                {
+                    if (parseInt(item.type) == 1) return '奖励';
+                    if (parseInt(item.type) == 2) return '惩罚';
+                   
+                    return '';
+                }
+            },
+            { display: '物品', name: 'goods', width: 120, type: 'int'},
+            { display: '分值', name: 'score', width: 50, type: 'int'},        
+            { display: '奖金', name: 'award', width: 50, type: 'int'},
+       
+            { display: '对象', name: 'target', width: 50, type:'int',   
+                editor: { type: 'select', data: targetData, valueColumnName: 'target' },             
+                render: function (item)
+                {
+                    if (parseInt(item.target) == 0) return '全部';
+                    if (parseInt(item.target) == 1) return '科室';
+                    if (parseInt(item.target) == 2) return '个人';
+                    return '';
+                }
+            },
+            { display: '同步', name: 'syncadjust', width: 80, type:'int',
+                editor: { type: 'select', data: syncData, valueColumnName: 'syncadjust' },
+                render: function (item)
+                {
+                    if (parseInt(item.syncadjust) == 0) return '不奖惩';
+                    if (parseInt(item.syncadjust) == 1) return '同步奖惩';
+                    if (parseInt(item.syncadjust) == 2) return '选择奖惩';
+                    return '';
+                }
+            },
+            
+            { display: '同步分值', name: 'syncscore', width: 50, type: 'int'},
+            { display: '同步奖金', name: 'syncaward', width: 50, type: 'int'},
+
+            { display: '说明', name: 'remark',width: 100, type: 'textarea'}
+            ],
+
+            url: "adjustlists/json",  method: "GET",                       
+            width: '100%',
+            toolbar: { items: [
+                { text: '增加', click: addRow, icon: 'add' },
+                { line: true },
+                { text: '修改', click: modifyRow, icon: 'modify' },
+                { line: true },
+                { text: '删除', click: deleteRow, icon: 'delete' }
+                ] }
+          });
+        }
+        
+        f_initGrid();
+        
+        function f_reload() {
+          grid.loadData();
+        }
+        
+        function getSelected()
+        { 
+            var row = manager.getSelectedRow();
+            if (!row) { alert('请选择行'); return; }
+            alert(JSON.stringify(row));
+        }
+        
+        function getData()
+        { 
+            var data = manager.getData();
+            alert(JSON.stringify(data));
+        }
+        
+        function addRow()
+        {
+          showDetail({}, false);
+        }
+        
+        function modifyRow()
+        {
+            var selected = grid.getSelected();            
+            if (!selected) { LG.tip('请选择行!'); return }
+            var parent = grid.getParent(selected);
+            
+            showDetail({            
+                id: selected.id,                
+                title: selected.title,
+                score: selected.score,
+                award: selected.award,
+                goods:selected.goods,
+                remark: selected.remark,
+                type: selected.type,
+                target: selected.target,
+                syncadjust: selected.syncadjust,
+                syncscore: selected.syncscore,
+                syncaward: selected.syncaward,
+                orderNum: selected.orderNum
+            }, false);
+        }
+        
+        function deleteRow()
+        {
+            jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
+                if (confirm) f_delete(); });
+        }
+        
+        function f_delete() {
+          var selected = grid.getSelected();
+          if (selected) {
+              $.ajax({
+                url: 'adjustlist/' + selected.id,
+                  type: 'DELETE',                  
+                  loading: '正在删除中...',                  
+                  success: function () {
+                      //LG.showSuccess('删除成功');
+                      LG.tip('删除成功!');
+                      f_reload();
+                  },
+                  error: function (message) {
+                      LG.showError(message);
+                  }
+              });
+          }
+          else {
+              LG.tip('请选择行!');
+          }
+        }
+        
+      var detailWin = null, curentData = null, currentIsAddNew;
+      var mainform = $("#mainform");
+      
+      function showDetail(data, isAddNew)
+      {
+          currentData = data;
+          currentIsAddNew = isAddNew;
+          if (detailWin)
+          {
+              detailWin.show(); 
+          }
+          else
+          {
+              //创建表单结构
+              
+              mainform.ligerForm({
+                  inputWidth: 280,
+                  fields: [
+              { name: "adjustlist.id", type: "hidden" },
+              { display: "序号", name: "adjustlist.orderNum", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "text", 
+                validate: { required: true, maxlength: 50} },
+              { display: "项目", name: "adjustlist.title", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "text", 
+                validate: { required: true, maxlength: 50} },          
+              { display: "奖惩类型", name: "typeHide", comboboxName: "typeCombox", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "select",
+                options: {data: typeData, valueField: 'type', valueFieldID: 'adjustlist.type'} },  
+              { display: "物品", name: "adjustlist.goods", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "text", 
+                validate: { required: true, maxlength: 50} },  
+              { display: "分值", name: "adjustlist.score", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "text", 
+                validate: { required: true, maxlength: 50} },         
+              { display: "奖金", name: "adjustlist.award", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "text", 
+                validate: { required: true, maxlength: 50} },
+            
+              { display: "奖惩对象", name: "targetHide", comboboxName: "targetCombox", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "select",
+                options: {data: targetData, valueField: 'type', valueFieldID: 'adjustlist.target'} },  
+              { display: "同步奖惩", name: "syncHide", comboboxName: "syncCombox", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "select",
+                options: {data: syncData, valueField: 'type', valueFieldID: 'adjustlist.syncadjust'} },   
+              { display: "同步分值", name: "adjustlist.syncscore", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "text" },
+              { display: "同步奖金", name: "adjustlist.syncaward", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "text" },
+              { display: "说明", name: "adjustlist.remark", newline: true, 
+                labelWidth: 100, width: 220, space: 30, type: "textarea" } ],               
+                  toJSON: JSON2.stringify
+              });
+              
+              //$("#DeptParentName").attr("readonly", "readonly");
+
+              detailWin = $.ligerDialog.open({
+                  target: $("#detail"),
+                  width: 450, height: 400, top:30,
+                  buttons: [
+                  { text: '确定', onclick: function () { save(); } },
+                  { text: '取消', onclick: function () { detailWin.hide(); } }
+                  ]
+              });
+          }
+          
+          if (currentData)
+          {       
+              $("[name$=id]").val(currentData.id);
+              $("[name$=orderNum]").val(currentData.orderNum);
+              $("[name$=title]").val(currentData.title);    
+              $("[name$=goods]").val(currentData.goods);       
+              $("[name$='adjustlist.score']").val(currentData.score);   
+              $("[name$='adjustlist.award']").val(currentData.award);   
+              $("[name$=remark]").val(currentData.remark);
+
+              $("[name='adjustlist.type']").val(currentData.type);
+              $("#typeCombox").ligerGetComboBoxManager().setValue(currentData.type); 
+
+              $("[name='adjustlist.target']").val(currentData.target);
+              $("#targetCombox").ligerGetComboBoxManager().setValue(currentData.target); 
+
+
+              $("[name='adjustlist.syncadjust']").val(currentData.syncadjust);
+              $("#syncCombox").ligerGetComboBoxManager().setValue(currentData.syncadjust); 
+              
+              $("[name='adjustlist.syncscore']").val(currentData.syncscore);   
+              $("[name='adjustlist.syncaward']").val(currentData.syncaward);  
+
+              $("[name$=title]").focus();
+          }
+
+          function save()
+          {
+              $("#mainform").validate();
+             
+              $.ajax({
+                  loading: '正在保存数据中...',
+                  type: 'POST',
+                  url: 'adjustlist',                  
+                  data: $("#mainform").serialize(),
+                  success: function ()
+                  {
+                    detailWin.hide();
+                    grid.loadData();
+                    LG.tip('保存成功!');
+                  },
+                  error: function (message)
+                  {
+                    LG.tip(message);
+                  }
+              });
+          }
+        }
+   
+  })
+  </script>

@@ -1,0 +1,190 @@
+#{extends 'main.html'/}
+<div class="l-clear"></div>
+<div id="maingrid" style="margin-top:1px"></div> <br />
+<div style="display:none;"></div>
+<div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+
+<script type="text/javascript">
+    $(function () {
+       
+        var manager, grid;
+        function f_initGrid() 
+        {         
+            grid = manager = $("#maingrid").ligerGrid({
+     
+                columns: [
+                    { display: '编号', name: 'id', width:80,type: 'int' },
+                    { display: '模块名称', name: 'name', width: 100,type: 'string', type: 'textarea' },
+                    { display: '模块url', name: 'webpage', width: 180, type: 'string',type: 'textarea' },
+                    { display: '等级',  name: 'level', width: 100, type: 'string', type: 'textarea'},
+                    { display: '排序号', name: 'orderNum', width: 100, type: 'string', type: 'textarea'},
+                    { display: '描述',  name: 'remark', width: 100, type: 'string', type: 'textarea'},
+                    { display: '父模块编号',  name: 'parentId', width: 80, type: 'int' }
+          
+                ],
+
+                url: "modules/json",  method: "GET",                       
+                width: '100%',pageSize: 50,
+                toolbar: { items: [
+                        { text: '增加', click: addRow, icon: 'add' },
+                        { line: true },
+                        { text: '修改', click: modifyRow, icon: 'modify' },
+                        { line: true },
+                        { text: '删除', click: deleteRow, icon: 'delete' }
+                    ] }
+            });         	
+        }
+        
+        f_initGrid();
+        
+        function f_reload() {
+            grid.loadData();
+        }
+        
+        function getSelected()
+        { 
+            var row = manager.getSelectedRow();
+            if (!row) { alert('请选择行'); return; }
+            alert(JSON.stringify(row));
+        }
+        
+        function getData()
+        { 
+            var data = manager.getData();
+            alert(JSON.stringify(data));
+        }
+        
+        function addRow()
+        {
+            showDetail({}, false);
+        }
+        
+        function modifyRow()
+        {
+            var selected = grid.getSelected();
+            if (!selected) { LG.tip('请选择行!'); return }
+            
+            showDetail({            
+                id: selected.id,
+                name: selected.name,
+                webpage: selected.webpage,
+                level: selected.level,
+                orderNum: selected.orderNum,
+                remark: selected.remark,
+                parentId: selected.parentId
+            }, false);
+        }
+        
+        function deleteRow()
+        {
+            jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
+                if (confirm) f_delete(); });
+        }
+        
+        function f_delete() {
+            var selected = grid.getSelected();
+            if (selected) {
+                $.ajax({
+                    url: 'module/' + selected.id,
+                    type: 'DELETE',                  
+                    loading: '正在删除中...',                  
+                    success: function () {
+                        //LG.showSuccess('删除成功');
+                        LG.tip('删除成功!');
+                        f_reload();
+                    },
+                    error: function (message) {
+                        LG.showError(message);
+                    }
+                });
+            }
+            else {
+                LG.tip('请选择行!');
+            }
+        }
+        
+        var detailWin = null, curentData = null, currentIsAddNew;
+        var mainform = $("#mainform");
+	    
+        function showDetail(data, isAddNew)
+        {
+            currentData = data;
+            currentIsAddNew = isAddNew;
+            if (detailWin)
+            {
+                detailWin.show(); 
+            }
+            else
+            {
+                //创建表单结构
+              
+                mainform.ligerForm({
+                    inputWidth: 280,
+                    fields: [
+                        { name: "module.id", type: "hidden" },
+                        { display: "模块名称", name: "module.name", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text", 
+                            validate: { required: true, maxlength: 50} },
+                        { display: "模块url", name: "module.webpage", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text" } ,
+                        { display: "等级", name: "module.level", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text" } ,
+                        { display: "排序号", name: "module.orderNum", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text" } ,  
+                        { display: "描述", name: "module.remark", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text" },
+                        { display: "父模块编号", name: "module.parentMod.id", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text" }  
+                    ],         			
+                    toJSON: JSON2.stringify
+                });
+              
+                //$("#DeptParentName").attr("readonly", "readonly");
+
+                detailWin = $.ligerDialog.open({
+                    target: $("#detail"),
+                    width: 450, height: 240, top:80,
+                    buttons: [
+                        { text: '确定', onclick: function () { save(); } },
+                        { text: '取消', onclick: function () { detailWin.hide(); } }
+                    ]
+                });
+            }
+          
+            if (currentData)
+            {    	  
+                $("[name$=id]").val(currentData.id)
+                $("[name$=name]").val(currentData.name);
+                $("[name$=webpage]").val(currentData.webpage);
+                $("[name$=level]").val(currentData.level);
+                $("[name$=orderNum]").val(currentData.orderNum);
+                $("[name$=remark]").val(currentData.remark);
+                $("[name$=parentMod\\.id]").val(currentData.parentId);
+                $("[name$=name]").focus();
+            }
+
+            function save()
+            {
+                $("#mainform").validate();
+             
+                $.ajax({
+                    loading: '正在保存数据中...',
+                    type: 'POST',
+                    url: 'module',                  
+                    data: $("#mainform").serialize(),
+                    success: function ()
+                    {
+                        detailWin.hide();
+                        grid.loadData();
+                        LG.tip('保存成功!');
+                    },
+                    error: function (message)
+                    {
+                        LG.tip(message);
+                    }
+                });
+            }
+        }
+   
+    })
+</script>

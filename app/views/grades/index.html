@@ -1,0 +1,185 @@
+	#{extends 'main.html'/}
+	<div class="l-clear"></div>
+    <div id="maingrid" style="margin-top:1px"></div> <br />
+    <div style="display:none;"></div>
+    <div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+    
+    <script type="text/javascript">
+    $(function () {
+        var typeData = [{ type: 1, text: '职能科室' }, { type: 2, text: '管理科室'}];
+
+        var manager, grid;
+
+        function f_initGrid() 
+        {
+         	grid = manager = $("#maingrid").ligerGrid({
+            columns: [
+            { display: '编号', name: 'id', width: 50, type: 'int' },
+            { display: '项目', name: 'name', width: 100, type: 'textarea' },
+            { display: '上限', name: 'upperLimit', width: 100, type:'int'},
+            { display: '下限', name: 'lowLimit', width: 100, type:'int'},
+            { display: '扣分', name: 'reduce', width: 100, type:'int'},
+            { display: '描述', name: 'remark', width: 200, type: 'string', type: 'textarea'}
+            ],
+
+            url: "grades/json",  method: "GET",                       
+            width: '100%',
+            toolbar: { items: [
+                { text: '增加', click: addRow, icon: 'add' },
+                { line: true },
+                { text: '修改', click: modifyRow, icon: 'modify' },
+                { line: true },
+                { text: '删除', click: deleteRow, icon: 'delete' }
+                ] }
+        	});         	
+        }
+        
+        f_initGrid();
+        
+        function f_reload() {
+          grid.loadData();
+        }
+        
+        function getSelected()
+        { 
+            var row = manager.getSelectedRow();
+            if (!row) { alert('请选择行'); return; }
+            alert(JSON.stringify(row));
+        }
+        
+        function getData()
+        { 
+            var data = manager.getData();
+            alert(JSON.stringify(data));
+        }
+        
+        function addRow()
+        {
+        	showDetail({}, false);
+        }
+        
+        function modifyRow()
+        {
+            var selected = grid.getSelected();
+            if (!selected) { LG.tip('请选择行!'); return }
+            var parent = grid.getParent(selected);
+            showDetail({            
+                id: selected.id,
+                name: selected.name,
+                upperLimit: selected.upperLimit,
+                lowLimit: selected.lowLimit,
+                reduce: selected.reduce,
+                remark: selected.remark
+            }, false);
+        }
+        
+        function deleteRow()
+        {
+            jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
+            		if (confirm) f_delete(); });
+        }
+        
+        function f_delete() {
+          var selected = grid.getSelected();
+          if (selected) {
+              $.ajax({
+            	  url: 'dept/' + selected.id,
+                  type: 'DELETE',                  
+                  loading: '正在删除中...',                  
+                  success: function () {
+                      //LG.showSuccess('删除成功');
+                      LG.tip('删除成功!');
+                      f_reload();
+                  },
+                  error: function (message) {
+                      LG.showError(message);
+                  }
+              });
+          }
+          else {
+              LG.tip('请选择行!');
+          }
+        }
+        
+	    var detailWin = null, curentData = null, currentIsAddNew;
+	    var mainform = $("#mainform");
+	    
+	    function showDetail(data, isAddNew)
+	    {
+          currentData = data;
+          currentIsAddNew = isAddNew;
+          if (detailWin)
+          {
+              detailWin.show(); 
+          }
+          else
+          {
+              //创建表单结构
+              
+              mainform.ligerForm({
+                  inputWidth: 280,
+                  fields: [
+         			{ name: "grade.id", type: "hidden" },
+         			{ display: "项目", name: "grade.name", newline: true, 
+         			  labelWidth: 100, width: 220, space: 30, type: "text", 
+         			  validate: { required: true, maxlength: 50} },
+         			{ display: "上限", name: "grade.upperLimit", newline: true, 
+         			  labelWidth: 100, width: 220, space: 30, type: "text", 
+         			  validate: { required: true, maxlength: 50} },
+         			{ display: "下限", name: "grade.lowLimit", newline: true, 
+         			  labelWidth: 100, width: 220, space: 30, type: "text", 
+         			  validate: { required: true, maxlength: 50} },  
+         		    { display: "扣分", name: "grade.reduce", newline: true, 
+         			  labelWidth: 100, width: 220, space: 30, type: "text", 
+         			  validate: { required: true, maxlength: 50} },  
+         			{ display: "说明", name: "grade.remark", newline: true, 
+                	  labelWidth: 100, width: 220, space: 30, type: "textarea" } ],           			  
+                  toJSON: JSON2.stringify
+              });
+
+              detailWin = $.ligerDialog.open({
+                  target: $("#detail"),
+                  width: 450, height: 280, top:80,
+                  buttons: [
+                  { text: '确定', onclick: function () { save(); } },
+                  { text: '取消', onclick: function () { detailWin.hide(); } }
+                  ]
+              });
+          }
+          
+          if (currentData)
+          {    	  
+        	  $("[name$=id]").val(currentData.id)
+              $("[name$=name]").val(currentData.name);
+              $("[name$=upperLimit]").val(currentData.upperLimit);
+              $("[name$=lowLimit]").val(currentData.lowLimit);
+              $("[name$=reduce]").val(currentData.reduce);
+              $("[name$=remark]").val(currentData.remark);
+              $("[name$=title]").focus();
+          }
+
+          function save()
+          {
+              $("#mainform").validate();
+             
+              $.ajax({
+                  loading: '正在保存数据中...',
+                  type: 'POST',
+                  url: 'grade',                  
+                  data: $("#mainform").serialize(),
+                  success: function ()
+                  {
+                	  detailWin.hide();
+                      grid.loadData();
+                      LG.tip('保存成功!');
+                  },
+                  error: function (message)
+                  {
+                      LG.tip(message);
+                  }
+              });
+          }
+        }
+   
+	})
+    </script>

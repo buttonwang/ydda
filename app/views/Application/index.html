@@ -1,0 +1,494 @@
+
+<html>
+    <meta http-equiv="x-ua-compatible" content="ie=edge,chrome=1">
+    <head>
+        <title>医德档案管理平台</title>        
+        <link rel="shortcut icon" type="image/png" href="/public/images/favicon.png">  
+	    <link href="/public/ligerUI/skins/Aqua/css/ligerui-all.css" rel="stylesheet" type="text/css" />
+	      <script src="/public/javascripts/jquery/jquery-1.5.2.min.js" type="text/javascript"></script>    
+    <script src="/public/ligerUI/js/ligerui.all.js"  type="text/javascript"></script>
+    <script src="/public/javascripts/jquery/jquery.messager.js"  type="text/javascript"></script> 
+    <script src="/public/ligerUI/js/common.js" type="text/javascript"></script>   
+    <script src="/public/ligerUI/js/LG.js" type="text/javascript"></script>
+    <!-- <script src="/public/ligerUI/js/ligerui.expand.js" type="text/javascript"></script> --> 
+    <script src="/public/ligerUI/js/json2.js" type="text/javascript"></script>    
+    <script src="/public/javascripts/jquery-validation/jquery.validate.min.js" type="text/javascript"></script> 
+    <script src="/public/javascripts/jquery-validation/jquery.metadata.js" type="text/javascript"></script>
+    <script src="/public/javascripts/jquery-validation/messages_cn.js" type="text/javascript"></script>
+    <script src="/public/javascripts/application.js" type="text/javascript"></script>
+    <script src="../../../lib/ligerUI/js/plugins/ligerDateEditor.js" type="text/javascript"></script>
+        <style type="text/css"> 
+        body,html{height:100%;}
+        body{ padding:0px; margin:0; overflow:hidden;}  
+        .l-link{ display:block; height:26px; line-height:26px; padding-left:10px; text-decoration:underline; color:#333;}
+        .l-link2{text-decoration:underline; color:white;}
+        .l-layout-bottom{ background:#E5EDEF; text-align:center;}
+        #pageloading{position:absolute; left:0px; top:0px; background:white url('loading.gif') no-repeat center; width:100%; height:100%;z-index:99999;}
+        .l-link{ display:block; line-height:22px; height:22px; padding-left:20px;border:1px solid white; margin:4px;}
+        .l-link-over{ background:#FFEEAC; border:1px solid #DB9F00;}
+        .l-winbar{ background:#2B5A76; height:30px; position:absolute; left:0px; bottom:0px; width:100%; z-index:99999;}
+
+        /* 顶部 */ 
+        .l-title{background: url('../public/ligerUI/images/banner.jpg') no-repeat; text-align: right;}
+        .l-topmenu-welcome{ width: 450px;  margin: 0px 10px 0px auto;   z-index:-1; height:50px; line-height:50px;}
+        .l-topmenu-welcome a{ text-decoration:underline; color:#000000;} 
+
+        </style>
+        <script type="text/javascript">
+            var tab = null;
+            var accordion = null;
+            var tree = null;
+            var open;
+            var depts = [];
+          //  var roles = [];      
+            $(function ()
+            {   
+                //布局
+                $("#layout1").ligerLayout({ leftWidth: 190, height: '100%', onHeightChanged: f_heightChanged });
+                var height = $(".l-layout-center").height();
+               
+               //Tab
+                $("#framecenter").ligerTab({ height: "height "});
+               
+               //面板
+                $("#accordion1").ligerAccordion({ height: height - 24, speed: null });
+                $(".l-link").hover(function ()
+                {
+                    $(this).addClass("l-link-over");
+
+                }, function ()
+                {
+                    $(this).removeClass("l-link-over");
+                });
+
+                //树
+                $("#tree1").ligerTree({
+                    url:"/module/showMod",
+                    checkbox: false,
+                    slide: true,
+                    nodeWidth: 120,
+                    attribute: ['nodename', 'url'],
+                    textFieldName: 'name',
+                    onSelect: function (node)
+                    {    
+                        if (!node.data.webpage) return;
+                        var tabid = $(node.target).attr("tabid");
+                        if (!tabid)
+                        {
+                            tabid = new Date().getTime();
+                            $(node.target).attr("tabid", tabid)
+                        }
+
+                        f_addTab(tabid, node.data.name, node.data.webpage);
+
+                   },
+                   onAfterAppend:function(parentNode, newdata) {
+                        collapseAll();      
+                   }
+
+
+                });
+
+                tab = $("#framecenter").ligerGetTabManager();
+
+                accordion = $("#accordion1").ligerGetAccordionManager();
+
+               // tree = $("#tree1").ligerGetTreeManager();           
+              
+                $("#pageloading").hide();
+                
+                $.getJSON("/user/findLoginr", function(json){                 
+                   roleid=json;              
+                   if(roleid==2){
+                       $("#table1").show();
+                       $("#table2").hide();
+                       $("#table3").hide();
+                   } else if(roleid==3){
+                        $("#table1").hide();
+                        $("#table2").show();
+                        $("#table3").hide(); 
+                   } else if(roleid==4){
+                        $("#table1").hide();
+                        $("#table2").hide();
+                        $("#table3").show();
+                   } else{
+                        $("#table1").hide();
+                        $("#table2").hide();
+                        $("#table3").hide(); 
+                       
+                   }
+                });
+             
+
+            });
+            function collapseAll()      
+            {    
+                 tree = $("#tree1").ligerGetTreeManager();
+                 tree.collapseAll(); 
+            }
+            function f_heightChanged(options)
+            {
+                if (tab)
+                    tab.addHeight(options.diff);
+                if (accordion && options.middleHeight - 24 > 0)
+                    accordion.setHeight(options.middleHeight - 24);
+            }
+
+            function f_addTab(tabid,text, webpage)
+            {   
+                tab.addTabItem({ tabid : tabid,text: text, url:webpage });
+            } 
+           
+         /*   $.getJSON('roles/findAll',false, function(data) {		 				  
+               roles = data;       
+            });*/
+     </script> 
+
+	
+
+</head>
+
+<body style="padding:0px;">  
+  <div id="pageloading"></div> 
+  <div id="layout1" style="width:100%">
+        <div id="layout-top" position="top" style="">  
+            <div style="margin-top:0px; margin-left:0px;"  class="l-title">                             
+                <div class="l-topmenu-welcome">
+                <span>欢迎您使用医德档案！【${connected.realName} 已登录】</span><span class="space">|</span>                  
+                <a href="#" id="changePWA">修改密码</a> 
+                <span class="space">|</span>
+                <a href="#"  onclick="changeUser()">个人信息修改</a><span class="space">|</span>
+                <a href="@{Application.logout}" class="l-link2">退出</a>
+                </div>
+            </div>            
+        </div>
+       <div position="left"  title="功能菜单" id="accordion1" >
+         	<div title="功能列表" class="l-scroll">
+                 <ul id="tree1" style="margin-top:3px;">
+                </div>
+       </div>
+  <!-- <div position="left"  title="主要菜单" id="accordion1" > 
+	        <div title="档案填报" class="l-scroll">
+	             <div style=" height:7px;"></div>
+	             <a class="l-link roleg" href="javascript:f_addTab('1','个人填报','/notes?tag=0')">个人填报</a>
+	             <a class="l-link roleb" href="javascript:f_addTab('2','科室填报','/notes?tag=1')">科室填报</a>
+	            <a class="l-link rolec" href="javascript:f_addTab('3','纪检监督科填报','/notes?tag=2')">纪检监督科填报</a>
+               </div>
+	        <div title="档案审核" class="l-scroll"> 
+	             <div style=" height:7px;"></div>	             
+	             <a class="l-link roleb" href="javascript:f_addTab('11','科室审核','/notes/approve?level=0')">科室审核</a>
+	             <a class="l-link rolec" href="javascript:f_addTab('12','纪检监督科审核','/notes/approve?level=1')">纪检监督科审核</a>
+               
+                </div>            
+	        <div title="档案查询">
+	            <div style=" height:7px;"></div>
+	            <a class="l-link rolea" href="javascript:f_addTab('31','个人查询','/notes/query?tag=0')">个人查询</a>
+	            <a class="l-link roleb" href="javascript:f_addTab('32','科室查询','/notes/query?tag=1')">科室查询</a>
+                    <a class="l-link rolec" href="javascript:f_addTab('33','纪检监督科查询','/notes/query?tag=2')">纪检监督科查询</a>
+                  
+                </div>
+            <div title="档案考评">
+                <div style=" height:7px;"></div>
+                <a class="l-link roleg" href= "javascript:f_addTab('41','个人考评','/checks?tag=0')">个人考评</a>
+                <a class="l-link roleb" href= "javascript:f_addTab('42','科室考评','/checks?tag=1')">科室考评</a>
+                <a class="l-link rolec" href= "javascript:f_addTab('43','纪检监督科考评','/checks?tag=2')">纪检监督科考评</a>              
+            
+            </div>
+            <div title="考评统计">
+	            <div style=" height:7px;"></div>
+                    <a class="l-link roled" href="javascript:f_addTab('35','年度考评结果明细','/checks/resultdetail')">考评结果明细</a>        
+                    <a class="l-link roled" href="javascript:f_addTab('36','年度考评结果统计','/checks/resultcount')">考评结果统计</a>   
+                    <a class="l-link roled" href="javascript:f_addTab('37','一票否决明细','/checks/onevotekilldetail')">一票否决明细</a>  
+	            <a class="l-link roled" href="javascript:f_addTab('38','一票否决统计','/checks/onevotekillcount')">一票否决统计</a>          
+                    <a class="l-link roled" href="javascript:f_addTab('39','表彰情况明细','/checks/commenddetail')">表扬信、花篮等明细</a>  
+	            <a class="l-link roled" href="javascript:f_addTab('40','表彰情况统计','/checks/commendcount')">表扬信、花篮等统计</a>          
+                    <a class="l-link roled" href="javascript:f_addTab('41','收取/拒收红包明细','/checks/redpacketdetail')">收取/拒收红包明细</a>  
+	            <a class="l-link roled" href="javascript:f_addTab('42','收取/拒收红包统计','/checks/redpacketcount')"> 收取/拒收红包统计</a>          
+               
+            </div>	    
+            <div title="系统设置">
+                <div style=" height:7px;"></div>
+              
+                 <a class="l-link rolex" href="javascript:f_addTab('91','科室','/depts')">科室</a>                                               
+                 <a class="l-link rolex" href="javascript:f_addTab('92','人员','/users')">人员</a> 
+                 <a class="l-link rolex" href="javascript:f_addTab('93','基础考评标准','/checklists')">基础考评标准</a>
+                 <a class="l-link rolex" href="javascript:f_addTab('94','基础考评方法','/checkmethods')">基础考评方法</a>  
+                 <a class="l-link rolex" href="javascript:f_addTab('95','奖惩标准','/adjustlists')">奖惩标准</a>                             
+                 <a class="l-link rolex" href="javascript:f_addTab('96','考评结果','/grades')">考评结果</a>
+                 <a class="l-link rolex" href="javascript:f_addTab('97','一票否决','/votekills')">一票否决</a>
+                 <a class="l-link rolex" href="javascript:f_addTab('98','角色管理', '/roles')">角色管理</a>
+                 <a class="l-link rolex" href="javascript:f_addTab('99','模块管理', '/modules')">模块管理</a>
+                 <a class="l-link rolex" href="javascript:f_addTab('100','角色授权', '/role/warrant')">角色授权</a>
+                 <a class="l-link rolex" href="javascript:f_addTab('101','模块授权', '/module/warrant')">模块授权</a>
+ 
+            </div>
+        </div>-->
+        <div position="center" id="framecenter"> 
+            <div id="home" title="我的主页" style="height:2000px" >           
+                 #{include  '/Application/myHome.html'/}
+            </div> 
+            
+        </div> 
+        <div position="bottom" style="height:20px; line-height:20px; text-align:center;">
+            Copyright © 2014 www.ashinex.com
+        </div>
+    </div>
+  
+    
+    
+    
+
+
+<div style="display:none"></div>
+    <div id="changePWDiv" style="display:none">
+        <ul style="display: block; clear: both; width:250px; height: auto; font-size: 13px; margin-bottom: 15px;">
+        <li style="display: inline; float: left; width: 200px; height: 25px; line-height: 25px;">
+                注：密码长度6-16位</li>
+        </ul>
+        <ul style="display: block; clear: both; width:250px; height: auto; font-size: 13px; margin-bottom: 15px;">
+            <li style="display: inline; float: left; width: 80px; height: 25px; line-height: 25px;">
+                当前密码</li>
+            <li style="display: inline; float: left; height: 25px; line-height: 25px;">
+                <input id="curPassword" type="password" style="display: inline; float: left; height: 18px; line-height: 18px;">
+            </li>
+        </ul>        
+        <ul style="display: block; clear: both; width:250px; height: auto; font-size: 13px; margin-bottom: 15px;">
+            <li style="display: inline; float: left; width: 80px; height: 25px; line-height: 25px;">
+                新密码</li>
+            <li style="display: inline; float: left; height: 25px; line-height: 25px;">
+                <input id="password" type="password" style="display: inline; float: left; height: 18px; line-height: 18px;"></li>            
+        </ul>        
+        <ul style="display: block; clear: both; width:250px; height: auto; font-size: 13px; margin-bottom: 15px;">
+            <li style="display: inline; float: left; width: 80px; height: 25px; line-height: 25px;">确认密码</li>
+            <li style="display: inline; float: left; height: 25px; line-height: 25px;">
+                <input  id="password2" type="password" style="display: inline; float: left; height: 18px; line-height: 18px;"></li>
+            <li style="display: inline; float: left; height: 25px; line-height: 25px; margin-left: 25px;"></li>
+        </ul>        
+    </div>
+  
+ 
+</body>
+
+    <script type="text/javascript">
+      
+        $('#changePWA').bind('click', function() {
+            $.ligerDialog.open({ target: $("#changePWDiv"), 
+                buttons: [ 
+                { text: '确定', id: "changePW", onclick: function (item, dialog) { changePassword(); } }, 
+                { text: '关闭', onclick: function (item, dialog) { dialog.hide(); } } ] });   
+        });
+        
+        //修改密码
+        function changePassword() {
+            var cp = $("#curPassword").val(); var p = $("#password").val(); var p2 = $("#password2").val();
+            var action = "@{Application.changePassword}";
+            $.get(action, {curPassword: cp, password: p, password2: p2},
+                function(data){alert(data); $(":password").val(""); }
+            );
+        };
+
+       
+       
+       /*
+         $('#changeUserPI').bind('click', function() {
+            $.ligerDialog.open({ target: $("#changeUserPi"), 
+                buttons: [ 
+                { text: '确定', id: "changeUser", onclick: function (item, dialog) { changeUser(); } }, 
+                { text: '关闭', onclick: function (item, dialog) { dialog.hide(); } } ] });   
+        });
+        */
+       
+       
+function changeUser()
+{
+    var user ;   //当前登入信息
+    $.getJSON('user/findLogin', function(data) {
+        user = data;
+    });
+
+    var detailWin = null;
+    var depts = [];
+    var roles = [];        
+    var categorys = [{ id: 1, name: '医师' }, { id: 2, name: '护士'},
+       { id: 3, name: '医技人员' }, { id: 4, name: '其他'}];
+        
+    var sexs = [{id: '男', name: '男'}, {id: '女', name: '女'}];
+    
+    var user ;   //当前登入信息
+     $.getJSON('depts/findAll', function(data) {		 				  
+        	  depts = data;
+    		});
+    $.getJSON('user/findLogin', function(data) {		 				  
+        user = data;
+        init_form();       
+    });
+   
+      
+    function init_form(){
+    var from = $("#detailForm").ligerForm({
+        inputWidth: 280,
+        defaultType:"text",
+        fields: [
+           { display: "id",id:"id",name: "user.id",type: "hidden" },
+          			{ display: "用户名",id:"name", name: "user.name", newline: true, type: "text", 
+          				validate:{specialCharValidate:false,required:true,minlength:2,maxlength:30}, width: 200},
+                { display: "姓名",id:"realName", name: "user.realName", newline: false, type: "text", 
+                  validate:{specialCharValidate:false,required:true,minlength:2,maxlength:30}, width: 200},  
+          			{ display: "邮箱",id:"email",name: "user.email",type: "text",width: 200, newline: true,
+          				validate: {  maxlength: 50,email:true}},
+           			{ display: "电话",id:"tel",name: "user.tel", type: "text", width: 200, newline: false, validate: {maxlength: 20}},
+          			{ display: "性别", id:"sex", name: "user.sexHide", comboboxName: "sexCombox", type: "select", width: 200, newline: true,
+                  options: {data: sexs,  valueField: 'id', textField: 'name', valueFieldID: 'user.sex'} },
+          			// 新增
+                { display: "民族",id:"nation",name: "user.nation", type: "text" ,width: 200,validate: {maxlength: 20}, newline: false},          		       
+                { display: "出生日期", id:"birthday",name: "user.birthday", type: "date",format: "yyyy-MM-dd",width: 200,
+          				validate: { required: false}, newline: true},
+          			{ display: "政治面貌",id:"politics",name: "user.politics", type: "text" ,width: 200,validate: {maxlength: 50}, newline: false}, 	
+                { display: "籍贯",id:"nativePlace",name: "user.nativePlace", type: "text" ,width: 200,validate: {maxlength: 20}, newline: true},        //宁城新增     		       
+              
+                
+                // 新增
+                { display: "入党时间", id:"joinPartyTime",name: "user.joinPartyTime", type: "date",format: "yyyy-MM-dd",width: 200,
+          			   validate: { required: false}, newline: false},
+                { display: "工作时间", id:"jobInTime",name: "user.jobInTime", newline: true,  type: "date",format: "yyyy-MM-dd",width: 200},
+          			
+                { display: "文化程度",id:"education",name: "user.education", type: "text" ,width: 200,validate: {maxlength: 50}, newline: false},
+                              
+                 //新增
+          			{ display: "基础学历",id:"baseEducation",name: "user.baseEducation", type: "text" ,width: 200,validate: {maxlength: 50}, newline: true},
+          			{ display: "院校专业时间",id:"baseGraduated",name: "user.baseGraduated", type: "text" ,width: 200,validate: {maxlength: 50}, newline: false},
+          			{ display: "最高学历",id:"highEducation",name: "user.highEducation", type: "text" ,width: 200,validate: {maxlength: 50}, newline: true},
+          			{ display: "院校专业时间",id:"highGraduated",name: "user.highGraduated", type: "text" ,width: 200,validate: {maxlength: 50}, newline: false},          			                                
+                { display: "职称",id:"title",name: "user.title", type: "text", width: 200, newline: true}, 
+          			{ display: "取得职称时间", id:"getTitleTime",name: "user.getTitleTime", type: "date",format: "yyyy-MM-dd",width: 200,
+          			             validate: { required: false}, newline: false},
+                { display: "已聘职称",id:"alreadyTitle",name: "user.alreadyTitle", type: "text", width: 200, newline: true},           			                               
+                { display: "科室", id:"dept",name: "user.deptHide", comboboxName: "deptCombox", newline: false, 
+          			            width: 200, type: "select", 
+          			            options: {data: depts,  valueField: 'id', textField: 'name',valueFieldID: 'user.dept.id'},
+          			            validate: { required: false}}, 
+                                                       
+                { display: "专业类别", id:"category",name: "user.categoryHide", comboboxName: "categoryCombox", newline: true, 
+                                           width: 200, type: "select", 
+                                           options: {data: categorys,  valueField: 'id', textField: 'name', valueFieldID: 'user.category'},
+                                           validate: { required: false}},
+          			{ display: "专业技术职务", id:"job",name: "user.job", newline: false,  type: "text" ,width: 200},                 
+          			//{ display: "任职时间", id:"jobInTime",name: "user.jobInTime", newline: true,  type: "date",format: "yyyy-MM-dd",width: 200},
+          			{ display: "资格证书号码", id:"qcn",name: "user.qcn", newline: true,  type: "text", width: 200},  
+          			{ display: "执业证书号码", id:"pcn",name: "user.pcn", newline: false,  type: "text", width: 200},  
+          			{ display: "岗位描述",id:"jobDesc", name: "user.jobDesc", newline: true, width: 200,  type: "hidden"}, 
+       
+                { display: "岗位等级",id:"postGrade", name: "user.postGrade", newline: true, width: 200,  type: "text"}, 
+                { display: "备案时间", id:"putRecordTime",name: "user.putRecordTime", type: "date",format: "yyyy-MM-dd",width: 200,
+                                           validate: { required: false}, newline: false},
+                { display: "身份",id:"IdentType", name: "user.IdentType", newline: true, width: 200,  type: "text"},                                                   
+               /* { display: "角色", id:"role",name: "user.roleHide", comboboxName: "roleCombox", newline: false, 
+          			          width: 200, type: "select", 
+          			          options: {data: roles,  valueField: 'id', textField: 'name', valueFieldID: 'user.role.id'},
+          			          validate: { required: true}},*/ 
+                { display: "排序号", id:"orderNum",name: "user.orderNum", newline: true,  type: "hidden", width: 200}
+          			  ],
+               
+        toJSON: JSON2.stringify
+    });
+          
+    $("#name").ligerGetDateEditorManager().setDisabled();
+
+    $.metadata.setType("attr", "validate");
+    var  detailWin=null;
+    var v = $("#detailForm").validate({
+        debug:false,
+        errorPlacement: function (lable, element)
+        {
+            if (element.hasClass("l-textarea"))
+            {
+                element.ligerTip({ content: lable.html(), target: element[0] }); 
+            }
+            else if (element.hasClass("l-text-field"))
+            {
+                element.parent().ligerTip({ content: lable.html(), target: element[0] });
+            }
+            else
+            {
+                lable.appendTo(element.parents("td:first").next("td"));
+            }
+        },
+        
+        success: function (lable)
+        {         
+            lable.ligerHideTip();
+            lable.remove();
+        },
+        
+       	submitHandler: function ()
+	             	{
+                          
+	            	  $("#detailForm .l-text,.l-textarea").ligerHideTip();
+	                     $.ajax({
+	                         loading: '正在保存数据中...',
+	                         type: 'POST',
+	                         url: 'user',                  
+	                         data: $("#detailForm").serialize(),
+	                         success: function ()
+	                         {
+                                     $.ligerDialog.alert("修改成功!!");
+                                     detailWin.hide();
+	                         },
+	                         error: function (message)
+	                         {
+	                            $.messager.show("保存失败",false);
+	                         }
+	                     });
+	         	         return false;
+                                 //$.ajaxSettings.async = false;  //同步刷新
+	             	}
+    });
+    
+    $("#detailForm").ligerForm();
+    detailWin = $.ligerDialog.open({
+        target: $("#detail"),
+        allowClose:false,
+        title:'个人信息修改',
+        width: 700, height: 500, top: 0,
+        buttons: [
+            { text: '上传照片', width: 100, onclick: function() { upload();} },
+            { text: '确定', onclick: function() { save();  detailWin.hide();} },
+            { text: '取消', onclick: function () {
+                    //隐藏错误冒泡提示信息
+                    ligerHideTip();
+                    detailWin.hide(); } }
+        ]
+    });
+    
+        loadData(user);
+        $("#sexCombox").ligerGetComboBoxManager().setValue(user.sex);  
+        if(user.dept!=null){
+          	    $("#deptCombox").ligerGetComboBoxManager().setValue(user.dept.id);
+        }
+        
+       // $("#roleCombox").ligerGetComboBoxManager().setValue(user.role.id);                      
+        $("#categoryCombox").ligerGetComboBoxManager().setValue(user.category);
+       // $("#roleCombox").ligerGetDateEditorManager().setDisabled();     
+    }
+
+    function save()
+    {  
+        $('#detailForm').submit();   				
+    }
+    
+    function upload()
+    {
+        open = $.ligerDialog.open({
+            height:200,
+            url: 'upload',
+            isResize: true,
+            title: '上传照片',
+            width: null, showMax: true, showToggle: true, showMin: true, modal: false            
+        }); 
+    }   
+        
+}
+    </script>
+    <div id="detail" style="display:none;">
+    <form name="detailForm" method="post" action="" id="detailForm"></form>
+</html>

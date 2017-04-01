@@ -1,0 +1,50 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge,chrome=1">
+<head>
+<link rel="shortcut icon" type="image/png" href="/public/images/favicon.png">
+<link rel="stylesheet" type="text/css" media="screen" href="/public/login/login.css">
+<style>
+    .label.one {font-weight:bolder; }
+</style>
+
+</head>
+
+<body>
+    <div id="login">
+        <div id="login_content">
+            <div class="loginForm">
+                <form id="loginForm" method="POST" action="@{Application.authenticate}">                        
+                    <p>
+                        <label><b>用户名:</b></label>
+                        <input type="text" name="name" placeholder="用户名" value="${flash.name}"
+                        	size="20"  class="login_input">                       
+                    </p>
+                    <p>
+                        <label><b>密&nbsp;&nbsp;&nbsp;&nbsp;码:</b></label>
+                        <input type="password" name="password" placeholder="密码"
+                        	 size="20" class="login_input">            
+                    </p>                  
+                    <div class="login_bar">
+                        <input class="sub" type="submit" value=" ">
+                    </div>                  
+                </form>
+                <br/>
+                #{if flash?.error}
+					<div class="error"><h5 style="color:red;">${flash.error}</h5></div>
+				#{/if}
+            </div>                             
+            <div class="login_banner"><img src="/public/login/login_ba.jpg"></div>
+            <div class="login_main">
+                <div class="login_inner">
+                    <p>爱生信公司出品</p>
+                    <p></p>
+                </div>
+            </div>
+        </div>
+        <div id="login_footer">
+            Copyright © 2014 <a href="http://www.ashinex.com" target="_blank">www.ashinex.com </a> Inc. All Rights Reserved.
+        </div>
+    </div>
+</body>
+</html>

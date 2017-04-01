@@ -1,0 +1,6 @@
+# Application dependencies
+
+require:
+    - play
+    - net.sf.flexjson -> flexjson 2.1
+    - play -> excel 1.2.3

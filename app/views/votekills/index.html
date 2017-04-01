@@ -1,0 +1,192 @@
+	#{extends 'main.html'/}
+	<div class="l-clear"></div>
+    <div id="maingrid" style="margin-top:1px"></div> <br />
+    <div style="display:none;"></div>
+    <div id="detail" style="display:none;overflow:hidden;"><form id="mainform" method="post"></form></div>
+    
+    <script type="text/javascript">
+    $(function () {
+        var gradeData = [];
+        
+        $.getJSON('grades/json', function(data) {		 				  
+			     gradeData = data.Rows;
+		    });
+		        
+        var manager, grid;
+
+        function f_initGrid()
+        {
+         	grid = manager = $("#maingrid").ligerGrid({
+            columns: [
+            { display: '编号', name: 'id', width: 50, type: 'int' },
+            { display: '项目', name: 'title', width: 400, type: 'textarea' },
+            { display: '物品', name: 'goods', width: 100, type: 'textarea' },
+            { display: '结果', name: 'grade', width: 100, type:'textarea', 
+              render: function (item)
+              {
+              	if (item.grade) return item.grade.name;
+              	return '';
+              } },
+            { display: '描述', name: 'remark', width: 200, type: 'string', type: 'textarea'}
+            ],
+
+            url: "votekills/json",  method: "GET",                       
+            width: '100%',
+            toolbar: { items: [
+                { text: '增加', click: addRow, icon: 'add' },
+                { line: true },
+                { text: '修改', click: modifyRow, icon: 'modify' },
+                { line: true },
+                { text: '删除', click: deleteRow, icon: 'delete' }
+                ] }
+        	});         	
+        }
+        
+        f_initGrid();
+        
+        function f_reload()
+        {
+          grid.loadData();
+        }
+        
+        function getSelected()
+        { 
+            var row = manager.getSelectedRow();
+            if (!row) { alert('请选择行'); return; }
+            alert(JSON.stringify(row));
+        }
+        
+        function getData()
+        { 
+            var data = manager.getData();
+            alert(JSON.stringify(data));
+        }
+        
+        function addRow()
+        {
+        	showDetail({}, false);
+        }
+        
+        function modifyRow()
+        {
+            var selected = grid.getSelected();
+            if (!selected) { LG.tip('请选择行!'); return }
+            //var parent = grid.getParent(selected);
+            var gradeid = (selected.grade)?selected.grade.id:0;
+            showDetail({
+                id: selected.id,
+                title: selected.title,
+                goods:selected.goods,
+                grade: gradeid,
+                remark: selected.remark
+            }, false);
+        }
+        
+        function deleteRow()
+        {
+            jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
+            		if (confirm) f_delete(); });
+        }
+        
+        function f_delete() 
+        {
+          var selected = grid.getSelected();
+          if (selected) {
+              $.ajax({
+            	  url: 'votekill/' + selected.id,
+                  type: 'DELETE',                  
+                  loading: '正在删除中...',                  
+                  success: function () {
+                      //LG.showSuccess('删除成功');
+                      LG.tip('删除成功!');
+                      f_reload();
+                  },
+                  error: function (message) {
+                      LG.showError(message);
+                  }
+              });
+          }
+          else {
+              LG.tip('请选择行!');
+          }
+        }
+        
+	    var detailWin = null, curentData = null, currentIsAddNew;
+	    var mainform = $("#mainform");
+	    
+	    function showDetail(data, isAddNew)
+	    {
+          currentData = data;
+          currentIsAddNew = isAddNew;
+          if (detailWin)
+          {
+              detailWin.show(); 
+          }
+          else
+          {
+              //创建表单结构              
+              mainform.ligerForm({
+                  inputWidth: 280,
+                  fields: [
+         			{ name: "votekill.id", type: "hidden" },
+         			{ display: "否决项目", name: "votekill.title", newline: true, 
+         			  labelWidth: 100, width: 220, space: 30, type: "textarea", 
+         			  validate: { required: true, maxlength: 50} },
+                                { display: "物品", name: "votekill.goods", newline: true, 
+         			  labelWidth: 100, width: 220, space: 30, type: "text", 
+         			  validate: { required: true, maxlength: 50} },
+         			{ display: "否决结果", name: "gradeHide", comboboxName: "gradeCombox", newline: true, 
+         			  labelWidth: 100, width: 220, space: 30, type: "select",
+         			  options: {data: gradeData, valueField: 'id', textField: 'name', valueFieldID: 'votekill.grade.id'} },
+         			{ display: "项目描述", name: "votekill.remark", newline: true, 
+                	  labelWidth: 100, width: 220, space: 30, type: "textarea" } ],         			
+                  toJSON: JSON2.stringify
+              });
+              
+              //$("#DeptParentName").attr("readonly", "readonly");
+
+              detailWin = $.ligerDialog.open({
+                  target: $("#detail"),
+                  //width: 450, height: 280, top:80,
+                  buttons: [
+                  { text: '确定', onclick: function () { save(); } },
+                  { text: '取消', onclick: function () { detailWin.hide(); } }
+                  ]
+              });
+          }
+          
+          if (currentData)
+          {    	  
+        	    $("[name$=id]").val(currentData.id)
+              $("[name$=title]").val(currentData.title);   
+              $("[name$=goods]").val(currentData.goods);   
+              $("[name$=remark]").val(currentData.remark);
+             // $("#gradeCombox").ligerGetComboBoxManager().setValue(currentData.grade);
+              $("[name$=title]").focus();
+          }
+
+          function save()
+          {
+              $("#mainform").validate();
+             
+              $.ajax({
+                  loading: '正在保存数据中...',
+                  type: 'POST',
+                  url: 'votekill',                  
+                  data: $("#mainform").serialize(),
+                  success: function ()
+                  {
+                	  detailWin.hide();
+                    grid.loadData();
+                    LG.tip('保存成功!');
+                  },
+                  error: function (message)
+                  {
+                    LG.tip(message);
+                  }
+              });
+          }
+        }
+   
+	})
+  </script>

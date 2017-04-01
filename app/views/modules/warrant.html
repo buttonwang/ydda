@@ -1,0 +1,132 @@
+	#{extends 'main.html'/}
+	<div class="l-clear"></div>
+        <div id="navtab1"  style="width:98%;border:1px solid #A3C0E8; ">
+            <table  >
+                <tr>
+                    <td colspan="3"><div id="maingrid1" style="margin-top:1px"></div></td>
+                </tr>
+                <tr>
+                    <td><div id="maingrid2" style="margin-top:1px"></div> </td>
+                    <td align="center">
+                        &nbsp;<input type="button" value="增加" onclick="add()"/>
+                        &nbsp;&nbsp;
+                        &nbsp;<input type="button" value="删除" onclick="remove()"/>
+                    </td>
+                    <td> <div id="maingrid3" style="margin-top:1px"></div></td>
+                </tr>
+               
+            </table>
+        
+        </div>
+        <br />
+  
+    <div style="display:none;"></div>
+    <div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+    
+    <script type="text/javascript">
+    
+    var manager, role_grid,griding,grided;
+    $(function () {
+           
+        function f_initGrid() 
+        {
+            role_grid = manager = $("#maingrid1").ligerGrid({
+            columns: [
+            { display: '编号', name: 'id', width: 50, type: 'int' },
+            { display: '角色名称', name: 'name', width: 120, type: 'textarea' } 
+            ],
+            url: "/roles/json",  method: "GET", height:"240", title:"角色列表",              
+            width: '100%',  
+            onSelectRow:showModes
+           
+            });   
+                
+             griding = manager = $("#maingrid2").ligerGrid({
+            columns: [
+            { display: '编号', name: '1', width: 50, type: 'int' },
+            { display: '模块名称', name: '2', width: 160, type: 'textarea' },
+            { display: '备注', name: '3', width: 100, type: 'textarea' },
+            { display: '角色代码', name: '0', width: 100, type: 'hidden' }
+            
+            ],
+            pageSize:"50" ,                 
+            width: '100%',height:"400",title:"未授权模块列表"     
+          
+           });         
+
+             grided = manager = $("#maingrid3").ligerGrid({
+            columns: [
+            { display: '编号', name: '1', width: 50, type: 'int' },
+            { display: '模块名称', name: '2', width: 160, type: 'textarea' },
+            { display: '备注', name: '3', width: 100, type: 'textarea' },
+            { display: '角色代码', name: '0', width: 100, type: 'hidden' }
+            ],
+            height:"400", pageSize:"50",                      
+            width: '100%',title:"已授权模块列表"    
+        	});              
+        }
+        
+        f_initGrid();
+           
+	})
+         function showModes(){
+            var  row=role_grid.getSelectedRow();
+            var url = "getModing/?id="+row.id+'&pageSize=50' ;
+            $.getJSON(
+            url,              
+            function(jsondata) {    
+                griding.setOptions({ data: jsondata }); 
+                griding.loadData();
+            });
+            
+            var url = "getModed/?id="+row.id+'&pageSize=50' ;
+            $.getJSON(
+            url,              
+            function(jsondata) {    
+                grided.setOptions({ data: jsondata }); 
+                grided.loadData();
+            });                  
+        }
+      
+        function add(){
+             var  row=griding.getSelectedRow();
+             if (!row) { alert('请选择行'); return; }
+            // row[0] 角色代码  row[1] 模块代码
+                $.ajax({
+                  loading: '正在保存数据中...',
+                  type: 'POST',
+                  url: 'addrolem',                  
+                  data: {roleid:row[0],id:row[1]},
+                  success: function ()
+                  {            
+                      LG.tip('增加成功!');
+                      showModes();
+                  },
+                  error: function (message)
+                  {
+                      LG.tip(message);
+                  }
+              });
+        }
+        function remove(){
+             var  row=grided.getSelectedRow();
+             if (!row) { alert('请选择行'); return; }
+            // row[0] 角色代码  row[1] 模块代码
+                $.ajax({
+                  loading: '正在删除数据中...',
+                  type: 'DELETE',
+                  url: 'delrolem',                  
+                  data: {roleid:row[0],id:row[1]},
+                  success: function ()
+                  {
+                           LG.tip('删除成功!');
+                           showModes();
+                  },
+                  error: function (message)
+                  {
+                      LG.tip(message);
+                  }
+              });
+            
+        }
+    </script>

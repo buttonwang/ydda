@@ -1,0 +1,40 @@
+<div position="right">
+	</br>
+	<select name="checkYear" id="checkYear" align>   
+	        <option value="2011">2011 年度</option>	
+		<option value="2012">2012 年度</option>
+		<option value="2013">2013 年度</option>
+		<option value="2014">2014 年度</option>
+		<option value="2015">2015 年度</option>
+		<option value="2016">2016 年度</option>
+		<option value="2017">2017 年度</option>
+		<option value="2018">2018 年度</option>
+		<option value="2019">2019 年度</option>
+		<option value="2020">2020 年度</option>
+		<option value="2021">2021 年度</option>
+                <option value="2022">2022 年度</option>
+	</select> 
+        <div id="queryDiv">
+           人员检索: <input style="width:92px" id="queryByName" name="queryByName" type="text" value="" size="13" onkeydown="EnterPress(event)"/>
+        </br></br>
+        
+        </div>
+	<div id="userTreeDiv" style="width:180px; height:722px; margin:0px;  border:1px solid #ccc; overflow:auto; ">
+            <ul id="userTree">
+             <li id="d-1"><span>全院</span><ul></ul></li> 
+            </ul>
+	</div>
+        
+</div>
+
+
+<script type="text/javascript">
+
+  $(function() {
+	$("#checkYear").ligerComboBox({lable:"考评年度", lableWidth:50, width: 95}); 
+        
+  });
+  
+   
+
+</script>

@@ -1,0 +1,166 @@
+#{extends 'main.html'/}
+
+<div id="layout1">
+    <div  position="center" title="档案查询">
+      <!--  <div id="state"  style="background-color:#C4E1FF;height:18px;font-size:2; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择：</div>  --> 
+        <div class="l-clear"></div>
+        <div id="navtab1" style="width: 860px;overflow:hidden; border:1px solid #A3C0E8; ">          
+            <div  title="查询条件" style="">
+                <div id="detail"  style="margin-top:1px">
+                    <form id="queryform"  method="post">
+   
+                    </form>               
+               </div>  <br> <br/>  
+               <table width="60%">
+                   <tr>
+                       <td width="50%">&nbsp;</td><td><input id="btnSet" type="button" value="查　询" onclick="query();"></td>
+                       <td >&nbsp;&nbsp;</td>
+                       <td><input id="btnReset" type="button" value="重　置" onclick="resetform();"></td>                     
+                   </tr>
+                   <tr><td>&nbsp;</td></tr>
+               </table>
+            </div> 
+            
+        </div>  
+        <div id="navtab1" style="width: 860px;overflow:hidden; border:1px solid #A3C0E8; ">
+            <div   title="档案列表">
+                <div id="maingrid" style="margin-top:1px"></div> <br />
+                <div style="display:none;"></div>             
+            </div>    
+        </div> 
+    </div>
+</div>
+
+<script type="text/javascript">  
+    $(function () {    
+        var tag=${tag};
+       /* if (tag==0) {
+            $("#userTreeDiv").hide() ;      
+        } else{
+            $("#userTreeDiv").show();
+        }*/
+        
+        var manager, grid;
+        $("#layout1").ligerLayout({leftWidth: 160,height: 600});
+        $("#navtab1").ligerTab();
+
+        var depts=[];
+        var users=[];
+        var categorys=[{"id":1,name:"基础考评"},{"id":2,name:"加分项目"},{"id":3,name:"一票否决"}];
+
+        var queryform = $("#queryform");
+        function f_initGrid()
+        {     
+            grid = manager = $("#maingrid").ligerGrid({
+                columns: [
+                    { display: '姓名', name:'realName', width: 80,  type: 'textarea' },
+                    { display: '科室', name: 'deptName', width: 80,  type: 'textarea' },
+                    { display: '考评类别', name: 'category', width: 80,  type: 'textarea' ,              
+                      render: function (item)
+                     {          
+                            if (parseInt(item.category) == 1) return '基础考评';
+                            if (parseInt(item.category) == 2) return '加分项目';
+                            if (parseInt(item.category) == 3) return '一票否决';
+                            return '';
+                    }},
+                    { display: '项目', name: 'checkTitle', width: 150, type: 'textarea' },
+                    { display: '时间', name: 'noteDate', width: 100, type: 'textarea' },
+                    { display: '内容', name: 'content', width: 200, type: 'textarea' },
+                    { display: '分数', name: 'score', width: 50, type: 'textarea' },
+                    { display: '证明人', name: 'certifyMan', width: 60, type: 'textarea' }
+                  ],
+               // url:'detailfilejson?tag='+tag, 
+                method: "GET", title: "档案列表",	            
+                width: '100%',height:"100%", pageSize: 30, showTitle: true, checkbox: false, checkboxColWidth: 50
+            });
+        }
+        
+        f_initGrid();
+        var  fieldsarr=[];
+        function f_initquery() {
+            if(tag>0){
+               fieldsarr=[                                          
+                    { display: "填报起始时间", name: "begindate", newline: true, 
+                        labelWidth: 100, width: 120, space: 30, type: "date"},
+                    { display: "填报截止时间", name: "enddate",  newline: false, 
+                        labelWidth: 100, width: 120, space: 30, type: "date"},
+                    { display: "姓名", name: "userHide", comboboxName: "userCombox",newline: false, 
+                        labelWidth: 100, width: 120, space: 30, type: "select",
+                        options: {data: users,valueField: 'id', textField: 'realName'} },
+                    { display: "科室", name: "deptHide", comboboxName: "deptCombox", newline: true, 
+                        labelWidth: 100, width: 120, space: 30, type: "select",
+                        options: {data: depts, valueField: 'id', textField: 'name'} },	
+                    { display: "职称", name: "title",  newline: false, 
+                        labelWidth: 100, width: 120, space: 30, type: "text"},                    
+                    { display: "考评分类", name: "category", comboboxName: "categoryCombox",newline: false, 
+                        labelWidth: 100, width: 120, space: 0, type: "select" ,align :"left",
+                        options: {data: categorys, valueField: 'id', textField: 'name'} }                         
+                ];
+            } else{
+                   fieldsarr=[                                          
+                    { display: "填报起始时间", name: "begindate", newline: true, 
+                        labelWidth: 100, width: 120, space: 30, type: "date"},
+                    { display: "填报截止时间", name: "enddate",  newline: false, 
+                        labelWidth: 100, width: 120, space: 30, type: "date"},                         
+                    { display: "考评分类", name: "category", comboboxName: "categoryCombox",newline: false, 
+                        labelWidth: 100, width: 120, space: 0, type: "select" ,align :"left",
+                        options: {data: categorys, valueField: 'id', textField: 'name'} }                         
+                ];
+            }
+            queryform.ligerForm({
+                inputWidth: 280,
+                fields: fieldsarr,
+                pageSize: 50,       				
+                toJSON: JSON2.stringify
+            });
+        }
+
+        $.getJSON('/depts/findAll', function(data) {                          
+            depts = data;         
+        });
+
+
+        $.getJSON('/users/findAll', function(data) {                          
+            users = data;
+            f_initquery();         
+        });
+        
+        function f_reload() {
+            grid.loadData();
+        }
+       
+        query = function (){              
+            $.ajax({
+                loading: '正在查询中...',
+                type: 'POST',
+                url: 'detailfilejson?tag='+tag+'&pagesize=30',                  
+                data: $("#queryform").serialize(),
+                dataType:"json",
+                success: function (jsonStr){
+                    if(jsonStr.Total == 0){
+                        alert("查询无结果！");
+                    }
+                    grid.setOptions({ data: jsonStr }); 
+                    grid.loadData();  
+                    
+                },
+                error: function (message)
+                {
+                    LG.tip(message);              
+                }
+            });    
+        }
+        
+        resetform = function (){   
+            $("[name$=begindate]").ligerGetComboBoxManager().setValue();
+            $("[name$=enddate]").ligerGetComboBoxManager().setValue();  
+            $("#categoryCombox").ligerGetComboBoxManager().setValue();  
+            $("[name$=title]").val();  
+            $("#userCombox").ligerGetComboBoxManager().setValue();      
+            $("#deptCombox").ligerGetComboBoxManager().setValue();    
+        }
+            
+
+    })
+           
+</script>
