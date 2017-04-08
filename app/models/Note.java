@@ -43,7 +43,7 @@ public class Note extends Model {
     @ManyToOne
     public User createdMan; //记录人
 
-    public Date createdDate; //记录时间
+    public Date createdDate = new Date(); //记录时间
     
     public Date updatedDate; //更新时间
     
@@ -196,7 +196,7 @@ public class Note extends Model {
     }
     
     public static String toCheckJson(List<Note> notes) {
-    	return new JSONSerializer()    	
+        return new JSONSerializer()    	
     	  .transform(new DateTransformer("yyyy-MM-dd"), "noteDate")
     	  .include("id","noteYear", "noteDate", "content", "certifyMan","approveLevel", "approveLevelName","checkTitle","checkId","userId","deptId","realName","deptName","category","categoryName","approveComment","score","goods","createdManName")
     	  .exclude("*")

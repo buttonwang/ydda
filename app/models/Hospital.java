@@ -24,7 +24,6 @@ public class Hospital extends Model {
     
     public static String toCheckJson(Hospital hospital) {
     	return new JSONSerializer()    	
-    	  //.transform(new DateTransformer("yyyy-MM-dd"), "noteDate")
     	  .include("id", "name", "remark")
     	  .exclude("*")
     	  .serialize(hospital);
