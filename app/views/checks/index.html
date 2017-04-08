@@ -390,7 +390,7 @@
         
         //查看所有项目        
         allgrid = $("#allgrid").ligerGrid({
-            columns: [{ display: '填报日期', name: 'noteDate',type:'text',width: 80 },
+            columns: [{ display: '发生日期', name: 'noteDate',type:'text',width: 80 },
                 { display: '姓名', name: 'realName', type:'text',width: 60 },
                 { display: '科室', name: 'deptName', type:'text',width: 80 },
                 { display: '事项', name: 'content',  align: 'left',type:'text',width: 150 },
@@ -563,7 +563,7 @@
                             labelWidth: 100, width: 220, space: 30,type: "text" } ,   
                         { display: "自我评价", name: "recorddetail.remark", newline: true, 
                             labelWidth: 100, width: 220, space: 30,type: "textarea" } ,                    
-                        { display: "填报日期", name: "recorddetail.recordTime", newline: true,
+                        { display: "发生日期", name: "recorddetail.recordTime", newline: true,
                             labelWidth: 100, width: 220, space: 30,type: "date", 
                             validate: { required: true, maxlength: 50} }  ,
                         { display: "医务人员签字", name: "recorddetail.signatory", newline: true, 
@@ -653,7 +653,7 @@
                             labelWidth: 100, width: 220, space: 30, type: "text" } ,
                         { display: "科室评价", name: "recorddetail1.remark", newline: true, 
                             labelWidth: 100, width: 220, space: 30, type: "textarea" } ,
-                        { display: "填报日期", name: "recorddetail1.recordTime", newline: true,
+                        { display: "发生日期", name: "recorddetail1.recordTime", newline: true,
                             labelWidth: 100, width: 220, space: 30, type: "date", 
                             validate: { required: true, maxlength: 50} },
                         { display: "科室主任签字", name: "recorddetail1.signatory", newline: true, 
@@ -742,7 +742,7 @@
                         { display: "单位评价等次", name: "gradeHide", comboboxName:"gradeCombox", newline: true, 
                             labelWidth: 100, width: 220, space: 30, type: "select",
                             options: {data: grades, valueField: 'id', textField: 'name'} },         
-                        { display: "填报日期", name: "recorddetail3.recordTime", newline: true,
+                        { display: "发生日期", name: "recorddetail3.recordTime", newline: true,
                             labelWidth: 100, width: 220, space: 30, type: "date", 
                             validate: { required: true, maxlength: 50} }],                
                     toJSON: JSON2.stringify
@@ -834,7 +834,7 @@
                             labelWidth: 100, width: 220, space: 30,newline: false },
                         { display: "综合考评结论", name: "record4.conclusion", newline: true, 
                             labelWidth: 100, width: 220, space: 30, type: "text"},                          
-                        { display: "填报日期", name: "record4.conclusionTime", newline: true,
+                        { display: "发生日期", name: "record4.conclusionTime", newline: true,
                             labelWidth: 100, width: 220, space: 30, type: "date", 
                             validate: { required: true, maxlength: 50} }],                 
                     toJSON: JSON2.stringify

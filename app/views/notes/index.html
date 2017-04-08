@@ -47,8 +47,8 @@ var managerTree = null;
 
         function f_initGrid(                                                                                                                                                                                                       )
         { 
-            //考评主项
-            if(tag>0)
+          //考评主项
+          if(tag>0)
           {
                  grid = manager = $("#maingrid").ligerGrid({
                 columns: [
@@ -113,8 +113,8 @@ var managerTree = null;
             });
         }else
         {
-                 grid = manager = $("#maingrid").ligerGrid({
-                 columns: [
+                grid = manager = $("#maingrid").ligerGrid({
+                columns: [
                     { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
                     { display: '项目', name: 'title', width: 600, type: 'textarea', align:'left'}
                 ],
@@ -168,14 +168,11 @@ var managerTree = null;
                         { text: '删除', click: deleteRow, icon: 'delete' }
                     ] }
             });
-            
-
-            
             }
 
             //所有项目
             allgrid = $("#allgrid").ligerGrid({    
-                columns: [{ display: '填报日期', name: 'noteDate',type:'text',width: 80 },
+                columns: [{ display: '发生日期', name: 'noteDate',type:'text', width: 80, format: "yyyy-dd"},
                     { display: '姓名', name: 'realName', type:'text',width: 60 },
                     { display: '科室', name: 'deptName', type:'text',width: 80 },
                     { display: '考评类别', name: 'categoryName',  type:'text',width: 80},
@@ -207,7 +204,7 @@ var managerTree = null;
             $.getJSON(
             url,              
             function(jsondata) {    
-                allgrid.setOptions({ data: jsondata }); 
+                allgrid.setOptions({ data: jsondata });
                 allgrid.loadData();
             });
         }
@@ -326,6 +323,7 @@ var managerTree = null;
                 deptId:dept
             }, false);             
         }
+
         function addRow_voteMore()
         {
             var names = managerTree.getChecked();
@@ -457,7 +455,7 @@ var managerTree = null;
                             { name: "notes.category", type: "hidden" },
                             { display: "考评项目", name: "checkListTitle", newline: false, 
                                 labelWidth: 120, width:220, space: 30, type: "textarea"},
-                            { display: "填报日期", name: "notes.noteDate", newline: true,
+                            { display: "发生日期", name: "notes.noteDate", newline: true,
                                 labelWidth: 120, width: 220, space: 30, type: "date", 
                                 validate: { required: true, maxlength: 50} },
                              { display: "科室", name: "notes.deptHide", comboboxName: "deptCombox", newline: true,
@@ -488,7 +486,7 @@ var managerTree = null;
                             { name: "notes.category", type: "hidden" },
                             { display: "考评项目", name: "checkListTitle", newline: false, disabled: true,
                                 labelWidth: 100, width: 220, space: 30, type: "textarea"},
-                            { display: "填报日期", name: "notes.noteDate", newline: true,
+                            { display: "发生日期", name: "notes.noteDate", newline: true,
                                 labelWidth: 100, width: 220, space: 30, type: "date", 
                                 validate: { required: true, maxlength: 50} },
                             { display: "内容", name: "notes.content", newline: true, 
@@ -666,7 +664,7 @@ var managerTree = null;
             function(jsondata) {    
                 if (jsondata.Total>0) {        
                     detailGrid = $(grid_d).css('margin',6).ligerGrid({                              
-                        columns: [{ display: '填报日期', name: 'noteDate',type:'float',width: 80 },
+                        columns: [{ display: '发生日期', name: 'noteDate',type:'float',width: 80 },
                             { display: '姓名', name: 'realName', type:'float',width: 60 },
                             { display: '科室', name: 'deptName', type:'float',width: 80 },
                             { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },
@@ -706,7 +704,7 @@ var managerTree = null;
             function(jsondata) {    
                 if (jsondata.Total>0) {        
                     detailGrid = $(grid_d).css('margin',6).ligerGrid({                         
-                        columns: [{ display: '填报日期', name: 'noteDate',type:'float',width: 80 },
+                        columns: [{ display: '发生日期', name: 'noteDate',type:'float',width: 80 },
                             { display: '姓名', name: 'realName', type:'float',width: 60 },
                             { display: '科室', name: 'deptName', type:'float',width: 80 },
                             { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },
@@ -746,7 +744,7 @@ var managerTree = null;
             function(jsondata) {    
                 if (jsondata.Total>0) {        
                     detailGrid = $(grid_d).css('margin',6).ligerGrid({                                 
-                        columns: [{ display: '填报日期', name: 'noteDate',type:'float',width: 80 },
+                        columns: [{ display: '发生日期', name: 'noteDate',type:'float',width: 80 },
                             { display: '姓名', name: 'realName', type:'float',width: 60 },
                             { display: '科室', name: 'deptName', type:'float',width: 80 },
                             { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },

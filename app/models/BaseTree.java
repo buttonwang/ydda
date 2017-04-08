@@ -32,8 +32,5 @@ public class BaseTree {
         public String qcn;
         
         public String pcn; 
-        
-
-        
                
 }
