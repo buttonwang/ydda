@@ -144,7 +144,6 @@
             }      
         });               
     }
-    
   
     // 显示其它平台       isArchive 判断是否归档
     function init_check_qtpingtai(isArchive,id,year){  
@@ -210,9 +209,6 @@
         });                                        
     }    
    
-   
-    
-    
     var logUserName='';
     $(function () { 
         //$('#navtab1').bind("selectstart",function(){return false;}); 
@@ -581,12 +577,11 @@
                     $("[name$=signatory]").val(data.signatory);  
                 }else{                                       
                     $("[name$=remark]").val('');  
-                    $("[name$=recordTime]").val('');
+                   
                     $("[name$=signatory]").val(logUserName);  
                 }
                 
                 $.getJSON("checkautoscore/",{UserId:userid,Year:year,level:0}, function(json){   
-                    
                     if(json!=null){                 
                         $("[name$='recorddetail.score']").val(json);   
                         //设定分数不可改
@@ -747,7 +742,7 @@
                             validate: { required: true, maxlength: 50} }],                
                     toJSON: JSON2.stringify
                 });
-                
+
                 $("[name$=year]").val(year);           
                 $("[name$=userID3]").val(userid); 
                 $("[name$=currentObject3]").val(name);  
@@ -765,7 +760,7 @@
                 if(data){                                                
                     $("[name$=recordTime]").val(data.recordTime);
                 }else{                                                        
-                    $("[name$=recordTime]").val('');
+                    $("[name$=recordTime]").val(new Date().toLocaleDateString());
                 }         
                 $.getJSON("checkautoscore/",{UserId:userid,Year:year,level:2}, function(json){                 
                    // if(json!=null){                 

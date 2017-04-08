@@ -1,11 +1,13 @@
 #{extends 'main.html'/}
 <script type="text/javascript">
-var managerTree = null;
-   //user,dept初始值,放在最外面，让所有方法都能读取
+    var managerTree = null;
+    //user,dept初始值,放在最外面，让所有方法都能读取
     var user = -1;
     var dept = -1;
     var names = "";
-   $(function () {
+    var today = new Date();
+    var todayStr = today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate();
+    $(function () {
        $("#uploadp").hide();
         var tag=${tag};       
         if (tag==0) {
@@ -509,7 +511,7 @@ var managerTree = null;
                         toJSON: JSON2.stringify
                     });
                                         
-                    detailWin = $.ligerDialog.open({
+                detailWin = $.ligerDialog.open({
                         target: $("#detail"),
                         show: false,
                         width: 360, height: 440, 
@@ -537,8 +539,7 @@ var managerTree = null;
                         function(jsondata) {                               
                             goodsCombox.setData(jsondata);                           
                         });
-                } 
-                else if (currentData.category==3) {                             
+                } else if (currentData.category==3) {                             
                     goodsCombox.setEnabled();
                     $.getJSON('votekills/findgoods', {id:currentData.checkListId}, 
                         function(jsondata) {                               
@@ -572,6 +573,7 @@ var managerTree = null;
                 {           
                     var checkMethodMgr = $("#checkmethSel").ligerGetComboBoxManager() || $("#checkmethodsel").ligerGetComboBoxManager();
                     var scoreMgr = $("#notes\\.score").ligerGetComboBoxManager();
+                    var noteDateMgr = $("#notes\\.noteDate").ligerGetComboBoxManager();
 
                     $("[name$=id]").val(currentData.id)              
                     if(currentData.category==1){
@@ -589,8 +591,12 @@ var managerTree = null;
                         checkMethodMgr.setDisabled();
                         scoreMgr.setDisabled();
                     }
-                    $("#checkListTitle").val(currentData.checkListtitle);             
-                    $("[name$=noteDate]").val(currentData.noteDate);                         
+                    $("#checkListTitle").val(currentData.checkListtitle);    
+
+                    if (currentData.noteDate) {$("[name$=noteDate]").val(currentData.noteDate); }
+                    else{ $("[name$=noteDate]").val(todayStr); };
+                    noteDateMgr.setDisabled();
+
                     $("[name$=content]").val(currentData.content);          
                     $("[name$=certifyMan]").val(currentData.certifyMan);  
                     $("[name$=category]").val(currentData.category);               
