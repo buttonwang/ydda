@@ -46,7 +46,7 @@
 
         var depts=[];
         var users=[];
-        var categorys=[{"id":1,name:"基础考评"},{"id":2,name:"加分项目"},{"id":3,name:"一票否决"}];
+        var categorys=[{"id":1,name:"减分项目"},{"id":2,name:"加分项目"},{"id":3,name:"一票否决"}];
 
         var queryform = $("#queryform");
         function f_initGrid()
@@ -58,7 +58,7 @@
                     { display: '考评类别', name: 'category', width: 80,  type: 'textarea' ,              
                       render: function (item)
                      {          
-                            if (parseInt(item.category) == 1) return '基础考评';
+                            if (parseInt(item.category) == 1) return '减分项目';
                             if (parseInt(item.category) == 2) return '加分项目';
                             if (parseInt(item.category) == 3) return '一票否决';
                             return '';
@@ -119,7 +119,6 @@
             depts = data;         
         });
 
-
         $.getJSON('/users/findAll', function(data) {                          
             users = data;
             f_initquery();         
@@ -159,8 +158,6 @@
             $("#userCombox").ligerGetComboBoxManager().setValue();      
             $("#deptCombox").ligerGetComboBoxManager().setValue();    
         }
-            
-
     })
            
 </script>
