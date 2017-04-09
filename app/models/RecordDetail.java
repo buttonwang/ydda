@@ -37,7 +37,7 @@ public class RecordDetail extends Model {
 
     public String remark; //备注
 
-    public Date recordTime;  //评价时间
+    public Date recordTime = new Date();  //评价时间
 
    // public Integer agreeNumber;   //同意人数
 
@@ -75,7 +75,6 @@ public class RecordDetail extends Model {
     public static String toCheckJson(RecordDetail  model) {
     	return new JSONSerializer()    	
     	  .transform(new DateTransformer("yyyy-MM-dd"), "recordTime")
-    	//  .include("id", "score", "remark", "recordTime","agreeNumber","notAgreeNumber","notAgreeCause","signatory")
           .include("id", "score", "remark", "recordTime","suifangBY","suifangPP","ydyfBY","ydyfPP","signatory")
     	  .exclude("*")
     	  .serialize(model);

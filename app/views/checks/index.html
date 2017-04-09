@@ -491,15 +491,17 @@
             if (getQueryParam()==false) return false;
             location.href = "check_export_excel/?UserId=" + userid + "&Year=" + year;        
         }
+
         //导出全部
         function export_excel_all() {
             if (getQueryParam()==false) return false;
             location.href = "check_export_excel_all/?Year="+ year;        
         }
+
         //考评表归档
         function  archive_submit(){     
             if (getQueryParam()==false) return false; 
-            if (getIsArchive()==true){ alert("考评表已归档！"); return false;}
+            if (getIsArchive()==true) { alert("考评表已归档！"); return false;}
             $.ligerDialog.confirm('考评表不能再修改，是否确定归档？',function (r)  {          
                 if(r){  
                     var isvotekill=$("#haveVoteKill").val();
@@ -559,8 +561,8 @@
                             labelWidth: 100, width: 220, space: 30,type: "text" } ,   
                         { display: "自我评价", name: "recorddetail.remark", newline: true, 
                             labelWidth: 100, width: 220, space: 30,type: "textarea" } ,                    
-                        { display: "发生日期", name: "recorddetail.recordTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30,type: "date", 
+                        { display: "评价时间", name: "recorddetail.recordTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30,type: "hidden", 
                             validate: { required: true, maxlength: 50} }  ,
                         { display: "医务人员签字", name: "recorddetail.signatory", newline: true, 
                             labelWidth: 100, width: 220, space: 30,type: "text" } 
@@ -648,8 +650,8 @@
                             labelWidth: 100, width: 220, space: 30, type: "text" } ,
                         { display: "科室评价", name: "recorddetail1.remark", newline: true, 
                             labelWidth: 100, width: 220, space: 30, type: "textarea" } ,
-                        { display: "发生日期", name: "recorddetail1.recordTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30, type: "date", 
+                        { display: "评价时间", name: "recorddetail1.recordTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "hidden", 
                             validate: { required: true, maxlength: 50} },
                         { display: "科室主任签字", name: "recorddetail1.signatory", newline: true, 
                             labelWidth: 100, width: 220, space: 30, type: "text" } 
@@ -737,8 +739,8 @@
                         { display: "单位评价等次", name: "gradeHide", comboboxName:"gradeCombox", newline: true, 
                             labelWidth: 100, width: 220, space: 30, type: "select",
                             options: {data: grades, valueField: 'id', textField: 'name'} },         
-                        { display: "发生日期", name: "recorddetail3.recordTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30, type: "date", 
+                        { display: "评价时间", name: "recorddetail3.recordTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "hidden", 
                             validate: { required: true, maxlength: 50} }],                
                     toJSON: JSON2.stringify
                 });
@@ -829,8 +831,8 @@
                             labelWidth: 100, width: 220, space: 30,newline: false },
                         { display: "综合考评结论", name: "record4.conclusion", newline: true, 
                             labelWidth: 100, width: 220, space: 30, type: "text"},                          
-                        { display: "发生日期", name: "record4.conclusionTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30, type: "date", 
+                        { display: "评价时间", name: "record4.conclusionTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "hidden", 
                             validate: { required: true, maxlength: 50} }],                 
                     toJSON: JSON2.stringify
                 });
@@ -1025,7 +1027,7 @@
             </div>
             <div id="allgrid" style="display:none"></div>
 
-            <p align="center" style="display:none"><strong>山东省医务人员医德考评表</strong><strong> </strong></p>                                         
+            <p align="center" style="display:none"><strong>医务人员医德考评表</strong><strong> </strong></p>                                         
             <form id="mainform" name="mainform">
                 <input  id="userId" name="userId"  value=""  type="hidden" />  
 

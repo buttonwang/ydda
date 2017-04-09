@@ -345,18 +345,18 @@ public class Notes extends Application {
 
     public static void save(Note notes, String userCombox_val, String deptCombox_val, String goodsCombox, int tag) {
         User user = connectedUser();
-        long userId = UserRole.getMaxRoleId(user);
+        long roleId = UserRole.getMaxRoleId(user);
         String[] names = {userCombox_val};
-        if (userId != 2) {
+        if (roleId > 2) {
             if (userCombox_val.contains(";")) {
                 names = userCombox_val.split(";");
             }
         }
-       if(notes.id  != null){
-              System.out.println("ddd");
-              notes.save();
-        }else{
-        for (int i = 0; i < names.length; i++) {
+        if (notes.id  != null) {
+            //System.out.println("ddd");
+            notes.save();
+        } else {
+          for (int i = 0; i < names.length; i++) {
             Note note = new Note();                    //创建一个新的对象，for循环能为每个对象赋值一个id
             note.noteDate = notes.noteDate;            //将形参的值赋给对象
             note.certifyMan = notes.certifyMan;
@@ -370,23 +370,26 @@ public class Notes extends Application {
             note.voteKill = notes.voteKill;
 
             if (notes.approveLevel == null) {
-                if (userId > 3) {                               //医德医风小组填报不必科室审核
-                    notes.approveLevel = (int) userId - 3;
+                if (roleId > 3) {                               //医德医风小组填报不必科室审核
+                    notes.approveLevel = (int) roleId - 3;
                 } else {
                     notes.approveLevel = 0;
                 }
             }
+            
             //if (note.user== null)  note.user = connectedUser();
             if (names[i] != null && !(names[i].equals(""))) {
                 note.user = (User) User.findById(Long.parseLong(names[i]));
             } else {
                 note.user = user;                //个人填报增加人员
             }
+            
             if (deptCombox_val != null && !(deptCombox_val.equals(""))) {
                 note.dept = (Dept) Dept.findById(Long.parseLong(deptCombox_val));
             } else {
                 note.dept = user.dept;             // 个人填报增加科室             
             }
+            
             if (goodsCombox != null && !(goodsCombox.equals(""))) {   //增加奖惩实物
                 note.goods = goodsCombox;
             }
@@ -412,10 +415,8 @@ public class Notes extends Application {
                 note.noteYear = noteYear;
             }
             note.save();
+          }
         }
-         }
-
-
         renderJSON("");
     }
 }

@@ -184,8 +184,8 @@ public class Checks extends Application {
         Note note = Note.findVoteKillNote(UserId, Year);
         renderJSON(note);
     }
-    //已有的自我评价信息
 
+    //已有的自我评价信息
     public static void selfhistory(long UserId, int Year) {
         User user = User.findById(UserId);
         Record rd = Record.findByUser(user, Year);
@@ -269,11 +269,9 @@ public class Checks extends Application {
 
         qitaStr = "{\"suifangBY\":" + suifangBY + ",\"suifangPP\":" + suifangPP + ",\"ydyfBY\":" + ydyfBY + ",\"ydyfPP\":" + ydyfPP + "}";
         renderJSON(qitaStr);
-
-
     }
-    //自动计算分数  +自动等级 2012-12-17
 
+    //自动计算分数  +自动等级 2012-12-17
     public static void getAutoScore(long UserId, int level, String Year) {
         String initStr = null;
         Long userid = Long.valueOf(UserId);
@@ -397,6 +395,7 @@ public class Checks extends Application {
             recorddetail.user = user;
             recorddetail.checkLevel = checkLevel;
             // recorddetail.score = score;
+            recorddetail.recordTime = new Date();
             recorddetail.save();
         } else {
             //修改档案              
@@ -406,11 +405,12 @@ public class Checks extends Application {
                 recorddetail.user = user;
                 recorddetail.checkLevel = checkLevel;
                 //  recorddetail.score = score;
+                recorddetail.recordTime = new Date();
                 recorddetail.save();
             } else {                   //修改自我评价            
                 // RD.score = recorddetail.score;
                 RD.remark = recorddetail.remark;
-                RD.recordTime = recorddetail.recordTime;
+                RD.recordTime = new Date(); // recorddetail.recordTime;
                 RD.user = user;
                 RD.score = recorddetail.score;
                 RD.signatory = recorddetail.signatory;
@@ -435,6 +435,7 @@ public class Checks extends Application {
             recorddetail1.user = user;
             recorddetail1.checkLevel = checkLevel;
             //recorddetail1.score = score;
+            recorddetail1.recordTime = new Date();
             recorddetail1.save();
         } else {
             RecordDetail RD = RecordDetail.findByRecord(currentRecord, checkLevel);
@@ -443,11 +444,12 @@ public class Checks extends Application {
                 recorddetail1.user = user;
                 recorddetail1.checkLevel = checkLevel;
                 //  recorddetail1.score = score;
+                recorddetail1.recordTime = new Date();
                 recorddetail1.save();
             } else {
                 //RD.score = recorddetail1.score;
                 RD.remark = recorddetail1.remark;
-                RD.recordTime = recorddetail1.recordTime;
+                RD.recordTime =  new Date(); // recorddetail1.recordTime;
                 RD.user = user;
                 RD.score = recorddetail1.score;
                 RD.signatory = recorddetail1.signatory;
@@ -476,8 +478,8 @@ public class Checks extends Application {
      * recorddetail2.notAgreeCause; RD.recordTime = recorddetail2.recordTime;
      * RD.user = user; RD.save(); } } renderJSON(""); }
      */
-    //保存单位评价
 
+    //保存单位评价
     public static void checkcom(Record record3, RecordDetail recorddetail3, long gradeCombox_val, long userID3) {
         User recordUser = User.findById(userID3);
         User user = connectedUser();
@@ -493,6 +495,7 @@ public class Checks extends Application {
             recorddetail3.user = user;
             recorddetail3.checkLevel = checkLevel;
             //   recorddetail3.score = score;
+            recorddetail3.recordTime = new Date();
             recorddetail3.save();
         } else {
             currentRecord.grade = grade;
@@ -503,10 +506,11 @@ public class Checks extends Application {
                 recorddetail3.user = user;
                 recorddetail3.checkLevel = checkLevel;
                 //    recorddetail3.score = score;
+                recorddetail3.recordTime = new Date();
                 recorddetail3.save();
             } else {
                 //RD.score = recorddetail3.score;
-                RD.recordTime = recorddetail3.recordTime;
+                RD.recordTime = new Date();
                 RD.user = user;
                 RD.score = recorddetail3.score;
                 RD.save();
@@ -515,24 +519,24 @@ public class Checks extends Application {
         renderJSON("");
 
     }
-    //保存综合评价
 
+    //保存综合评价
     public static void checkcomplex(Record record4, long userID4) {
         User recordUser = User.findById(userID4);
         Record currentRecord = Record.findByUser(recordUser, record4.year);
         if (currentRecord == null) {
             record4.user = recordUser;
+            record4.conclusionTime = new Date();
             record4.save();
         } else {
             currentRecord.conclusion = record4.conclusion;
-            currentRecord.conclusionTime = record4.conclusionTime;
+            currentRecord.conclusionTime =  new Date();  // record4.conclusionTime;
             currentRecord.save();
         }
         renderJSON("");
-
     }
-    //保存备注
 
+    //保存备注
     public static void checkremark(Record record5, long userID5) {
         User recordUser = User.findById(userID5);
         Record currentRecord = Record.findByUser(recordUser, record5.year);
@@ -544,15 +548,14 @@ public class Checks extends Application {
             currentRecord.save();
         }
         renderJSON("");
-
     }
-    //年度考评结果明细
 
+    //年度考评结果明细
     public static void resultdetail() {
         render();
     }
+ 
     //年度考评结果明细
-
     public static void resultdetailjson(String year, String deptCombox_val, String gradeCombox_val) {
         //调整  改为全院参与统计（不排除一票否决的信息） 
         String sql = "select r.id, r.year ,d.name,x.realName,x.sex,x.title,g.name as grade from YDDA_Record as r "
@@ -635,10 +638,9 @@ public class Checks extends Application {
         renderArgs.put(RenderExcel.RA_FILENAME, "医德考评表-" + user.realName + ".xls");
         render(user, rd, rd1, rd2, rd3, rd4, hp, jobInTimeS, conclusionTimeS, rd1_recordTimeS, rd2_recordTimeS, rd4_recordTimeS, suifangBY, suifangPP, ydyfBY, ydyfPP, isVoteKill);
     }
+
     //exportExcelAll
-
     public static void exportExcelAll(int Year) {
-
         List<User> list = User.all().fetch();
         List li = new ArrayList();
         // System.out.println(list.size());
@@ -721,7 +723,6 @@ public class Checks extends Application {
         renderArgs.put(RenderExcel.RA_ASYNC, true);
         renderArgs.put(RenderExcel.RA_FILENAME, "医德考评表-全院所有人员.xls");
         render(li);
-
     }
 
     //一票否决项目明细  2012-11-22
@@ -746,13 +747,13 @@ public class Checks extends Application {
         String jsonStr = YUtils.ligerGridData(notesStr, total);
         renderJSON(jsonStr);
     }
-    //表彰情况一览表
 
+    //表彰情况一览表
     public static void commenddetail() {
         render();
     }
-    //表彰情况统计
 
+    //表彰情况统计
     public static void commendcount() {
         render();
     }
@@ -785,8 +786,8 @@ public class Checks extends Application {
 
 
     }
-    //表彰情况一览表统计数据  2012-11-23
 
+    //表彰情况一览表统计数据  2012-11-23
     public static void commendcountjson(String year, String deptCombox) {
         String yearSQL = "";
         String deptSQL = "";
@@ -917,7 +918,10 @@ public class Checks extends Application {
         boolean isvk = ("有".equals(isVoteKill)) ? true : false;
         record.status = 1;
         record.isVoteKill = isvk;
+        record.archiveTime = new Date();
+        record.archiveMan = connectedUser().realName;
         record.save();
+
         CheckLevel checkLevel = CheckLevel.findByName("其他平台");
         RecordDetail RD = RecordDetail.findByRecord(record, checkLevel);
         if (RD == null) {
@@ -937,6 +941,6 @@ public class Checks extends Application {
             RD.save();
         }
         renderJSON("");
-
     }
+
 }

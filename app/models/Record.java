@@ -29,7 +29,7 @@ public class Record extends Model {
    
     public String  conclusion;  //考评结论
 
-    public Date  conclusionTime; //结论时间
+    public Date  conclusionTime = new Date(); //结论时间
 
     public String  remark;  //备注
     
@@ -39,7 +39,7 @@ public class Record extends Model {
     
     public String archiveRemark; //归档备注
     
-    public Integer status; 	//0: 新建  1：归档
+    public Integer status = 0; 	//0: 新建  1：归档
     
     public Integer checkout; //0: 在档  1：外借
     
@@ -48,7 +48,6 @@ public class Record extends Model {
     public Blob attachment;  //电子版文件
     
     public boolean isVoteKill=false;  //是否含有一票否决
-    
     
     public String toString() {
         return "";
