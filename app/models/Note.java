@@ -55,7 +55,7 @@ public class Note extends Model {
    
     public String approveComment;  //审核意见
     
-    public String imgSrc;    //照片路径   档案记录的图片存证
+    public String fileSrc;    //照片路径   医德档案记录的文件存证
     
     @Transient
     public String approveLevelName;
@@ -128,7 +128,7 @@ public class Note extends Model {
     }
     
     public static String defaultSortName() {
-    	return " noteDate desc ";
+    	return " noteDate, createdDate desc ";
     }
    
     @Transient
@@ -198,7 +198,7 @@ public class Note extends Model {
     public static String toCheckJson(List<Note> notes) {
         return new JSONSerializer()    	
     	  .transform(new DateTransformer("yyyy-MM-dd"), "noteDate")
-    	  .include("id","noteYear", "noteDate", "content", "certifyMan","approveLevel", "approveLevelName","checkTitle","checkId","userId","deptId","realName","deptName","category","categoryName","approveComment","score","goods","createdManName")
+    	  .include("id","noteYear", "noteDate", "content", "fileSrc", "certifyMan","approveLevel", "approveLevelName","checkTitle","checkId","userId","deptId","realName","deptName","category","categoryName","approveComment","score","goods","createdManName")
     	  .exclude("*")
     	  .serialize(notes);
     }
@@ -206,7 +206,7 @@ public class Note extends Model {
     public static String toApproveJson(List<Note> notes) {
     	return new JSONSerializer()
     	  .transform(new DateTransformer("yyyy-MM-dd"), "noteDate")
-    	  .include("id", "realName", "checkTitle", "noteDate", "content", "approveLevel", "approveLevelName","certifyMan","deptName","categoryName","approveComment","score","goods","createdManName")
+    	  .include("id", "realName", "checkTitle", "noteDate", "content", "fileSrc", "approveLevel", "approveLevelName","certifyMan","deptName","categoryName","approveComment","score","goods","createdManName")
     	  .exclude("*")
     	  .serialize(notes);
     }

@@ -1,9 +1,12 @@
 package controllers;
 
+import java.io.File;
+
 import play.*;
 import play.mvc.*;
 import play.data.*;
 import java.util.*;
+import play.libs.Files;
 
 import flexjson.JSONSerializer;
 import javax.persistence.Query;
@@ -419,4 +422,17 @@ public class Notes extends Application {
         }
         renderJSON("");
     }
+
+    public static void upload(long noteId) {
+        int retStatus = (int)noteId;
+        render(retStatus);
+    }
+
+    //上传附件
+    public static void fileUpload(File attachment) {      
+         String fileName = attachment.getName();
+         Files.copy(attachment, Play.getFile("public/notefile/" + fileName));
+         renderJSON("");
+    }
+
 }

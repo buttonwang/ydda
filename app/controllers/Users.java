@@ -175,9 +175,9 @@ public class Users extends Controller {
         String userStr = User.toTransformJson(user);
         renderJSON(userStr);
     }
+
     //人员维护：根据用户名、姓名、科室查询
-    
-     public static void queryjson(String name,String type) {
+    public static void queryjson(String name,String type) {
         List<User> list=null;
     	if(name==null || name.equals("")){
            list = User.all().fetch();      
@@ -196,7 +196,8 @@ public class Users extends Controller {
     	renderJSON(jsonStr);
         
     }
-     //个人信息修改：查找登陆者
+    
+    //个人信息修改：查找登陆者
     public static void  findLogin() {
         User user = connectedUser(); 
         String userStr = user.toTransformJson(user);
@@ -208,14 +209,15 @@ public class Users extends Controller {
         long  roleid=UserRole.getMaxRoleId(user);
         renderJSON(roleid);
     }
-     // 重置用户密码
+    
+    // 重置用户密码
     public static void  resetPass(long id){
         User user=User.findById(id);
         user.resetPass();
         user.save();
     }
     
-     //上传照片
+    //上传照片
     public static void imageUpload(File attachment,long userId){         
         User user = connectedUser();
         long  roleid=UserRole.getMaxRoleId(user);
@@ -264,8 +266,9 @@ public class Users extends Controller {
         int retStatus = (int)userId;
         render(retStatus);
     }
+    
     //读出照片所在的路径
-     public static void findAllImgSrc(long user_Id)
+    public static void findAllImgSrc(long user_Id)
     {
         Query query = JPA.em().createNativeQuery("select imgSrc from AX_User where id="+user_Id);
         List imgSrc = query.getResultList();

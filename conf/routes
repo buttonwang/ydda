@@ -17,8 +17,8 @@ GET    /deptt                                   Application.deptT
 GET    /usert                                   Application.userT
 
 POST   /upload                                  Users.upload
-# Notes
 
+# Notes
 GET     /notes                           		Notes.index
 GET     /notes/json                        		Notes.json
 GET     /notes/checkalljson                     Notes.checkalljson
@@ -37,6 +37,8 @@ POST    /notes/approvefail	                    Notes.approvefailsave
 GET     /notes/query                           	Notes.query
 POST    /notes/filejson                         Notes.filejson
 GET     /notes/expor_approve_excel/             Notes.exporApprove
+
+GET     /noteUpload                             Notes.upload
 
 # Checks
 GET	    /checks                                 Checks.index

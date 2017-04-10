@@ -477,7 +477,9 @@
                             { display: "分数", name: "notes.score", newline: true, 
                                 labelWidth: 120, width: 220, space: 30, type: "text" } ,
                             { display: "经办人(证明人)", name: "notes.certifyMan", newline: true,
-                                labelWidth: 120, width: 220, space: 30, type: "text"}];                                
+                                labelWidth: 120, width: 220, space: 30, type: "text"},
+                            { display: "附件", name: "notes.fileSrc", newline: true,
+                                labelWidth: 100, width: 220, space: 30, type: "text"}     ];                                 
                     } else {                 
                         fieldsarr=[
                             { name: "notes.id", type: "hidden" },
@@ -502,7 +504,9 @@
                             { display: "分数", name: "notes.score", newline: true, 
                                 labelWidth: 100, width: 220, space: 30, type: "text" } ,   	  
                             { display: "经办人(证明人)", name: "notes.certifyMan", newline: true,
-                                labelWidth: 100, width: 220, space: 30, type: "text"}];                                                      
+                                labelWidth: 100, width: 220, space: 30, type: "text"} ,
+                            { display: "附件", name: "notes.fileSrc", newline: true,
+                                labelWidth: 100, width: 220, space: 30, type: "text"}     ];                                                      
                     }   
                     
                     mainform.ligerForm({
@@ -511,12 +515,13 @@
                         toJSON: JSON2.stringify
                     });
                                         
-                detailWin = $.ligerDialog.open({
+                    detailWin = $.ligerDialog.open({
                         target: $("#detail"),
                         show: false,
                         width: 360, height: 440, 
-                        top:80,
+                        top:20,
                         buttons: [
+                            { text: '上传附件', onclick: function () { uploadFile(); } },
                             { text: '确定', onclick: function () { save(); } },
                             { text: '取消', onclick: function () { detailWin.hide(); } }
                         ]
@@ -611,7 +616,25 @@
                 
                 //$("#checkListTitle").ligerGetTextAreaManager().setDisabled();
                 $("#checkListTitle").attr('readonly', 'readonly');           
-          
+
+                function uploadFile()
+                {
+                    $.ligerDialog.open({
+                        height:200,
+                        //url: 'noteUpload',
+                        target: $("#noteupload"),
+                        isResize: true,
+                        title: '上传附件',
+                        width: null, modal: false,
+                        buttons: [ { text: '确定', onclick: function (item, dialog)
+                                                             {
+                                                              $("[name$=fileSrc]").val(attachment.value); } }, 
+                                   { text: '取消', onclick: function (item, dialog) { dialog.close();   } } ]                                                  } } ]  
+                    });
+
+                }
+
+
                 function save()
                 {
                     $("#mainform").validate();
@@ -628,7 +651,6 @@
                             return;
                         }
                     }
-                   
                     
                     $.ajax({
                         loading: '正在保存数据中...',
@@ -912,9 +934,6 @@
     <div position="center" title="记事">
         <div  id="state"  style="background-color:#C4E1FF;height:20px;font-size:1; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择: </div>     
         <div id="navtab1" position="center" style="width: 100%;border:1px solid #A3C0E8; ">
-            
-         
-            
             <div tabid="base" title="减分项目" lselected="true">
                 <div id="maingrid" style="margin-top:1px"></div> <br />
                 <div style="display:none;"></div>
@@ -945,5 +964,13 @@
         </div>  
     </div>
 </div>
- <!-- <a class="l-button" onclick="getSelected()" style="float:left;margin-right:10px;">获取选择</a>-->
 
+<div id="noteupload">
+    <form method="POST" name="noteuploadform" enctype="multipart/form-data" action="@{Notes.fileUpload}?noteId=${retStatus}">  
+    </br>
+    </br>
+    选择需要上传的文件: <input type="file" id="attachment" name="attachment"/>
+    <br/>
+    <br/>
+    </form>
+</div>
