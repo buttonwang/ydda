@@ -625,11 +625,11 @@
                         target: $("#noteupload"),
                         isResize: true,
                         title: '上传附件',
-                        width: null, modal: false,
+                        width: null, modal: true,
                         buttons: [ { text: '确定', onclick: function (item, dialog)
                                                              {
                                                               $("[name$=fileSrc]").val(attachment.value); } }, 
-                                   { text: '取消', onclick: function (item, dialog) { dialog.close();   } } ]                                                  } } ]  
+                                   { text: '取消', onclick: function (item, dialog) { dialog.close();   } } ]   
                     });
 
                 }
