@@ -627,11 +627,10 @@
                         title: '上传附件',
                         width: null, modal: true,
                         buttons: [ { text: '确定', onclick: function (item, dialog)
-                                                             {
-                                                              $("[name$=fileSrc]").val(attachment.value); } }, 
-                                   { text: '取消', onclick: function (item, dialog) { dialog.close();   } } ]   
+                                                             {$("[name$=fileSrc]").val(attachment.value);     } },  //todo:ajax port form 
+                                   { text: '取消', onclick: function (item, dialog) 
+                                                             {noteuploadform.reset(); $("[name$=fileSrc]").val(""); dialog.hide() } } ]   
                     });
-
                 }
 
 
