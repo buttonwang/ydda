@@ -237,7 +237,7 @@ public class Users extends Controller {
                 User id = User.findById(userId);
                 id.imgSrc = "public/Picture/"+pName;
                 id.save();
-                System.out.println("hhhhhh");
+
                 renderTemplate("Users/picture.html", retStatus);
             }
             else

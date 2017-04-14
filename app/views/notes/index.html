@@ -70,7 +70,8 @@
                         { text: '修改', click: modifyRow, icon: 'modify' },
                         { line: true },
                         { text: '删除', click: deleteRow, icon: 'delete' },
-                        { line: true}
+                        { line: true},
+                        { text: '附件上传', click: uploadFile, icon: 'up' }
                     ] }
             });
                    //加分项目
@@ -90,7 +91,9 @@
                         { line:true },
                         { text: '修改', click: modifyRow, icon: 'modify' },
                         { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' }
+                        { text: '删除', click: deleteRow, icon: 'delete' },
+                        { line: true},
+                        { text: '附件上传', click: uploadFile, icon: 'up' }
                     ] }
             });
              //一票否决项目
@@ -110,7 +113,9 @@
                         { line: true},
                         { text: '修改', click: modifyRow, icon: 'modify' },
                         { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' }
+                        { text: '删除', click: deleteRow, icon: 'delete' },
+                        { line: true},
+                        { text: '附件上传', click: uploadFile, icon: 'up' }
                     ] }
             });
         }else
@@ -131,10 +136,13 @@
                         { line: true },
                         { text: '修改', click: modifyRow, icon: 'modify' },
                         { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' }
+                        { text: '删除', click: deleteRow, icon: 'delete' },
+                        { line: true },
+                        { text: '附件上传', click: uploadFile, icon: 'up' }
                     ] }
             });
-                   //加分项目
+            
+            //加分项目
             plusgrid = $("#plusgrid").ligerGrid({
                 columns: [
                     { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
@@ -142,14 +150,16 @@
                 ],
                 url: "adjustlists/json",  method: "GET",                   
                 detail: { onShowDetail: f_showNote_plus,onExtend:f_showNote_plus,height:'auto' },
-                title:"加分项目", 
+                //title:"加分项目", 
                 width: '100%', pageSize: 50,
                 toolbar: { items: [
                         { text: '添加', click: addRow_plus, icon: 'add' },
                         { line: true },
                         { text: '修改', click: modifyRow, icon: 'modify' },
                         { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' }
+                        { text: '删除', click: deleteRow, icon: 'delete' },
+                        { line: true },
+                        { text: '附件上传', click: uploadFile, icon: 'up' }
                     ] }
             });
              //一票否决项目
@@ -160,36 +170,40 @@
                 ],
                 url: "votekills/json",  method: "GET",                   
                 detail: { onShowDetail: f_showNote_vote,onExtend:f_showNote_vote,height:'auto' },
-                title:"一票否决项目", 
+                //title:"一票否决项目", 
                 width: '100%', pageSize: 50,
                 toolbar: { items: [
                         { text: '添加', click: addRow_vote, icon: 'add' },
                         { line: true },
                         { text: '修改', click: modifyRow, icon: 'modify' },
                         { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' }
+                        { text: '删除', click: deleteRow, icon: 'delete' },
+                        { line: true },
+                        { text: '附件上传', click: uploadFile, icon: 'up' }
                     ] }
             });
             }
 
             //所有项目
             allgrid = $("#allgrid").ligerGrid({    
-                columns: [{ display: '发生日期', name: 'noteDate',type:'text', width: 80, format: "yyyy-dd"},
+                columns: [
+                    { display: '发生日期', name: 'noteDate',type:'text', width: 80, format: "yyyy-dd"},
                     { display: '姓名', name: 'realName', type:'text',width: 60 },
                     { display: '科室', name: 'deptName', type:'text',width: 80 },
                     { display: '考评类别', name: 'categoryName',  type:'text',width: 80},
                     { display: '考评项目', name: 'checkTitle',type:'text',width: 150},
-                    { display: '事项', name: 'content',  align: 'left',type:'text',width: 150 },
+                    { display: '事项', name: 'content',  align: 'left',type:'text',width: 100 },
                     { display: '物品', name: 'goods', type:'text',width: 60 },
                     { display: '分数', name: 'score', type:'text',width: 60 },
-                    { display: '经办人(证明人)', name: 'certifyMan', type:'text',width: 100 },
-                    { display: '填报人', name: 'createdManName', type:'text',width: 100 },
-                    { display: '审核状态', name: 'approveLevelName', width: 100},
-                    { display: '备注', name: 'approveComment', width: 100}
+                    { display: '经办人', name: 'certifyMan', type:'text',width: 60 },
+                    { display: '填报人', name: 'createdManName', type:'text',width: 60 },
+                    { display: '审核状态', name: 'approveLevelName', width: 60},
+                    { display: '备注', name: 'approveComment', width: 60},
+                    { display: '附件', name: 'fileSrc', width: 60, render: preView }
                 ],  
                 // url: "notes/checkalljson?tag="+tag+'&userid='+user+'&deptid='+dept+'&checkYear='+checkYear,  
                 method: "GET",                             
-                title:"所有项目", 
+                //title:"所有项目", 
                 width: '100%',height:"80%" ,pageSize: 50       
             });    
         }
@@ -200,14 +214,21 @@
             detailGrid.loadData(true);
         }
 
+        function preView(row)
+        {        
+            var html = " ";                                   
+            if (row.fileSrc != null && row.fileSrc!="") {html = "<a target='_blank' href='" + row.fileSrc + "'>" + '预览</a>'; }                            
+            return html;
+        }
+
         function all_reload() {
             var checkYear=$("#checkYear").val(); 
             var url = "notes/checkalljson?tag="+tag+'&userid='+user+'&deptid='+dept+'&checkYear='+checkYear+'&pageSize=50' ;
             $.getJSON(
-            url,              
-            function(jsondata) {    
-                allgrid.setOptions({ data: jsondata });
-                allgrid.loadData();
+                url,              
+                function(jsondata) {    
+                    allgrid.setOptions({ data: jsondata });
+                    allgrid.loadData();
             });
         }
        
@@ -264,8 +285,9 @@
                 checkListId: selected.id,                
                 checkListtitle: selected.title,
                 category: 1,//填报分类
-                userId:usersid,
-                deptId:dept         
+                userId: usersid,
+                deptId: dept,
+                fileSrc: fileSrc         
             }, false);
         }
         //加分项目填报个人
@@ -282,7 +304,8 @@
                 checkListtitle: selected.title,
                 category:2,
                 userId:user,
-                deptId:dept
+                deptId:dept,
+                fileSrc: fileSrc
             }, false);                     
         }
         //加分项目填报多人
@@ -370,7 +393,8 @@
                 checkListtitle:selected.checkTitle,
                 category:selected.category,
                 score:selected.score,
-                goods:selected.goods
+                goods:selected.goods,
+                fileSrc: fileSrc
             }, false);         
         }
           
@@ -412,6 +436,25 @@
                 LG.tip('请选择行!');
             }
         }
+
+        function uploadFile()
+        {
+            var selected=(detailGrid==null)?null:detailGrid.getSelected();
+            if (!selected) { LG.tip('请选择行!'); return }         
+        
+            if(selected.approveLevel>0||selected.createdManName==null||selected.createdManName==''){
+                  $.ligerDialog.warn('该条记录不能被修改！');
+                  return ;
+            }
+
+            $.ligerDialog.open({
+                height:200,
+                url: 'noteUpload?noteId='+selected.id,
+                isResize: true,
+                title: '上传附件',
+                width: null, modal: true
+            }); 
+        }
                   
         var detailWin = null, curentData = null, currentIsAddNew;
         var mainform = $("#mainform");    
@@ -424,15 +467,15 @@
                 
             var checkmethods=[];
             if(currentData.category==1){   
-            //routes上面的路径是 checkmethods/findMthod      
+                    //routes上面的路径是 checkmethods/findMthod      
                     $.getJSON('checkmethods/findMethod',{id: currentData.checkListId},
                       function(jsondata){
                         init_detailWin(jsondata);
                     })
             } else if(currentData.category==2){                                                 
-                        init_detailWin(checkmethods);                       
+                   init_detailWin(checkmethods);                       
             }else{               
-                        init_detailWin(checkmethods);
+                   init_detailWin(checkmethods);
             }
             
             function init_detailWin(data){
@@ -477,9 +520,7 @@
                             { display: "分数", name: "notes.score", newline: true, 
                                 labelWidth: 120, width: 220, space: 30, type: "text" } ,
                             { display: "经办人(证明人)", name: "notes.certifyMan", newline: true,
-                                labelWidth: 120, width: 220, space: 30, type: "text"},
-                            { display: "附件", name: "notes.fileSrc", newline: true,
-                                labelWidth: 100, width: 220, space: 30, type: "text"}     ];                                 
+                                labelWidth: 120, width: 220, space: 30, type: "text"}   ];                                 
                     } else {                 
                         fieldsarr=[
                             { name: "notes.id", type: "hidden" },
@@ -504,9 +545,8 @@
                             { display: "分数", name: "notes.score", newline: true, 
                                 labelWidth: 100, width: 220, space: 30, type: "text" } ,   	  
                             { display: "经办人(证明人)", name: "notes.certifyMan", newline: true,
-                                labelWidth: 100, width: 220, space: 30, type: "text"} ,
-                            { display: "附件", name: "notes.fileSrc", newline: true,
-                                labelWidth: 100, width: 220, space: 30, type: "text"}     ];                                                      
+                                labelWidth: 100, width: 220, space: 30, type: "text"}
+                            ];                                                      
                     }   
                     
                     mainform.ligerForm({
@@ -520,14 +560,13 @@
                         show: false,
                         width: 360, height: 440, 
                         top:20,
-                        buttons: [
-                            { text: '上传附件', onclick: function () { uploadFile(); } },
+                        buttons: [                            
                             { text: '确定', onclick: function () { save(); } },
                             { text: '取消', onclick: function () { detailWin.hide(); } }
                         ]
                     });              
                 }
-             
+
                 var goodsCombox = $("#goodsCombox").ligerGetComboBoxManager();
                 $("#goodsCombox").val(""); 
                 if (currentData.category==2) {                             
@@ -606,6 +645,7 @@
                     $("[name$=certifyMan]").val(currentData.certifyMan);  
                     $("[name$=category]").val(currentData.category);               
                     $("[name$=score]").val(currentData.score);  
+                    $("[name$=fileSrc]").val(currentData.fileSrc);  
                     $("#goodsCombox").ligerGetComboBoxManager().setValue(currentData.goods);         
                     $("[name$=content]").focus();                    
                     if(tag>0){
@@ -616,24 +656,7 @@
                 
                 //$("#checkListTitle").ligerGetTextAreaManager().setDisabled();
                 $("#checkListTitle").attr('readonly', 'readonly');           
-
-                function uploadFile()
-                {
-                    $.ligerDialog.open({
-                        height:200,
-                        //url: 'noteUpload',
-                        target: $("#noteupload"),
-                        isResize: true,
-                        title: '上传附件',
-                        width: null, modal: true,
-                        buttons: [ { text: '确定', onclick: function (item, dialog)
-                                                             {$("[name$=fileSrc]").val(attachment.value);     } },  //todo:ajax port form 
-                                   { text: '取消', onclick: function (item, dialog) 
-                                                             {noteuploadform.reset(); $("[name$=fileSrc]").val(""); dialog.hide() } } ]   
-                    });
-                }
-
-
+                        
                 function save()
                 {
                     $("#mainform").validate();
@@ -731,7 +754,8 @@
             function(jsondata) {    
                 if (jsondata.Total>0) {        
                     detailGrid = $(grid_d).css('margin',6).ligerGrid({                         
-                        columns: [{ display: '发生日期', name: 'noteDate',type:'float',width: 80 },
+                        columns: [
+                            { display: '发生日期', name: 'noteDate',type:'float',width: 80 },
                             { display: '姓名', name: 'realName', type:'float',width: 60 },
                             { display: '科室', name: 'deptName', type:'float',width: 80 },
                             { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },
@@ -771,7 +795,8 @@
             function(jsondata) {    
                 if (jsondata.Total>0) {        
                     detailGrid = $(grid_d).css('margin',6).ligerGrid({                                 
-                        columns: [{ display: '发生日期', name: 'noteDate',type:'float',width: 80 },
+                        columns: [
+                            { display: '发生日期', name: 'noteDate',type:'float',width: 80 },
                             { display: '姓名', name: 'realName', type:'float',width: 60 },
                             { display: '科室', name: 'deptName', type:'float',width: 80 },
                             { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },
@@ -921,7 +946,6 @@
       function showMessage(json){
            statestr="&nbsp;&nbsp;科室："+json.dept.name+"&nbsp;&nbsp;&nbsp;姓名："+json.realName+"&nbsp;&nbsp;&nbsp;职称："+json.title;
            $("#state").html(statestr);
-       
       }
 
 </script>

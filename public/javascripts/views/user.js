@@ -138,35 +138,24 @@
      
         function uploadPicture()
         {
-
             var row = manager.getSelectedRow();
-            $.ligerDialog.open({
-            height:200,
-            url: 'upload',
-            isResize: true,
-            title: '上传照片',
-            width: null, showMax: true, showToggle: true, showMin: true, modal: false  
-                      
-        }); 
 
-            var row = manager.getSelectedRow();
             var selected = grid.getSelected();
             if (!selected) 
             {
-            	$.messager.show("请选择行",false);
+            	LG.tip("请选择行!");
             	return;
             }
             else
             {
                 $.ligerDialog.open({
-                height:200,
-                url: 'upload?userId='+row.id,
-                isResize: true,
-                title: '上传照片',
-                width: null, showMax: true, showToggle: true, showMin: true, modal: false  
+                    height:200,
+                    url: 'upload?userId='+row.id,
+                    isResize: true,
+                    title: '上传照片',
+                    width: null, modal: true  
                 }); 
             }    
-
         }
                
         function addRow()
@@ -179,7 +168,7 @@
             var row = manager.getSelectedRow();
             var selected = grid.getSelected();
             if (!selected) {
-            	$.messager.show("请选择行",false);
+            	LG.tip("请选择行!");
             	return;
             }
             var parent = grid.getParent(selected);            
@@ -191,7 +180,7 @@
             var row = manager.getSelectedRow();
             var selected = grid.getSelected();
             if (!selected) {
-            	$.messager.show("请选择行",false);
+            	LG.tip("请选择行!");
             	return
             }
             jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {

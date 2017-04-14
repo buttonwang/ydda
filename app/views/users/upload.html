@@ -5,13 +5,13 @@ and open the template in the editor.
 
 <!DOCTYPE html>
   #{extends 'main.html' /}
-          <form method="POST" enctype="multipart/form-data" action="@{Users.imageUpload}?userId=${retStatus}">  
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="file" id="attachment" name="attachment"/>
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="确定上传" id="submit" /> 
-          </form>
+<form method="POST" enctype="multipart/form-data" action="@{Users.imageUpload}?userId=${retStatus}">  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="file" id="attachment" name="attachment"/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="确定上传" id="submit" /> 
+</form>
 
 

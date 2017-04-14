@@ -391,9 +391,10 @@
                 { display: '科室', name: 'deptName', type:'text',width: 80 },
                 { display: '事项', name: 'content',  align: 'left',type:'text',width: 150 },
                 { display: '分数', name: 'score', type:'text',width: 60 },
-                { display: '经办人(证明人)', name: 'certifyMan', type:'text',width: 100 },
-                { display: '审核状态', name: 'approveLevelName', width: 100},
-                { display: '备注', name: 'approveComment', width: 100}
+                { display: '经办人', name: 'certifyMan', type:'text',width: 60 },
+                { display: '审核状态', name: 'approveLevelName', width: 60},
+                { display: '备注', name: 'approveComment', width: 100},
+                { display: '附件', name: 'fileSrc', width: 60, render: preView }
             ],               
             url: "",  
             method: "GET",                             
@@ -410,6 +411,13 @@
                 width: 820, height: 450, top:20,
                 target: $("#allgrid")               
             });
+        }
+        
+        function preView(row)
+        {        
+            var html = " ";                                   
+            if (row.fileSrc != null && row.fileSrc!="") {html = "<a target='_blank' href='" + row.fileSrc + "'>" + '预览</a>'; }                            
+            return html;
         }
         
         var userid, year;

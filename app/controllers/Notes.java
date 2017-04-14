@@ -429,10 +429,19 @@ public class Notes extends Application {
     }
 
     //上传附件
-    public static void fileUpload(File attachment) {      
-         String fileName = attachment.getName();
-         Files.copy(attachment, Play.getFile("public/notefile/" + fileName));
-         renderJSON("");
+    public static void fileUpload(File attachment, long noteId) {
+        //修改附件名，以noteId为名
+        String fileName = attachment.getName();
+        String pictureSuffix = fileName.substring(fileName.lastIndexOf(".")+1);     //获取后缀
+        String pName = noteId+"."+ pictureSuffix;
+        Files.copy(attachment, Play.getFile("public/notefile/" + pName));
+
+        //保存照片所在的路径
+        Note note = Note.findById(noteId);
+        note.fileSrc = "public/notefile/" + pName;
+        note.save();
+
+        renderTemplate("Notes/picture.html", 0);
     }
 
 }
