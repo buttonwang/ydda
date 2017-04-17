@@ -267,6 +267,7 @@
         {
             var names = managerTree.getChecked();
             var usersid = "";
+            var fileSrc = "";
             for (var i = 0; i < names.length; i++)
             {
                 usersid += names[i].data.id.replace("u","") + ";";
@@ -293,6 +294,7 @@
         //加分项目填报个人
         function addRow_plus( )
         {   
+            var fileSrc = "";
             var selected = plusgrid.getSelected();
             if (!selected) { LG.tip('请选择考评项目!'); return }   
             if(selected.title=='随访平台表扬评价'||selected.title=='医德医风平台表扬评价'){
@@ -374,6 +376,7 @@
         
         function modifyRow()
         {         
+            var fileSrc = "";
             var selected=(detailGrid==null)?null:detailGrid.getSelected();
             if (!selected) { LG.tip('请选择行!'); return }         
         
