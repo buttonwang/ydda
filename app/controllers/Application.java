@@ -50,10 +50,8 @@ public class Application extends Controller {
              int n=0;
              CheckLevel  clks = CheckLevel.findByName("科室评价");
              for(Record r:records){
-                 RecordDetail rdk=RecordDetail.findByRecord(r, clks);
-                 if(rdk!=null){
-                      n++;
-                 }  
+                 //RecordDetail rdk=RecordDetail.findByRecord(r, clks);
+                 //if(rdk!=null){n++;}  
              }
              myArrnum[6]= n;                                                       // 科室考评人数
              myArrnum[7]=deptNum-n;                                                   //还没有科室考评人数  
@@ -67,18 +65,16 @@ public class Application extends Controller {
              int m=0;
              CheckLevel  cldw = CheckLevel.findByName("单位评价");
              for(Record r:records){
-                 RecordDetail rdk=RecordDetail.findByRecord(r, cldw);
-                 if(rdk!=null){
-                      m++;
-                 }  
+                 //RecordDetail rdk=RecordDetail.findByRecord(r, cldw);
+                 //if(rdk!=null){m++;}  
              }
              myArrnum[11]= m;                                //(全院)单位考评人数
              myArrnum[12]= qyNum-m;                          //(全院)还未单位考评人数 
              myArrnum[13]= Record.count("status=1");                                 //(全院)归档人数
              myArrnum[14]= qyNum- myArrnum[13];                              //(全院)还未归档人数
         }
-            renderArgs.put("myArrnum", myArrnum);
-            renderArgs.put("myArrstr", myArrstr);          
+        renderArgs.put("myArrnum", myArrnum);
+        renderArgs.put("myArrstr", myArrstr);          
     }
     
     @Before(unless={"login", "authenticate", "logout"})

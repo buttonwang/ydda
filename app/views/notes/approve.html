@@ -26,7 +26,8 @@
                     { display: '物品', name: 'goods', width:80, type: 'textarea' },
                     { display: '分数', name: 'score', width:50, type: 'textarea' }, 
                     { display: '填报人', name: 'createdManName', width:60, type: 'textarea' },
-                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' }
+                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' },
+                    { display: '附件', name: 'fileSrc', width: 60, render: preView }
                    // ,{ display: '备注', name: 'approveComment', width: 100, type: 'textarea' }
                 ],
                 url: "approvejson?level="+level+'&isapprove=0', method: "GET", title: "未审核的填报档案",	            
@@ -55,7 +56,8 @@
                     { display: '物品', name: 'goods', width:80, type: 'textarea' },
                     { display: '分数', name: 'score', width:50, type: 'textarea' }, 
                     { display: '填报人', name: 'createdManName', width:60, type: 'textarea' },
-                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' }
+                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' },
+                    { display: '附件', name: 'fileSrc', width: 60, render: preView }
                    // ,{ display: '备注', name: 'approveComment', width: 100, type: 'textarea' }
                 ],
                 url: "approvejson?level="+level2+'&isapprove=1', method: "GET", title: "已审核的填报档案",	            
@@ -84,6 +86,13 @@
         { 
             var data = manager.getData();
             alert(JSON.stringify(data));
+        }
+
+        function preView(row)
+        {        
+            var html = " ";                                   
+            if (row.fileSrc != null && row.fileSrc!="") {html = "<a target='_blank' href='../" + row.fileSrc + "'>" + '预览</a>'; }                            
+            return html;
         }
         
         function viewRow()
@@ -206,6 +215,7 @@
                     else      
                         return} );              
                 }  
+
                 function cancelRow(){
                     var selected =   grid.getSelected();
                     if (!selected) { LG.tip('请选择行!'); return }      
