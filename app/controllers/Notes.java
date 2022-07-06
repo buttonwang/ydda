@@ -551,9 +551,10 @@ public static void exportQueryNotesExcel(String dept,String realName, int tag,
     public static void save(Note notes, String userCombox_val, String deptCombox_val, String goodsCombox, int tag) {
         User user = connectedUser();
         long roleId = UserRole.getMaxRoleId(user);
-        if (userCombox_val == null) {
-            userCombox_val = "";
-        }
+
+
+        if (userCombox_val == null) userCombox_val = "";
+
         String[] names = {userCombox_val};
 //        if (roleId > 2) {
             if (userCombox_val.contains(";")) {

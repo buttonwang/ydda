@@ -144,6 +144,7 @@
         }
 
         function viewRow() {
+
             var selected = grid.getSelected();
             if (!selected) { LG.tip('请选择考评项目!'); return }
 
@@ -249,10 +250,31 @@
                             },
                             error: function (message) {
                                 LG.showError(message);
-                            }
-                        })
-                    } else{
-                        return
+                            }})
+                    } ;              
+                }  
+
+                function cancelRow(){
+                    var selected =   grid.getSelected();
+                    if (!selected) { LG.tip('请选择行!'); return }      
+                    showDetail({
+                        id: selected.id
+         
+                    }, false);
+                }      
+	
+        
+                var detailWin_com = null, curentData_com = null, currentIsAddNew_com;
+                var commentform = $("#commentform");	        
+             
+                function showDetail(data_com, isAddNew_com)
+                {  
+                    currentData_com = data_com;
+                    currentIsAddNew_com = isAddNew_com;
+                    if (detailWin_com)
+                    {  
+                        detailWin_com.show(); 
+
                     }
                  });
                 }

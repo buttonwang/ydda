@@ -66,7 +66,6 @@ public class Application extends Controller {
              CheckLevel  cldw = CheckLevel.findByName("单位评价");
              for(Record r:records){
                  //RecordDetail rdk=RecordDetail.findByRecord(r, cldw);
-                 //if(rdk!=null){m++;}
              }
              myArrnum[11]= m;                                //(全院)单位考评人数
              myArrnum[12]= qyNum-m;                          //(全院)还未单位考评人数
@@ -74,7 +73,6 @@ public class Application extends Controller {
              myArrnum[14]= qyNum- myArrnum[13];                              //(全院)还未归档人数
         }
         renderArgs.put("myArrnum", myArrnum);
-        renderArgs.put("myArrstr", myArrstr);
     }
 
     @Before(unless={"login", "authenticate", "logout"})
