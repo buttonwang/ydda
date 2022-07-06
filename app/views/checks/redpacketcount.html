@@ -1,10 +1,11 @@
 #{extends 'main.html'/}
 <div id="layout1">
     <div  position="center" title="收取/拒收红包统计">
-        <!--  <div id="state"  style="background-color:#C4E1FF;height:18px;font-size:2; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择：</div>  --> 
         <div class="l-clear"></div>
         <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">          
             <div  title="查询条件" style="">
+                *{增加导出Excel按钮}*
+                <div id="toptoolbar"></div>
                 <div id="detail"  style="margin-top:1px">
                     <form id="queryform"  method="post"></form>               
                 </div>  <br> <br/>  
@@ -34,16 +35,17 @@
        
         
         var manager, grid;
-        $("#layout1").ligerLayout({ leftWidth: 160,height: 640});
+        $("#layout1").ligerLayout({ leftWidth: 160,height: 960});
         $("#navtab1").ligerTab(); 
-
-        //var votekills=[];
-      
-        // var grades=[{"id":1,name:"优秀"},{"id":2,name:"良好"},{"id":3,name:"一般"},{"id":3,name:"较差"}];
         var depts=[];
         var queryform = $("#queryform");
-        function f_initGrid()
-        {     
+        //        增加导出Excel按钮
+        $("#toptoolbar").ligerToolBar({
+            items: [
+                {text: '导出',id:'excel', icon:'outbox',click:export_redPacketCountExcel}
+            ]
+        });
+        function f_initGrid() {
             grid = manager = $("#maingrid").ligerGrid({
                 columns: [
                     //{ display: '序号', name:'0', width: 60,  type: 'textarea' },
@@ -54,7 +56,6 @@
                   
                          
                 ],
-                //url:'detailfilejson?tag='+tag, 
                 method: "GET", title: "收/拒收红包列表",	            
                 width: '100%', height:'98%',pageSize: 30, showTitle: true, checkbox: false, checkboxColWidth: 50
             });
@@ -95,7 +96,14 @@
         function f_reload() {
             grid.loadData();
         }
-       
+        //导出excel
+        function export_redPacketCountExcel() {
+            var deptCombox_val,year,deptName;
+            year = $("[name$=year]").val();
+            deptCombox_val= $("#deptCombox").ligerComboBox().getValue();
+            deptName=$("[name=deptCombox]").val();
+            location.href = "export_redPacketCount_excel/?year="+year+"&dept_id=" + deptCombox_val+"&deptName="+deptName;
+        }
           
         query = function (){              
             $.ajax({

@@ -4,11 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import javax.persistence.Query;
-import models.Dept;
 
-import models.Note;
-import models.User;
-import models.UserRole;
+import models.*;
+
 import play.Play;
 import play.db.jpa.JPA;
 import play.libs.Images;
@@ -28,13 +26,10 @@ public class Users extends Controller {
      * Get Users json.
      */
     public static void json(int page, int pagesize) {
-
-    	List<User> list = User.all().fetch(page, pagesize);      	 
+    	List<User> list = User.all().fetch(page, pagesize);
     	long total = User.count();
-    	
     	String notesStr = User.toCheckJson(list);
     	String jsonStr = YUtils.ligerGridData(notesStr, total);
-    	
     	renderJSON(jsonStr);
     }
 
@@ -77,6 +72,10 @@ public class Users extends Controller {
      * Delete a User.
      */
     public static void delete(long id) {
+        UserRole.DelUserRoleByUserid(id);
+        Notes.DelNoteBycreatedManId(id);
+        Records.delRecordByUserId(id);  //这个
+        Records.delRecordDetailByUserId(id);    //这个
         User.findById(id)._delete();
         renderJSON("");
     }
@@ -96,7 +95,7 @@ public class Users extends Controller {
         int len=selarr.length;
         for(int i=0;i<len;i++){
             long id=Integer.parseInt(selarr[i]);
-            Note note = Note.findById(id);
+            Note note =(Note) Note.findById(id);
             note.approveLevel = note.approveLevel + 1;
             note.save();    
         }     
@@ -126,9 +125,6 @@ public class Users extends Controller {
                 lists = User.findAll();
         }
         renderJSON(lists);
-        
-         // List<User> lists = User.findAll(); renderJSON(lists);
-         
     }
 
     static User connectedUser() {

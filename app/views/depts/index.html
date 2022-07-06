@@ -27,11 +27,10 @@
                         editor: { type: 'select', data: typeData, valueColumnName: 'type' },
                         render: function (item)
                         {   //宁城
-                            if (parseInt(item.type) == 1) return '临床';
-                            if (parseInt(item.type) == 2) return '医技';
-                            if (parseInt(item.type) == 3) return '行政';
-                            if (parseInt(item.type) == 4) return '后勤';
-                            if (parseInt(item.type) == 5) return '窗口';
+                            if (parseInt(item.type) == 1) return '行政后勤';
+                            if (parseInt(item.type) == 2) return '临床科室';
+                            if (parseInt(item.type) == 3) return '医技辅检';
+                            if (parseInt(item.type) == 4) return '特殊病区';
                     
                             //赤峰二院
                             /*  if (parseInt(item.type) == 1) return '内科';
@@ -79,7 +78,7 @@
         
         function addRow()
         {
-            showDetail({}, false);
+            showDetail({}, true);
         }
         
         function modifyRow()
@@ -133,30 +132,29 @@
             currentIsAddNew = isAddNew;
             if (detailWin)
             {
-                detailWin.show(); 
+                detailWin.show();
             }
             else
             {
                 //创建表单结构
-              
                 mainform.ligerForm({
                     inputWidth: 280,
                     fields: [
                         { name: "dept.id", type: "hidden" },
-                        { display: "科室名称", name: "dept.name", newline: true, 
-                            labelWidth: 100, width: 220, space: 30, type: "text", 
+                        { display: "科室名称", name: "dept.name", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "text",
                             validate: { required: true, maxlength: 50} },
-                        { display: "部门类型", name: "typeHide", comboboxName: "typeCombox", newline: true, 
+                        { display: "部门类型", name: "typeHide", comboboxName: "typeCombox", newline: true,
                             labelWidth: 100, width: 220, space: 30, type: "select",
                             options: {data: typeData, valueField: 'type', valueFieldID: 'dept.type'} },
-                        { display: "科室描述", name: "dept.remark", newline: true, 
+                        { display: "科室描述", name: "dept.remark", newline: true,
                             labelWidth: 100, width: 220, space: 30, type: "text" } ,
-                        { display: "科室主任", name: "dept.director", newline: true, 
-                            labelWidth: 100, width: 220, space: 30, type: "text" }                         
-                    ],         			
+                        { display: "科室主任", name: "dept.director", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "text" }
+                    ],
                     toJSON: JSON2.stringify
                 });
-              
+
                 //$("#DeptParentName").attr("readonly", "readonly");
 
                 detailWin = $.ligerDialog.open({

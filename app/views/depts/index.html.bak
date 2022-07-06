@@ -1,0 +1,206 @@
+#{extends 'main.html'/}
+<div class="l-clear"></div>
+<div id="maingrid" style="margin-top:1px"></div> <br />
+<div style="display:none;"></div>
+<div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+
+<script type="text/javascript">
+    $(function () {
+        // var typeData = [{ type: 1, text: '职能科室' }, { type: 2, text: '管理科室'}];
+      
+        // 宁城中心医院
+        var typeData = [{ type: 1, text: '临床' }, { type: 2, text: '医技'},{ type: 3, text: '行政'},{ type: 4, text: '后勤'},{ type: 5, text: '窗口'}];
+        //赤峰二院
+        // var typeData = [{ type: 1, text: '内科' }, { type: 2, text: '外科'},{ type: 3, text: '医技'},{ type: 4, text: '窗口科室'},{ type: 5, text: '行政后勤'}];
+      
+        //$(f_initGrid);
+
+        var manager, grid;
+
+        function f_initGrid() 
+        {
+            grid = manager = $("#maingrid").ligerGrid({
+                columns: [
+                    { display: '编号', name: 'id', width: 50, type: 'int' },
+                    { display: '名称', name: 'name', width: 100, type: 'textarea' },
+                    { display: '部门', name: 'type', width: 100, type:'int',
+                        editor: { type: 'select', data: typeData, valueColumnName: 'type' },
+                        render: function (item)
+                        {   //宁城
+                            if (parseInt(item.type) == 1) return '临床';
+                            if (parseInt(item.type) == 2) return '医技';
+                            if (parseInt(item.type) == 3) return '行政';
+                            if (parseInt(item.type) == 4) return '后勤';
+                            if (parseInt(item.type) == 5) return '窗口';
+                    
+                            //赤峰二院
+                            /*  if (parseInt(item.type) == 1) return '内科';
+                if (parseInt(item.type) == 2) return '外科';
+                if (parseInt(item.type) == 3) return '医技';
+                if (parseInt(item.type) == 4) return '窗口科室';
+                if (parseInt(item.type) == 5) return '行政后勤';   */             
+                            return '';
+                        }
+                    },
+                    { display: '描述', name: 'remark', width: 120, type: 'string', type: 'textarea'},
+                    { display: '科室主任', name: 'director', width: 120, type: 'string', type: 'textarea'}
+                ],
+
+                url: "depts/json",  method: "GET",                       
+                width: '100%',
+                toolbar: { items: [
+                        { text: '增加', click: addRow, icon: 'add' },
+                        { line: true },
+                        { text: '修改', click: modifyRow, icon: 'modify' },
+                        { line: true },
+                        { text: '删除', click: deleteRow, icon: 'delete' }
+                    ] }
+            });         	
+        }
+        
+        f_initGrid();
+        
+        function f_reload() {
+            grid.loadData();
+        }
+        
+        function getSelected()
+        { 
+            var row = manager.getSelectedRow();
+            if (!row) { alert('请选择行'); return; }
+            alert(JSON.stringify(row));
+        }
+        
+        function getData()
+        { 
+            var data = manager.getData();
+            alert(JSON.stringify(data));
+        }
+        
+        function addRow()
+        {
+            showDetail({}, false);
+        }
+        
+        function modifyRow()
+        {
+            var selected = grid.getSelected();
+            if (!selected) { LG.tip('请选择行!'); return }
+            var parent = grid.getParent(selected);
+            showDetail({            
+                id: selected.id,
+                name: selected.name,
+                type: selected.type,
+                remark: selected.remark,
+                director: selected.director
+            }, false);
+        }
+        
+        function deleteRow()
+        {
+            jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
+                if (confirm) f_delete(); });
+        }
+        
+        function f_delete() {
+            var selected = grid.getSelected();
+            if (selected) {
+                $.ajax({
+                    url: 'dept/' + selected.id,
+                    type: 'DELETE',                  
+                    loading: '正在删除中...',                  
+                    success: function () {
+                        //LG.showSuccess('删除成功');
+                        LG.tip('删除成功!');
+                        f_reload();
+                    },
+                    error: function (message) {
+                        LG.showError(message);
+                    }
+                });
+            }
+            else {
+                LG.tip('请选择行!');
+            }
+        }
+        
+        var detailWin = null, curentData = null, currentIsAddNew;
+        var mainform = $("#mainform");
+	    
+        function showDetail(data, isAddNew)
+        {
+            currentData = data;
+            currentIsAddNew = isAddNew;
+            if (detailWin)
+            {
+                detailWin.show(); 
+            }
+            else
+            {
+                //创建表单结构
+              
+                mainform.ligerForm({
+                    inputWidth: 280,
+                    fields: [
+                        { name: "dept.id", type: "hidden" },
+                        { display: "科室名称", name: "dept.name", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text", 
+                            validate: { required: true, maxlength: 50} },
+                        { display: "部门类型", name: "typeHide", comboboxName: "typeCombox", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "select",
+                            options: {data: typeData, valueField: 'type', valueFieldID: 'dept.type'} },
+                        { display: "科室描述", name: "dept.remark", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text" } ,
+                        { display: "科室主任", name: "dept.director", newline: true, 
+                            labelWidth: 100, width: 220, space: 30, type: "text" }                         
+                    ],         			
+                    toJSON: JSON2.stringify
+                });
+              
+                //$("#DeptParentName").attr("readonly", "readonly");
+
+                detailWin = $.ligerDialog.open({
+                    target: $("#detail"),
+                    width: 450, height: 180, top:80,
+                    buttons: [
+                        { text: '确定', onclick: function () { save(); } },
+                        { text: '取消', onclick: function () { detailWin.hide(); } }
+                    ]
+                });
+            }
+          
+            if (currentData)
+            {    	  
+                $("[name$=id]").val(currentData.id)
+                $("[name$=name]").val(currentData.name);
+                $("[name='dept.type']").val(currentData.type);
+                $("[name$=remark]").val(currentData.remark);
+                $("[name$=director]").val(currentData.director);
+                $("#typeCombox").ligerGetComboBoxManager().setValue(currentData.type);
+                $("[name$=name]").focus();
+            }
+
+            function save()
+            {
+                $("#mainform").validate();
+                $.ajax({
+                    loading: '正在保存数据中...',
+                    type: 'POST',
+                    url: 'dept',                  
+                    data: $("#mainform").serialize(),
+                    success: function ()
+                    {
+                        detailWin.hide();
+                        grid.loadData();
+                        LG.tip('保存成功!');
+                    },
+                    error: function (message)
+                    {
+                        LG.tip(message);
+                    }
+                });
+            }
+        }
+   
+    })
+</script>

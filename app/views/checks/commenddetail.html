@@ -1,10 +1,11 @@
 #{extends 'main.html'/}
 <div id="layout1">
     <div  position="center" title="表扬信、花篮等一览表">
-        <!--  <div id="state"  style="background-color:#C4E1FF;height:18px;font-size:2; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择：</div>  --> 
         <div class="l-clear"></div>
-        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">          
+        <div id="navtab1" style="width: 65%;overflow:hidden; border:1px solid #A3C0E8; ">
             <div  title="查询条件" style="">
+            *{增加导出Excel按钮}*
+                <div id="toptoolbar"></div>
                 <div id="detail"  style="margin-top:1px">
                     <form id="queryform"  method="post"></form>               
                 </div>  <br> <br/>  
@@ -19,7 +20,7 @@
             </div> 
 
         </div>  
-        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">                  
+        <div id="navtab1" style="width:65%;overflow:hidden; border:1px solid #A3C0E8; ">
             <div   title="档案列表">
                 <div id="maingrid" style="margin-top:1px"></div> <br />
                 <div style="display:none;"></div>             
@@ -32,17 +33,21 @@
     $(function () {    
         
         var manager, grid;
-        $("#layout1").ligerLayout({ leftWidth: 160,height: 640});
+        $("#layout1").ligerLayout({ leftWidth: 160,height: 960});
         $("#navtab1").ligerTab(); 
 
         var depts=[];
       
         var queryform = $("#queryform");
-        function f_initGrid()
-        {     
+        //        增加导出Excel按钮
+        $("#toptoolbar").ligerToolBar({
+            items: [
+                {text: '导出',id:'excel', icon:'outbox',click:export_CommendDetailExcel}
+            ]
+        });
+        function f_initGrid() {
             grid = manager = $("#maingrid").ligerGrid({
                 columns: [
-                  //  { display: '序号', name:'0', width: 60,  type: 'textarea' },
                     { display: '年度', name:'noteYear', width: 60,  type: 'textarea' },
                     { display: '日期', name:'noteDate', width: 80,  type: 'textarea' },
                     { display: '科室', name:'deptName', width: 80,  type: 'textarea' },
@@ -51,10 +56,8 @@
                     { display: '职称', name: 'title', width: 80,  type: 'textarea' },
                     { display: '项目名称', name: 'checkTitle', width: 240, type: 'textarea' },
                     { display: '物品', name: 'goods', width: 80, type: 'textarea' }
-                  
                 ],
-                //url:'detailfilejson?tag='+tag, 
-                method: "GET", title: "表扬信、花篮等列表",	            
+                method: "GET", title: "表扬信、花篮等列表",
                 width: '100%',height:'98%', pageSize: 30, showTitle: true, checkbox: false, checkboxColWidth: 50
             });
         }
@@ -91,7 +94,14 @@
         function f_reload() {
             grid.loadData();
         }
-       
+        //导出excel
+        function export_CommendDetailExcel() {
+            var deptCombox_val,year,deptName;
+            year = $("[name$=year]").val();
+            deptCombox_val= $("#deptCombox").ligerComboBox().getValue();
+            deptName = $("[name=deptCombox]").val();
+            location.href = "export_commendDetail_excel/?year="+year+"&deptCombox_val=" + deptCombox_val+"&deptName="+deptName;
+        }
           
         query = function (){              
             $.ajax({
@@ -119,10 +129,7 @@
         resetform = function (){   
             $("[name$=year]").val("");         
             $("#deptCombox").ligerGetComboBoxManager().setValue();    
-           // $("#gradeCombox").ligerGetComboBoxManager().setValue();  
         }
-            
-
     })
            
 </script>

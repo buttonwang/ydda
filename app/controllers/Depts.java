@@ -50,31 +50,21 @@ public class Depts extends Controller {
         String deptstr="";
         if (userRole == 3) {                    //角色为科室医德考评小组,则限制科室列表  
                 Query querydepts = JPA.em().createNativeQuery("select name  from YDDA_Dept where id='" + user.dept.id + "'");
-                
                 List listdept = querydepts.getResultList();
-               
                 if (listdept != null && listdept.size() >= 1) {
                       for (int i = 0; i < listdept.size(); i++) {
                           deptstr = deptstr + "'" + listdept.get(i).toString() + "',";
                       }
                      deptstr = deptstr.substring(0, (deptstr.length() - 1));
-
                      depts = Dept.find("name in (" + deptstr + ")").fetch();
-
-
                } else {
-                     //depts = Dept.find("id=?", user.dept.id).fetch();
                     //如果没有查找到，就查询所有的部门，供选择
                      depts = Dept.findAll();
                }
         } else {
             depts = Dept.findAll();
         }
-   
-        //HashMap<String,Object> obj = new HashMap<String,Object>();
         renderJSON(depts);
-        
-
     }
      /*
      * 根据名称来查找科室
@@ -83,6 +73,7 @@ public class Depts extends Controller {
       List<Dept> lists = Dept.find("name like ?",  "%" + key + "%").fetch();
         renderJSON(lists);
     }
+
      static User connectedUser() {
         String userId = session.get("logged");
         return (userId==null) ? null : (User)User.findById(Long.parseLong(userId));
@@ -90,8 +81,13 @@ public class Depts extends Controller {
     /**
      * Update a dept.
      */
-    public static void save(Dept dept) {       
-        dept.save();
+    public static void save(Dept dept) {
+        try{
+            Dept result= dept.save();
+            System.out.println(result);
+        }catch (Exception e){
+            System.out.println(e);
+        }
         renderJSON("");
     }
     

@@ -28,11 +28,11 @@ public class CheckMethods extends Application{
     /**
      * Get CheckMethod json.
      */
-    public static void checkjson(long id, int page, int pagesize) {    	
-    	List<CheckMethod> checkmethods = CheckMethod.find("checkList.id=? ", id).fetch();    						   
-    	long total = CheckMethod.count("checkList.id=? ", id);    
+    public static void checkjson(long id, int page, int pagesize) {
+    	List<CheckMethod> checkmethods = CheckMethod.find("checkList.id=? ", id).fetch();
+    	long total = CheckMethod.count("checkList.id=? ", id);
     	String checkmethodStr = CheckMethod.toCheckJson(checkmethods);
-    	String jsonStr = YUtils.ligerGridData(checkmethodStr, total);   	
+    	String jsonStr = YUtils.ligerGridData(checkmethodStr, total);
     	renderJSON(jsonStr);
     }
     /**
@@ -49,8 +49,8 @@ public class CheckMethods extends Application{
     }
     
     public static void findMethod(long id) {
-    	//List<CheckMethod> checkmethods = CheckMethod.find("checkList.id=? ", id).fetch(); 
-         String sql = "select id,title,score from YDDA_CheckMethod where checkList_id="+id;            
+    	//List<CheckMethod> checkmethods = CheckMethod.find("checkList.id=? ", id).fetch();
+         String sql = "select id,title,score from YDDA_CheckMethod where checkList_id="+id;
          Query query = JPA.em().createNativeQuery(sql, BaseCheckMethod.class);
          List<BaseCheckMethod> lists = query.getResultList();
          renderJSON(lists);

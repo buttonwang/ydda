@@ -1,135 +1,189 @@
 #{extends 'main.html'/}
-<div id="layout1">
-    <div  position="center" title="年度考评结果明细">
-        <!--  <div id="state"  style="background-color:#C4E1FF;height:18px;font-size:2; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择：</div>  --> 
-        <div class="l-clear"></div>
-        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">          
-            <div  title="查询条件" style="">
-                <div id="detail"  style="margin-top:1px">
-                    <form id="queryform"  method="post"></form>               
-                </div>  <br> <br/>  
-                <table width="60%">
-                    <tr>
-                        <td width="50%">&nbsp;</td><td><input id="btnSet" type="button" value="查　询" onclick="query();" /></td>            
-                        <td >&nbsp;&nbsp;</td>
-                        <td><input id="btnReset" type="button"  value="重　置" onclick="resetform();"/></td>         
-                    </tr>
-                    <tr><td>&nbsp;</td></tr>
-                </table>
-            </div> 
-
-        </div>  
-        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">                  
-            <div   title="档案列表">
-                <div id="maingrid" style="margin-top:1px"></div> <br />
-                <div style="display:none;"></div>             
-            </div>    
-        </div>  
-    </div>
-</div>
-
-<script type="text/javascript">  
-    $(function () {    
-        
-        var manager, grid;
-        $("#layout1").ligerLayout({ leftWidth: 160,height: 640});
-        $("#navtab1").ligerTab(); 
-
-        var depts=[];
-      
-        var grades=[{"id":1,name:"优秀"},{"id":2,name:"良好"},{"id":3,name:"一般"},{"id":4,name:"较差"}];
-
+<link rel="stylesheet" href="../../public/stylesheets/chosen.css">
+<link rel="stylesheet" href="../../public/stylesheets/bootstrap.min.css">
+<script type="text/javascript" src="../../public/javascripts/jquery/chosen.jquery.js"></script>
+<script type="text/javascript">
+    var manager, grid;
+    $(function () {
+        $("#layout1").ligerLayout({ leftWidth: 160,height: 960});
         var queryform = $("#queryform");
-        function f_initGrid()
-        {     
+        //加载科室
+        $.getJSON('/depts/findAll', function(data) {
+            for(var p in data){
+                $("#deptCombox_val").append("<option value='"+data[p].id+"'>"+data[p].name+"</option>");
+            }
+            $(function(){
+                $('.dept_select').chosen();
+            });
+        });
+        //加载人员
+        $.getJSON('/users/findAll', function(data) {
+            for(var p in data){
+                $("#userCombox").append("<option value='"+data[p].id+"'>"+data[p].realName+"</option>");
+            }
+            $(function(){
+                $('.realName_select').chosen();
+            });
+        });
+        //加载档案类别与档案状态
+        $(function () {
+            $('.grade_select').chosen();
+        });
+        var d =new Date();       //默认为今年
+        var fullyear=d.getFullYear();
+        $("#year").val(fullyear);
+//        增加导出Excel按钮
+//        $("#toptoolbar").ligerToolBar({
+//            items: [
+//                {text: '导出',id:'excel', icon:'outbox',click:export_ResultDetailExcel}
+//            ]
+//        });
+        //初始化表格
+
+        function f_initGrid() {
             grid = manager = $("#maingrid").ligerGrid({
                 columns: [
-                   // { display: '序号', name:'0', width: 60,  type: 'textarea' },
+//                    { display: '年度', name:'1', width: 80,  type: 'textarea' },
                     { display: '年度', name:'1', width: 80,  type: 'textarea' },
                     { display: '科室', name:'2', width: 100,  type: 'textarea' },
                     { display: '姓名', name: '3', width: 100,  type: 'textarea' },
                     { display: '性别', name: '4', width: 100,  type: 'textarea' },
                     { display: '职称', name: '5', width: 100,  type: 'textarea' },
-                    { display: '考评等级', name: '6', width: 100, type: 'textarea' }
-                  
+                    { display: '考评等级', name: '6', width: 100, type: 'textarea' },
+                    { display: '考评分数', name: '7', width: 100, type: 'textarea' },
+                    { display: '是否一票否决', name: '8', id:'isVoteKill' ,width: 100, type: 'textarea',
+                        render:function (isVoteKill){
+                            if(isVoteKill){
+                                return '无';
+                            }else {
+                                return '有';
+                            }
+                        }
+                    }
                 ],
-                //url:'detailfilejson?tag='+tag, 
-                method: "GET", title: "年度档案考评列表",	            
+                method: "GET", title: "年度档案考评列表",
+                rownumbers:true,
                 width: '100%', height:"98%",pageSize: 30, showTitle: true, checkbox: false, checkboxColWidth: 50
             });
         }
-        
         f_initGrid();
-        var  fieldsarr=[];
-        function f_initquery() {       
-            fieldsarr=[                                          
-                { display: "年度",name: "year", newline: true, 
-                    labelWidth: 50, width: 120, space: 50, type: "text"},                                
-                { display: "科室", name: "deptHide", comboboxName: "deptCombox", newline: false, 
-                    labelWidth: 50, width: 120, space: 50, type: "select",
-                    options: {data: depts, valueField: 'id', textField: 'name'} },
-                { display: "考评等级", name: "gradeHide", comboboxName: "gradeCombox", newline: false, 
-                    labelWidth: 80, width: 120, space: 50, type: "select",
-                    options: {data: grades, valueField: 'id', textField: 'name'} }	                                             
-            ];
-          
-            queryform.ligerForm({
-                inputWidth: 280,
-                fields: fieldsarr,
-                pageSize: 50,       				
-                toJSON: JSON2.stringify
-            });
-	   
-            var d=new Date();       //默认为今年
-            var fullyear=d.getFullYear();
-            $("[name$=year]").val(fullyear);    
-           
-        }
-
-        $.getJSON('/depts/findAll', function(data) {                          
-            depts = data;  
-            f_initquery();     
-        });
-        
-        
-        
-        function f_reload() {
-            grid.loadData();
-        }
-       
-          
-        query = function (){              
+        query =  function  (){
+            var year = $("#year").val();
             $.ajax({
                 loading: '正在查询中...',
                 type: 'POST',
-                url: 'resultdetailjson',                  
+                url: 'resultdetailjson?year='+year,
                 data: $("#queryform").serialize(),
                 dataType:"json",
-                success: function (jsondata){  
+                success: function (jsondata){
                     if(jsondata.Total==0){
-                     //   LG.tip("查询为空！"); 
-                     $.ligerDialog.alert("查询无结果！");
+                        $.ligerDialog.alert("查询无结果！");
                     }
-                    grid.setOptions({ data: jsondata }); 
-                    grid.loadData();  
-                    
+                    grid.setOptions({ data: jsondata });
+                    grid.loadData();
                 },
-                error: function (message)
-                {
-                    LG.tip(message);              
+                error: function (message) {
+                    LG.tip(message);
                 }
-            });    
+            });
         }
-        
-        resetform =function (){   
-            $("[name$=year]").val("");         
-            $("#deptCombox").ligerGetComboBoxManager().setValue();    
-            $("#gradeCombox").ligerGetComboBoxManager().setValue();  
+        function f_reload() {
+            grid.loadData();
         }
-            
-
     })
-           
+    //导出excel
+    function export_ResultDetailExcel() {
+        var dept_val,grade_val,year,dept,grade,user;
+        dept_val=$("#deptCombox_val").val();
+        grade_val=$("#gradeCombox_val").val();
+        user = $("#userCombox").val();
+        year = $("#year").val();
+        dept = $("#deptCombox_val").find("option:selected").text();
+        grade = $("#gradeCombox_val").find("option:selected").text();
+        location.href = "export_resultDetail_excel/?year="+year+"&dept_id=" + dept_val+"&grade_id="
+                + grade_val+"&dept="+dept+"&grade="+grade+"&user="+user;
+    }
+    //重置
+    function restFrom(){
+        $(".dept_select").val('').trigger("chosen:updated");
+        $(".realName_select").val('').trigger("chosen:updated");
+        $(".grade_select").val('').trigger("chosen:updated");
+    }
 </script>
+<!-- loyout1开始-->
+<div id="layout1">
+    <!-- 档案查询开始-->
+    <div  position="center" title="档案查询">
+        <div class="l-clear"></div>
+        <!-- navtab1 查询条件 开始-->
+        <div id="navtab1" style="z-index: 1; width: 76%; height: 45%; overflow:hidden; border:1px solid #A3C0E8; ">
+            <!-- 查询条件 start-->
+            <div  title="查询条件">
+                <!-- detail start-->
+                <div id="detail"  style="margin-top:1px">
+                    <form id="queryform"  method="post">
+                        <div style="position:fixed; z-index:9999">
+                            <div id="timeCondition">
+                                *{<span style="color: red;line-height: 35px;">注：日期格式：2017-01-01</span>}*
+                                <br>
+                                年&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;度：
+                                <input type="text" id="year" style="width:205px;"/>
+                                科&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;室：
+                                <select name="deptCombox_val" style="width:205px;" id="deptCombox_val" class="dept_select" >
+                                    <option value="">请输入科室</option>
+                                </select>
+                            </div>
+                            <div>&nbsp;</div>
+                            <div id="nameCondition">
+                                姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：
+                                <select name="userCombox" style="width:205px;" id="userCombox" class="realName_select"  >
+                                    <option value="">请输入姓名</option>
+                                </select>
+                                考评级别：
+                                <select name="gradeCombox_val" style="width:205px;" id="gradeCombox_val" class="grade_select" >
+                                    <option value="">请选择考评级别</option>
+                                    <option value="1">优秀</option>
+                                    <option value="2">良好</option>
+                                    <option value="3">一般</option>
+                                    <option value="4">差</option>
+                                </select>
+                            </div>
+                            <div>&nbsp;</div>
+                            <div >
+                                <div style="margin-left: 100px;">
+                                    <input id="btnSet" type="button" value="查　询" onclick="query();" >
+                                </div>
+                                <div style="margin-left: 300px; margin-top: -36px">
+                                    <input id="btnReset" type="button" value="重　置" onclick="restFrom()">
+                                </div>
+                                <div style="margin-left: 500px; margin-top: -36px">
+                                    <input id="btnReset" type="button" value="导  出" onclick="export_ResultDetailExcel();">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 科室条件 end -->
+                    </form>
+                </div>
+                <!-- detail end-->
+            </div>
+            <!-- 查询条件 end-->
+        </div>
+        <!-- navtab1查询条件 结束-->
+        <!-- navtab1查询结果  开始-->
+        <div id="navtab1" style="  width: 76%; overflow:hidden; border:1px solid #A3C0E8; ">
+            <!-- 档案列表 开始-->
+            <div   title="考评结果列表">
+                <div id="maingrid" style="margin-top:1px"></div> <br />
+                <div style="display:none;"></div>
+                <!-- 档案列表 end-->
+            </div>
+        </div>
+        <!--  navtab1查询结果 end-->
+    </div>
+    <!-- 档案查询 结束-->
+</div>
+<!-- loyout1 结束-->
+
+
 
 

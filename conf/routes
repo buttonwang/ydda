@@ -32,11 +32,16 @@ GET     /notes/approve					        Notes.approve
 GET     /notes/approvejson              		Notes.approvejson
 GET     /notes/approve/{<[0-9]+>id}		        Notes.approveconfirm
 GET     /notes/approvemulti       	            Notes.approvemulti
+GET     /notes/batchReturn       	            Notes.batchReturn
 POST    /notes/approvefail	                    Notes.approvefailsave
 
 GET     /notes/query                           	Notes.query
 POST    /notes/filejson                         Notes.filejson
+POST     /notes/approvejsoncheck              	Notes.approvejsoncheck
+POST    /notes/detailfilejson                   Notes.detailfilejson
+POST    /notes/queryNotes                       Notes.queryNotes
 GET     /notes/expor_approve_excel/             Notes.exporApprove
+GET     /notes/export_query_notes_excel/        Notes.exportQueryNotesExcel
 
 GET     /noteUpload                             Notes.upload
 
@@ -54,7 +59,16 @@ POST	    /checks/commendcountjson            Checks.commendcountjson
 GET	    /checks/redpacketdetail                 Checks.redpacketdetail 
 GET	    /checks/redpacketcount                  Checks.redpacketcount 
 POST	    /checks/redpacketdetailjson         Checks.redpacketdetailjson 
-POST	    /checks/redpacketcountjson          Checks.redpacketcountjson 
+POST	    /checks/redpacketcountjson          Checks.redpacketcountjson
+POST	    /checks/onevotekilldetailjson       Checks.onevotekilldetailjson
+GET             /checks/export_resultDetail_excel/	                    Checks.exportResultDetailExcel
+GET             /checks/export_resultCount_excel/	                    Checks.exportResultCountExcel
+GET             /checks/export_onevotekillCount_excel/	                Checks.exportOneVoteKillCountExcel
+GET             /checks/export_onevotekillDetail_excel/	                Checks.exportOneVoteKillDetailExcel
+GET             /checks/export_commendCount_excel/	                    Checks.exportCommendCountExcel
+GET             /checks/export_commendDetail_excel/	                    Checks.exportCommendDetailExcel
+GET             /checks/export_redPacketCount_excel/	                Checks.exportRedPacketCountExcel
+GET             /checks/export_redPacketDetail_excel/	                Checks.exportRedPacketDetailExcel
 
 
 GET	    /checks/onevotekillcount                Checks.onevotekillcount 
@@ -67,6 +81,7 @@ POST	    /check_dept                         Checks.checkdept
 
 POST	    /check_com                          Checks.checkcom
 POST	    /check_complex                      Checks.checkcomplex
+POST	    /check_complexall                   Checks.checkcomplexall
 POST	    /check_remark                       Checks.checkremark
 GET	    /check_self/                            Checks.selfhistory
 GET	    /check_dept/                            Checks.depthistory
@@ -84,6 +99,7 @@ GET	    /checkautoscore/                        Checks.getAutoScore
 GET     /check_getHaveVoteKill/                 Checks.getHaveVoteKill
 GET     /check_export_excel/                    Checks.exportExcel
 POST	/arsave                                 Checks.arsave
+POST	/checks/score                           Checks.score
 
                               
 
@@ -93,6 +109,7 @@ GET     /depts/json                         	Depts.json
 DELETE  /dept/{<[0-9]+>id}		                Depts.delete
 POST	/dept					                Depts.save
 POST	/depts/findAll	                        Depts.findAll						
+POST	/depts/findByName	                    Depts.findByName
 
 #warrant
 GET       /roles                              	Roles.index
@@ -137,28 +154,28 @@ GET    /user/findLoginr                           Users.findLoginr
 POST  /user/resetpass/{<[0-9]+>id}		          Users.resetPass
 
 # CheckLists
-GET     /checklists                             Checklists.index
-GET     /checklists/json                        Checklists.json
-GET     /checklists/leafjson                    Checklists.leafjson
-GET     /checklists/simplejson                  Checklists.simplejson
-DELETE     /checklist/{<[0-9]+>id}	            Checklists.delete
-POST	/checklist								Checklists.save
+GET     /checklists                             CheckLists.index
+GET     /checklists/json                        CheckLists.json
+GET     /checklists/leafjson                    CheckLists.leafjson
+GET     /checklists/simplejson                  CheckLists.simplejson
+DELETE     /checklist/{<[0-9]+>id}	            CheckLists.delete
+POST	/checklist								CheckLists.save
 
 # CheckMethods
 GET     /checkmethods                           CheckMethods.index
 GET     /checkmethods/checkjson                 CheckMethods.checkjson
-GET     /checkmethods/findMthod                 CheckMethods.findMthod
+GET     /checkmethods/findMethod                 CheckMethods.findMethod
 POST    /checkmethod                            CheckMethods.save
 DELETE  /checkmethod/{<[0-9]+>id}		  		CheckMethods.delete
 
 # AjustLists
-GET     /adjustlists                            Adjustlists.index
-POST    /adjustlists/findadjust                 Adjustlists.findAdjust
-POST    /adjustlists/findgoods                  Adjustlists.findGoods
+GET     /adjustlists                            AdjustLists.index
+POST    /adjustlists/findadjust                 AdjustLists.findAdjust
+POST    /adjustlists/findgoods                  AdjustLists.findGoods
 
-GET     /adjustlists/json                       Adjustlists.json
-DELETE  /adjustlist/{<[0-9]+>id}		        Adjustlists.delete
-POST	/adjustlist							    Adjustlists.save
+GET     /adjustlists/json                       AdjustLists.json
+DELETE  /adjustlist/{<[0-9]+>id}		        AdjustLists.delete
+POST	/adjustlist							    AdjustLists.save
 
 
 # Grades

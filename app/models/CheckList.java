@@ -20,7 +20,7 @@ public class CheckList extends Model {
 
     public float score;
 
-    public String orderNum;
+    public int orderNum;
        	
     @MaxSize(1000)
     @Column(name="remark", length=1000)
@@ -53,9 +53,8 @@ public class CheckList extends Model {
     
     public static String toJson(List<CheckList> checkLists) {
     	return new JSONSerializer()
-    	  .include("id",  "title", "score", "parentId", "orderNum", "remark", 
-    			   //"checkLists.id", "checkLists.title", "checkLists.score", 
-    			   //"checkLists.parentId", "checkLists.orderNum", "checkLists.remark" )
+    	  .include(
+                  "id",  "title", "score", "parentId", "orderNum", "remark",
     			  "checkLists.*")
     	  .exclude("*")
     	  .serialize(checkLists);    	

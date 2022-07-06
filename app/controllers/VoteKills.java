@@ -11,7 +11,6 @@ import models.*;
  */
 
 public class VoteKills extends Controller {
-  
     public static void index() {
         render();
     }
@@ -20,14 +19,11 @@ public class VoteKills extends Controller {
      * Get VoteKills json.
      */
     public static void json(int page, int pagesize) {
-    	
-    	List<VoteKill> voteKills = VoteKill.all().fetch(page, pagesize);      	 
+    	List<VoteKill> voteKills = VoteKill.all().fetch(page, pagesize);
     	long total = VoteKill.count();
-    	
     	HashMap<String,Object> obj = new HashMap<String,Object>();
     	obj.put("Rows", voteKills);
     	obj.put("Total", total);
-    	
     	renderJSON(obj);
     }
 
@@ -55,30 +51,24 @@ public class VoteKills extends Controller {
     }
     
     public static void findAll() {
-    	
-    	List<VoteKill> votekills = VoteKill.findAll();      	 
-    	
-    	//HashMap<String,Object> obj = new HashMap<String,Object>();
+    	List<VoteKill> votekills = VoteKill.findAll();
     	renderJSON(votekills);
     }
+
    public static void findGoods(long id) {
         VoteKill votekill= VoteKill.findById(id);  
-        
         String goodsstr = "[";
-        
         String goodsVal = votekill.goods==null?"":votekill.goods;
-        
         if (goodsVal.trim() != "") {
            String[] goodsarr = votekill.goods.toString().split("\\|");
            for(int i=0;i<goodsarr.length;i++){
               goodsstr=goodsstr+"{\"id\":"+i+",\"name\":\""+goodsarr[i]+"\"},";
            }
            goodsstr=goodsstr.substring(0,goodsstr.length()-1)+"]"; 
-        }  else 
-        {
+        }  else {
+            System.out.println();
             goodsstr = "[]";
         }       
-        
         renderJSON(goodsstr);
     }
 }

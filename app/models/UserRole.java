@@ -39,5 +39,8 @@ public class UserRole extends Model {
             }
             return roleId;
         }
+    public static int DelUserRoleByUserid(long userid) {
+        return UserRole.delete(" user.id=?" ,userid);
+    }
 	
 }

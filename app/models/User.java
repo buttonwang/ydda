@@ -73,17 +73,17 @@ public class User extends Model {
     public String nation;                //民族
     public Date   joinPartyTime;         //入党时间
     
-    public String baseEducation;        //基础学历
-    public String baseGraduated;        //文化程度（何时何院校何专业毕业）
-    
+    public String baseEducation;        //第一学历
+    public Date baseGraduated;        //第一学历毕业时间
+
     public String highEducation;        //最高学历
-    public String highGraduated;        // 文化程度（何时何院校何专业毕业）
+    public Date highGraduated;        // 最高学历毕业时间
     
     public Date   getTitleTime;         //取得职称时间
     public String alreadyTitle;         //已聘职称
     
     public String postGrade;            //岗位等级
-    public Date   putRecordTime;        //备案时间
+    public Date   putRecordTime;        //信息录入时间
     public String IdentType;            //身份
 
     public String toString() {
@@ -139,6 +139,8 @@ public class User extends Model {
           .transform(new DateTransformer("yyyy-MM-dd"), "joinPartyTime")
           .transform(new DateTransformer("yyyy-MM-dd"), "getTitleTime")
           .transform(new DateTransformer("yyyy-MM-dd"), "putRecordTime")
+          .transform(new DateTransformer("yyyy-MM-dd"), "baseGraduated")
+          .transform(new DateTransformer("yyyy-MM-dd"), "highGraduated")
     	  .include("id", "name", "realName", "email", "lastLoginTime", "tel", "sex", "birthday", "age",
             "dept.name", "dept.id", "category",
             "politics", "education", "title", "job", "jobDesc", "jobInTime", "qcn", "pcn",
@@ -156,6 +158,8 @@ public class User extends Model {
           .transform(new DateTransformer("yyyy-MM-dd"), "joinPartyTime")
           .transform(new DateTransformer("yyyy-MM-dd"), "getTitleTime")
           .transform(new DateTransformer("yyyy-MM-dd"), "putRecordTime")
+          .transform(new DateTransformer("yyyy-MM-dd"), "baseGraduated")
+          .transform(new DateTransformer("yyyy-MM-dd"), "highGraduated")
     	  .include("id", "name", "realName", "email", "lastLoginTime", "tel", "sex", "birthday", "age",
             "dept.name", "dept.id", "category",
             "politics", "education", "title", "job", "jobDesc", "jobInTime", "qcn", "pcn",

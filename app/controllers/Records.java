@@ -61,7 +61,33 @@ public class Records extends Application {
      */
     public static void approve(int type) {        
         render();
-    }   
+    }
+
+    public static int delRecordByUserId(long id){
+        int a=0;
+        try {
+            List<Record> result = Record.find(" user.id=?", id).fetch();
+            for (int i = 0; i < result.size(); i++) {
+                RecordDetail.delete(" record.id=?", result.get(i).id);
+            }
+            a=Record.delete(" user.id=?", id);
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+        return a;
+    }
+
+    public static int delRecordDetailByUserId(long id){
+        int a=0;
+        try{
+            a=RecordDetail.delete(" user.id=?",id);
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+        return a;
+    }
+
+
     
 }
 

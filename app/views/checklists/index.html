@@ -1,202 +1,215 @@
-	#{extends 'main.html'/}
+#{extends 'main.html'/}
 
-  <div class="l-clear"></div>
-  <div id="maingrid" style="margin-top:1px"></div> <br />
-  <div style="display:none;"></div>
-  <div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
+<div class="l-clear"></div>
+<div id="maingrid" style="margin-top:1px"></div> <br/>
+<div style="display:none;"></div>
+<div id="detail" style="display:none;">
+    <form id="mainform" method="post"></form>
+</div>
 
-  <script type="text/javascript">
-  $(function () {
+<script type="text/javascript">
+    $(function () {
         var manager, grid;
 
-        function f_initGrid()
-        {
-         	grid = manager = $("#maingrid").ligerGrid({
-            columns: [
-            { display: '序号', name: 'orderNum', width: 100,  type: 'text', totalSummary: {type: 'count'} },
-            { display: '项目', name: 'title', width: 500, type: 'textarea' },
-            { display: '分值', name: 'score', width: 150, type: 'int', totalSummary: {type: 'sum'}},
-            { display: '说明', name: 'remark',width: 100, type: 'textarea'}
-            ],            
-            url: "checklists/json",  method: "GET",                       
-            width: '98%',   tree: { columnName: 'orderNum', childrenName: 'checkLists'}, 
-            toolbar: { items: [
-                { text: '增加', click: addRow, icon: 'add' },
-                { line: true },
-                { text: '修改', click: modifyRow, icon: 'modify' },
-                { line: true },
-                { text: '删除', click: deleteRow, icon: 'delete' }
-                ] },
-            onAfterShowData: function(data) {                
-                for (row in data.Rows) {
-                  grid.collapse(data.Rows[row]);
-                };
-                return false;
-            }
-        	});         	
+        function f_initGrid() {
+            grid = manager = $("#maingrid").ligerGrid({
+                columns: [
+                    {display: '序号', name: 'orderNum', width: 100, type: 'text', totalSummary: {type: 'count'}},
+                    {display: '项目', name: 'title', width: 500, type: 'textarea'},
+                    {display: '分值', name: 'score', width: 150, type: 'int', totalSummary: {type: 'sum'}},
+                    {display: '说明', name: 'remark', width: 100, type: 'textarea'}
+                ],
+                url: "checklists/json", method: "GET",
+                width: '98%', tree: {columnName: 'orderNum', childrenName: 'checkLists'},
+                toolbar: {
+                    items: [
+                        {text: '增加', click: addRow, icon: 'add'},
+                        {line: true},
+                        {text: '修改', click: modifyRow, icon: 'modify'},
+                        {line: true},
+                        {text: '删除', click: deleteRow, icon: 'delete'}
+                    ]
+                },
+                onAfterShowData: function (data) {
+                    for (row in data.Rows) {
+                        grid.collapse(data.Rows[row]);
+                    }
+                    ;
+                    return false;
+                }
+            });
         }
-        
+
         f_initGrid();
-        
-        function f_reload() 
-        {
-          grid.loadData();
+
+        function f_reload() {
+            grid.loadData();
         }
-        
-        function getSelected()
-        {
+
+        function getSelected() {
             var row = manager.getSelectedRow();
-            if (!row) { alert('请选择行'); return; }
+            if (!row) {
+                alert('请选择行');
+                return;
+            }
             alert(JSON.stringify(row));
         }
-        
-        function getData()
-        { 
+
+        function getData() {
             var data = manager.getData();
             alert(JSON.stringify(data));
         }
-        
-        function addRow()
-        {
-        	showDetail({}, false);
-        }
-        
-        function modifyRow()
-        {         
-            var selected = grid.getSelected();
-            if (!selected) { LG.tip('请选择行!'); return }
-            
-            var parent = grid.getParent(selected);
-            var parentId = parent?parent.id:0;
 
-            showDetail({   
-                id: selected.id,                
+        function addRow() {
+            showDetail({}, false);
+        }
+
+        function modifyRow() {
+            var selected = grid.getSelected();
+            if (!selected) {
+                LG.tip('请选择行!');
+                return
+            }
+
+            var parent = grid.getParent(selected);
+            var parentId = parent ? parent.id : 0;
+
+            showDetail({
+                id: selected.id,
                 title: selected.title,
                 score: selected.score,
                 remark: selected.remark,
                 parentId: parentId,
-                orderNum: selected.orderNum        
+                orderNum: selected.orderNum
             }, false);
         }
-        
-        function deleteRow()
-        {
-            jQuery.ligerDialog.confirm('确定要删除吗?', 
-        		function (confirm) {
-            		if (confirm) f_delete(); 
-            	}
+
+        function deleteRow() {
+            jQuery.ligerDialog.confirm('确定要删除吗?',
+                    function (confirm) {
+                        if (confirm) f_delete();
+                    }
             );
         }
-        
+
         function f_delete() {
-          var selected = grid.getSelected();
-          if (selected) {
-              $.ajax({
-            	  url: 'checklist/' + selected.id,
-                  type: 'DELETE',                  
-                  loading: '正在删除中...',                  
-                  success: function () {
-                      //LG.showSuccess('删除成功');
-                      LG.tip('删除成功!');
-                      f_reload();
-                  },
-                  error: function (message) {
-                      LG.showError(message);
-                  }
-              });
-          }
-          else {
-              LG.tip('请选择行!');
-          }
+            var selected = grid.getSelected();
+            if (selected) {
+                $.ajax({
+                    url: 'checklist/' + selected.id,
+                    type: 'DELETE',
+                    loading: '正在删除中...',
+                    success: function () {
+                        //LG.showSuccess('删除成功');
+                        LG.tip('删除成功!');
+                        f_reload();
+                    },
+                    error: function (message) {
+                        LG.showError(message);
+                    }
+                });
+            }
+            else {
+                LG.tip('请选择行!');
+            }
         }
-        
-  	    var detailWin = null, curentData = null, currentIsAddNew;
-  	    var mainform = $("#mainform");
-	    
-  	    function showDetail(data, isAddNew)
-  	    {
-          currentData = data;
-          currentIsAddNew = isAddNew;
-          if (detailWin)
-          {
-              detailWin.show(); 
-          }
-          else
-          {
-              //创建表单结构
-              
-              mainform.ligerForm({
-                  inputWidth: 280,
-                  fields: [
-         			{ name: "checklist.id", type: "hidden" },
-         			{ display: "序号", name: "checklist.orderNum", newline: true, 
-         			  labelWidth: 100, width: 320, space: 30, type: "text", 
-         			  validate: { required: true, maxlength: 50}  },
-         			  
-		            { display: "上级项目", name: "parentHide", comboboxName: "parentCombox", newline: true, 
-		              labelWidth: 100, width: 320, space: 30,  type: "select",
-		              selectBoxWidth: 520, selectBoxHeight: 500, 
-		              options: {tree: {url: "checklists/simplejson", checkbox: false, nodeWidth: 200, 
-		              textFieldName: "title", idFieldName: "id",  parentIDFieldName: "parent"}, treeLeafOnly:false,
-		              valueField: 'id', textField: 'title', valueFieldID: 'checklist.parentId.id'} },  
 
-         			  { display: "项目", name: "checklist.title", newline: true, 
-		              labelWidth: 100, width: 320, space: 30, type: "textarea", 
-		              validate: { required: true, maxlength: 50} },
-		              
-		            { display: "分值", name: "checklist.score", newline: true, 
-		              labelWidth: 100, width: 320, space: 30, type: "text", 
-		              validate: { required: false, maxlength: 50} },  
-		              
-         			  { display: "说明", name: "checklist.remark", newline: true, 
-                	  labelWidth: 100, width: 320, space: 30, type: "textarea" } ],         			
-                  toJSON: JSON2.stringify
-              });
-              
-              //$("#DeptParentName").attr("readonly", "readonly");
+        var detailWin = null, curentData = null, currentIsAddNew;
+        var mainform = $("#mainform");
 
-              detailWin = $.ligerDialog.open({
-                  target: $("#detail"),
-                  width: 550, height: 380, top:80,
-                  buttons: [
-                  { text: '确定', onclick: function () { save(); } },
-                  { text: '取消', onclick: function () { detailWin.hide(); } }
-                  ]
-              });
-          }
-          
-          if (currentData)
-          {    	  
-        	  $("[name$=id]").val(currentData.id)
-              $("[name$=orderNum]").val(currentData.orderNum);
-              $("[name$=title]").val(currentData.title);           
-              $("[name$=score]").val(currentData.score);   
-              $("[name$=remark]").val(currentData.remark);    
-              $("#parentCombox").ligerGetComboBoxManager().setValue(currentData.parentId);      
-              $("[name$=orderNum]").focus();
-          }
+        function showDetail(data, isAddNew) {
+            currentData = data;
+            currentIsAddNew = isAddNew;
+            if (detailWin) {
+                detailWin.show();
+            } else {
+                //创建表单结构
+                mainform.ligerForm({
+                    inputWidth: 280,
+                    fields: [
+                        {name: "checklist.id", type: "hidden"},
+                        {
+                            display: "序号", name: "checklist.orderNum", newline: true,
+                            labelWidth: 100, width: 320, space: 30, type: "text",
+                            validate: {required: true, maxlength: 50}
+                        },
+                        {
+                            display: "上级项目", name: "parentHide", comboboxName: "parentCombox", newline: true,
+                            labelWidth: 100, width: 320, space: 30, type: "select",
+                            selectBoxWidth: 520, selectBoxHeight: 500,
+                            options: {
+                                tree: {
+                                    url: "checklists/simplejson", checkbox: false, nodeWidth: 200,
+                                    textFieldName: "title", idFieldName: "id", parentIDFieldName: "parent"
+                                }, treeLeafOnly: false,
+                                valueField: 'id', textField: 'title', valueFieldID: 'checklist.parentId.id'
+                            }
+                        },
+                        {
+                            display: "项目", name: "checklist.title", newline: true,
+                            labelWidth: 100, width: 320, space: 30, type: "textarea",
+                            validate: {required: true, maxlength: 50}
+                        },
+                        {
+                            display: "分值", name: "checklist.score", newline: true,
+                            labelWidth: 100, width: 320, space: 30, type: "text",
+                            validate: {required: false, maxlength: 50}
+                        },
+                        {
+                            display: "说明", name: "checklist.remark", newline: true,
+                            labelWidth: 100, width: 320, space: 30, type: "textarea"
+                        }],
+                    toJSON: JSON2.stringify
+                });
 
-          function save()
-          {
-              $("#mainform").validate();
-             
-              $.ajax({
-                  loading: '正在保存数据中...',
-                  type: 'POST',
-                  url: 'checklist',                  
-                  data: $("#mainform").serialize(),
-                  success: function ()
-                  {
-                	  detailWin.hide();
-                      grid.loadData();
-                      LG.tip('保存成功!');
-                  },
-                  error: function (message)
-                  {
-                      LG.tip(message);
-                  }
-              });
-          }
+                //$("#DeptParentName").attr("readonly", "readonly");
+
+                detailWin = $.ligerDialog.open({
+                    target: $("#detail"),
+                    width: 550, height: 380, top: 80,
+                    buttons: [
+                        {
+                            text: '确定', onclick: function () {
+                            save();
+                        }
+                        },
+                        {
+                            text: '取消', onclick: function () {
+                            detailWin.hide();
+                        }
+                        }
+                    ]
+                });
+            }
+
+            if (currentData) {
+                $("[name$=id]").val(currentData.id)
+                $("[name$=orderNum]").val(currentData.orderNum);
+                $("[name$=title]").val(currentData.title);
+                $("[name$=score]").val(currentData.score);
+                $("[name$=remark]").val(currentData.remark);
+                $("#parentCombox").ligerGetComboBoxManager().setValue(currentData.parentId);
+                $("[name$=orderNum]").focus();
+            }
+
+            function save() {
+                $("#mainform").validate();
+
+                $.ajax({
+                    loading: '正在保存数据中...',
+                    type: 'POST',
+                    url: 'checklist',
+                    data: $("#mainform").serialize(),
+                    success: function () {
+                        detailWin.hide();
+                        grid.loadData();
+                        LG.tip('保存成功!');
+                    },
+                    error: function (message) {
+                        LG.tip(message);
+                    }
+                });
+            }
         }
-	})
-  </script>
+    })
+</script>

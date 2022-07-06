@@ -14,6 +14,8 @@ public class Record extends Model {
     
     public Integer year;    //年度
 
+    public Integer halfYear;  //半年度  0：不涉及半年考核  1： 上半年考核  2：下半年考核
+
     @ManyToOne
     public Dept dept;
     

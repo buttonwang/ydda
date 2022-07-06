@@ -21,14 +21,15 @@ public class AdjustLists extends Controller {
      * Get AdjustLists json.
      */
     public static void json(int page, int pagesize) {
-    	
-    	List<AdjustList> AdjustLists = AdjustList.find("order by OrderNum").fetch(page, pagesize);      	 
+
+//        List<AdjustList> AdjustLists = AdjustList.find("order by OrderNum").fetch(page, pagesize); // 泸州 修改加分项目序号排序 by  LSY
+        List<AdjustList> AdjustLists = AdjustList.find("order by id").fetch(page, pagesize);
     	long total = AdjustList.count();
-    	
+
     	HashMap<String,Object> obj = new HashMap<String,Object>();
     	obj.put("Rows", AdjustLists);
     	obj.put("Total", total);
-    	
+
     	renderJSON(obj);
     }
 

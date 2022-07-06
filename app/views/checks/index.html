@@ -1,1234 +1,1442 @@
 #{extends 'main.html'/}
 <script type="text/javascript">
-  
     var managerTree = null;
-    function displayAllCheckContent(data,flag){
-        document.mainform.reset();  
-        var id=null;
-        if(flag==0){    //flag 为0 为点击人员树操作，其它为个人考评或人员搜索
-            id=data.id.replace("u",'');   
-            $("#name").val(data.text); 
-            $("#dept").val(data.deptname); 
-            //考评表获取照片
-            $.getJSON("users/findAllImgSrc?user_Id="+data.id.replace("u",''),function(users){
-            var imgSrc = users;
-            $("#img").attr("src",imgSrc);
-            })
-           
-        } 
-        else
-        {
-           // $("#filePicture").hide();
-            id=data.id;
-            $("#name").val(data.realName); 
-            if(data.dept!=null){
-                $("#dept").val(data.dept.name); 
+    function displayAllCheckContent(data, flag) {
+        document.mainform.reset();
+        var id = null;
+        if (flag == 0) {    //flag 为0 为点击人员树操作，其它为个人考评或人员搜索
+            id = data.id.replace("u", '');
+            $("#name").val(data.text);
+            $("#dept").val(data.deptname);
+//            //考评表获取照片
+//            $.getJSON("users/findAllImgSrc?user_Id=" + data.id.replace("u", ''), function (users) {
+//                var imgSrc = users;
+//                $("#img").attr("src", imgSrc);
+//            })
+        } else {
+            id = data.id;
+            $("#name").val(data.realName);
+            if (data.dept != null) {
+                $("#dept").val(data.dept.name);
             }
-          
         }
-      /*
-        var imgSrc = "/public/userspicture/"+id+".jpg";//照片路径 
-        $("#img").attr("src",imgSrc);//头像路径在
-        $("#imgSrc").val(imgSrc);//头像路径在  */
-        $("#userId").val(id);  
-        $("#sex").val(data.sex);                       
-        $("#category").val(data.category); 
+        $("#userId").val(id);
+        $("#sex").val(data.sex);
+        $("#category").val(data.category);
         $("#job").val(data.job);
         $("#jobInTime").val(data.jobInTime);
         $("#qcn").val(data.qcn);
         $("#pcn").val(data.pcn);
-        var imagePath = data.imgSrc+"?"+Math.random();
-        $("#img").attr("src",imagePath);
-        
-       
-      
+        var imagePath = data.imgSrc + "?" + Math.random();
+        $("#img").attr("src", imagePath);
         //获取医院信息
-        $.getJSON("check_hospital/", function(json){                  
-            if(json != null)   {
-                $("#hospital_name").val(json.name);       
-            }                                    
-        });          
-        //设置考评年度  
-        var year=$("#checkYear").val();    
-        $("#year").val(year);
-        //显示一票否决信息与其他平台信息、考评结论、备注 ；status 归档标志 1：已归档 0：新建
-      
-        $.getJSON("check_record/", {UserId:id,Year:year},function(json){ 
-            if(json!=null){              
-                if(json.status==1){                 
-                    if(json.isVoteKill==true){         //是否有一票否决
-                        $("#haveVoteKill").val("有");   
-                    }
-                    init_check_qtpingtai(1,id,year);   //其他平台表扬批评信息             
-                } else{      
-                    $.getJSON("check_getHaveVoteKill/", {UserId:id,Year:year},function(json){                 
-                        if(json != null)   {
-                            $("#haveVoteKill").val("有");       
-                        }                               
-                    });   
-                    init_check_qtpingtai(0,id,year);     
-                     
-                }   
-               
-                if(json.conclusion!=null){
-                    $("#conclusion").val(json.conclusion);
-                }
-                if(json.conclusionTime!=null){                   
-                    var index=json.conclusionTime.indexOf("-");
-                    var monstr=json.conclusionTime.substring(index+1,index+3);
-                    var daystr=json.conclusionTime.substring(index+4,index+6);
-                    $("#conclusionMonth").val(monstr);
-                    $("#conclusionDay").val(daystr);                 
-                }    
-                 
-                if(json.remark!=null){
-                    $("#Remark").val(json.remark); 
-                }
-            
+        $.getJSON("check_hospital/", function (json) {
+            if (json != null) {
+                $("#hospital_name").val(json.name);
             }
         });
-         
-        init_check_self(id,year);         // 获取自我评价
-        init_check_dept(id,year);         // 获取科室评价                 
-        init_check_com(id,year);          // 获取单位评价
-     
+        //设置考评年度
+        var year = $("#checkYear").val();
+        $("#year").val(year);
+        //显示一票否决信息与其他平台信息、考评结论、备注 ；status 归档标志 1：已归档 0：新建
+        $.getJSON("check_record/", {UserId: id, Year: year}, function (json) {
+            if (json != null) {
+                if (json.status == 1) {
+                    if (json.isVoteKill == true) {         //是否有一票否决
+                        $("#haveVoteKill").val("有");
+                    }
+                    init_check_qtpingtai(1, id, year);   //其他平台表扬批评信息
+                } else {
+                    $.getJSON("check_getHaveVoteKill/", {UserId: id, Year: year}, function (json) {
+                        if (json != null) {
+                            $("#haveVoteKill").val("有");
+                        }else{
+                            $("#haveVoteKill").val("无");
+                        }
+                    });
+                    init_check_qtpingtai(0, id, year);
+                }
+                if (json.conclusion != null) {
+                    $("#conclusion").val(json.conclusion);
+                }
+//                if (json.conclusionTime != null) {
+//                    var index = json.conclusionTime.indexOf("-");
+//                    var yearStr =json.conclusionTime.substring(0,4);
+//                    var monstr = json.conclusionTime.substring(index + 1, index + 3);
+//                    var daystr = json.conclusionTime.substring(index + 4, index + 6);
+//                    $("#conclusionYear").val(yearStr);
+//                    $("#conclusionMonth").val(monstr);
+//                    $("#conclusionDay").val(daystr);
+//                }
+                if (json.remark != null) {
+                    $("#Remark").val(json.remark);
+                }
+            }
+        });
+        init_check_self(id, year);         // 获取自我评价
+        init_check_dept(id, year);         // 获取科室评价
+        init_check_com(id, year);          // 获取单位评价
+        init_check_complex(id,year);        //获取综合评价
     }
- 
-   
-    // 显示自我评价     
-    function init_check_self(id,year){                                
-        $.getJSON("check_self/",{UserId:id,Year:year}, function(json){                 
-            if(json !=null)   {                
-                if(json.score!=null){                   
+    // 显示自我评价
+    function init_check_self(id, year) {
+        $.getJSON("check_self/", {UserId: id, Year: year}, function (json) {
+            if (json != null) {
+                if (json.score != null) {
                     $("#self_score").val(json.score);
-                } 
-                if(json.remark!=null){                     
+                }
+                if (json.remark != null) {
                     $("#self_Remark").val(json.remark);
-                } 
-                if(json.signatory!=null){                     
+                }
+                if (json.signatory != null) {
                     $("#self_user").val(json.signatory);
-                } 
-                if(json.recordTime!=null){
-                    var index=json.recordTime.indexOf("-");
-                    var monstr=json.recordTime.substring(index+1,index+3);
-                    var daystr=json.recordTime.substring(index+4,index+6);
+                }
+                if (json.recordTime != null) {
+                    var index = json.recordTime.indexOf("-");
+                    var yearStr = json.recordTime.substring(0, 4);
+                    var monstr = json.recordTime.substring(index + 1, index + 3);
+                    var daystr = json.recordTime.substring(index + 4, index + 6);
+                    $("#selfYear").val(yearStr);
                     $("#selfMonth").val(monstr);
-                    $("#selfDay").val(daystr);    
-                 
-                } 
-            }        
-        });                    
+                    $("#selfDay").val(daystr);
+
+                }
+            }
+        });
     }
     // 显示科室评价
-    
-    function  init_check_dept(id,year){
-        $.getJSON("check_dept/",{UserId:id,Year:year}, function(json){                 
-            if(json !=null)   {                            
-                if(json.score!=null){
+    function init_check_dept(id, year) {
+        $.getJSON("check_dept/", {UserId: id, Year: year}, function (json) {
+            if (json != null) {
+                if (json.score != null) {
                     $("#dept_score").val(json.score);
-                } 
-                if(json.remark!=null){                  
+                }
+                if (json.remark != null) {
                     $("#dept_Remark").val(json.remark);
-                } 
-                if(json.signatory!=null){                     
+                }
+                if (json.signatory != null) {
                     $("#dept_user").val(json.signatory);
-                } 
-                if(json.recordTime!=null){
-                    var index=json.recordTime.indexOf("-");
-                    var monstr=json.recordTime.substring(index+1,index+3);
-                    var daystr=json.recordTime.substring(index+4,index+6);
+                }
+                if (json.recordTime != null) {
+                    var index = json.recordTime.indexOf("-");
+                    var yearStr = json.recordTime.substring(0, 4);
+                    var monstr = json.recordTime.substring(index + 1, index + 3);
+                    var daystr = json.recordTime.substring(index + 4, index + 6);
+                    $("#deptYear").val(yearStr);
                     $("#deptMonth").val(monstr);
-                    $("#deptDay").val(daystr); 
-                                
-                }                       
-            }      
-        });               
+                    $("#deptDay").val(daystr);
+
+                }
+            }
+        });
     }
-  
     // 显示其它平台       isArchive 判断是否归档
-    function init_check_qtpingtai(isArchive,id,year){  
-        var url=(isArchive==1)? "check_archiveqt/" :"check_qt/";
-        $.getJSON(url,{UserId:id,Year:year}, function(json){                 
-            if(json !=null)   {                            
+    function init_check_qtpingtai(isArchive, id, year) {
+        var url = (isArchive == 1) ? "check_archiveqt/" : "check_qt/";
+        $.getJSON(url, {UserId: id, Year: year}, function (json) {
+            if (json != null) {
                 $("#suifangBY").val(json.suifangBY);
                 $("#suifangPP").val(json.suifangPP);
                 $("#ydyfBY").val(json.ydyfBY);
-                $("#ydyfPP").val(json.ydyfPP);                       
-            }              
-        });                     
+                $("#ydyfPP").val(json.ydyfPP);
+            }
+        });
     }
     // 显示单位评价
-    function init_check_com(id,year){
-        $.getJSON("check_com_grade/",{UserId:id,Year:year}, function(json){
-            if(json!=null){
-                if(json.gradeName!=null){
+    function init_check_com(id, year) {
+        $.getJSON("check_com_grade/", {UserId: id, Year: year}, function (json) {
+            if (json != null) {
+                if (json.gradeName != null) {
                     $("#grade").val(json.gradeName);
-                } 
-            }               
-        });          
-        $.getJSON("check_com/",{UserId:id,Year:year}, function(json){   
-            if(json!=null){
-                if(json.recordTime!=null){
-                    if(json.score!=null){
+                }
+            }
+        });
+        $.getJSON("check_com/", {UserId: id, Year: year}, function (json) {
+            if (json != null) {
+                if (json.recordTime != null) {
+                    if (json.score != null) {
                         $("#com_score").val(json.score);
                     }
-                    var index=json.recordTime.indexOf("-");
-                    var monstr=json.recordTime.substring(index+1,index+3);
-                    var daystr=json.recordTime.substring(index+4,index+6);
+                    var index = json.recordTime.indexOf("-");
+                    var yearStr = json.recordTime.substring(0, 4);
+                    var monstr = json.recordTime.substring(index + 1, index + 3);
+                    var daystr = json.recordTime.substring(index + 4, index + 6);
+                    $("#comYear").val(yearStr);
                     $("#comMonth").val(monstr);
-                    $("#comDay").val(daystr);   
-                   
+                    $("#comDay").val(daystr);
                 }
-            } 
-        });        
+            }
+        });
     }
     //显示综合考评结论
-    function init_check_complex(id,year){          
-        $.getJSON("check_complex/",{UserId:id,Year:year}, function(json){                 
-            if(json !=null)   {
-                if(json.conclusion!=null){
+    function init_check_complex(id, year) {
+        $.getJSON("check_complex/", {UserId: id, Year: year}, function (json) {
+            if (json != null) {
+                if (json.conclusion != null) {
                     $("#conclusion").val(json.conclusion);
                 }
-                if(json.conclusionTime!=null){                   
-                    var index=json.conclusionTime.indexOf("-");
-                    var monstr=json.conclusionTime.substring(index+1,index+3);
-                    var daystr=json.conclusionTime.substring(index+4,index+6);
+                if (json.conclusionTime != null) {
+                    var index = json.conclusionTime.indexOf("-");
+                    var yearStr = json.conclusionTime.substring(0, 4);
+                    var monstr = json.conclusionTime.substring(index + 1, index + 3);
+                    var daystr = json.conclusionTime.substring(index + 4, index + 6);
+                    $("#conclusionYear").val(yearStr);
                     $("#conclusionMonth").val(monstr);
-                    $("#conclusionDay").val(daystr);                 
-                }      
-            }                          
-        });                                                          
-    }
-    
-    // 显示备注
-    function init_check_remark(id,year){      
-        $.getJSON("check_remark/",{UserId:id,Year:year}, function(json){                 
-            if(json !=null&&json.remark!=null)   {
-                $("#Remark").val(json.remark);           
-            }                        
-        });                                        
-    }    
-   
-    var logUserName='';
-    $(function () { 
-        //$('#navtab1').bind("selectstart",function(){return false;}); 
-        $.getJSON("/user/findLogin", function(json){                 
-            logUserName=json.realName;              
+                    $("#conclusionDay").val(daystr);
+                }
+            }
         });
-        
-        var tag=${tag};       
-        if (tag==0) {
-            $("#userTreeDiv").hide() ; 
-            $("#queryDiv").hide() ;
+    }
+    // 显示备注
+    function init_check_remark(id, year) {
+        $.getJSON("check_remark/", {UserId: id, Year: year}, function (json) {
+            if (json != null && json.remark != null) {
+                $("#Remark").val(json.remark);
+            }
+        });
+    }
+    var logUserName = '';
+    $(function () {
+        $.getJSON("/user/findLogin", function (json) {
+            logUserName = json.realName;
+        });
+        var tag =${tag};
+        if (tag == 0) {
+            $("#userTreeDiv").hide();
+            $("#queryDiv").hide();
             $("#uploadp").show();
-        } else{
+        } else {
             $("#userTreeDiv").show();
-            $("#queryDiv").show() ; 
-            $("#uploadp").hide();  
+            $("#queryDiv").show();
+            $("#uploadp").hide();
         }
         var allgrid;
-        var grades=[{"id":1,name:"优秀"},{"id":2,name:"良好"},{"id":3,name:"一般"},{"id":4,name:"较差"}];
-        
-        var date=new Date();
-        var fullyear=date.getFullYear();        
-        var options=document.getElementById("checkYear").options;  //下拉框           
-        var len=options.length;
-        for(var i=0;i<len;i++){                 
-            if (options[i].value==fullyear){              
-                options[i].selected=true;
+        var grades = [{"id": 1, name: "优秀"}, {"id": 2, name: "良好"}, {"id": 3, name: "一般"}, {"id": 4, name: "较差"}];
+        var date = new Date();
+        var fullyear = date.getFullYear();
+        var options = document.getElementById("checkYear").options;  //下拉框
+        var len = options.length;
+        for (var i = 0; i < len; i++) {
+            if (options[i].value == fullyear) {
+                options[i].selected = true;
                 break;
             }
         }
-        
         $("#layout1").ligerLayout({leftWidth: 181, height: 1520});
-        
-        
-        /***
-         * 左边树
-         */
-     /*   
+        //人员树
         var userTree = $("#userTree").ligerTree({
-            nodeWidth: 50,
-            parentIcon: "folder",
-            childIcon: "leaf",
-            checkbox: false,
-            url: "/usertree",
-            idFieldName :'id', parentIDFieldName :'pid'        
-        }); 
+            nodeWidth: 350,
+            checkbox: true,
+            onSelect: onSelect,
+            idFieldName: 'id',
+            parentIDFieldName: 'pid'
+        });
+        managerTree = $("#userTree").ligerGetTreeManager();
+        function onSelect(node) {
+            if (node.data.id == "d-1") {
+                if (node.data.children && node.data.children.length == 0) {
+                    managerTree.loadData(node.target, "/deptt");  //加载科室
+                }
+            } else if (node.data.children == undefined) {
+                if (node.data.pid == "0") {
+                    if (node.data.children == undefined) {
+                        managerTree.loadData(node.target, "/usert?deptId=" + node.data.id.replace("d", ''));//加载人员
+                    }
+                }
+            }
+        }
         managerTree = $("#userTree").ligerGetTreeManager();
         userTree.bind("click",
-        function(node) {        
-            document.mainform.reset();    // 清空form ,无需一一赋空值
-            //  id= node.data.id;           // 屏蔽
-            pid= node.data.pid;         
-            pid=pid.replace("d",'');        
-            if(pid>0){                    //选中为医生 
-                
-                displayAllCheckContent(node.data,0);       
-            }
-        }            
-    );
-      */  
-     
-    /*     ********************************************异步加载人员树************************************************    */ 
-      //人员树
-  
-      var userTree = $("#userTree").ligerTree({
-            
-            nodeWidth: 50,
-            //parentIcon: "folder",
-            //childIcon: "leaf",
-            checkbox: false,
-            onSelect:onSelect,
-            //url: "/usertree",   
-            idFieldName:'id',
-            parentIDFieldName :'pid'
-            //textFieldName :""
-        
-        }); 
-     managerTree = $("#userTree").ligerGetTreeManager();
-     function onSelect(node)
-         {    
-          if (node.data.id == "d-1")  
-                {                   
-                   if (node.data.children && node.data.children.length == 0)                   
-                        {
-                            managerTree.loadData(node.target, "/deptt");  //加载科室             
-                        }
-                  }else if(node.data.children == undefined  )
-                        {
-                           if(node.data.pid == "0")
-                               {
-                                   if(node.data.children == undefined)
-                                       {  
-                                             managerTree.loadData(node.target,"/usert?deptId="+node.data.id.replace("d",''));//加载人员 
-                                            
-                                       }
-                                    
-                               }
-                        }
-                         
-                            
-              
-         }
-      managerTree = $("#userTree").ligerGetTreeManager();
-        userTree.bind("click",
-        function(node) {        
-            document.mainform.reset();    // 清空form ,无需一一赋空值
-            //  id= node.data.id;           // 屏蔽
-            pid= node.data.pid;         
-            var pid=-1;
-            if(typeof(node.data.pid)!="undefined"){         
-                pid= node.data.pid;                      
-                pid=pid.replace("d",''); 
-               
-            }
-           if(pid>0){                    //选中为医生 
-                
-                displayAllCheckContent(node.data,0);       
-            }
-        }            
-    );
-     
-   /*   *******************************************************************************************   */  
- 
-        if(tag==0){
-            $("#toptoolbar").ligerToolBar({ items: [
-                    { text: '自我评价填写', click: showDetail_Self_submit, icon:'add'},
-                    { line:true },
-                    { text: '备注', click: showDetail_Remark_submit, icon:'add'},
-                    { line:true },
-                    { text: '查看全部',  click: re_allgrid_submit, icon:'archives' },
-                    { line: true },
-                    { text: '导出',  click: export_excel, icon:'outbox' },
-                    {line:true}
-                ] });
-            //个人考评，自动获得考评内容         
+                function (node) {
+                    document.mainform.reset();    // 清空form ,无需一一赋空值
+                    //  id= node.data.id;           // 屏蔽
+                    pid = node.data.pid;
+                    var pid = -1;
+                    if (typeof(node.data.pid) != "undefined") {
+                        pid = node.data.pid;
+                        pid = pid.replace("d", '');
+                    }
+                    if (pid > 0) {                    //选中为医生
+                        displayAllCheckContent(node.data, 0);
+                    }
+                }
+        );
+        if (tag == 0) {
+            $("#toptoolbar").ligerToolBar({
+                items: [
+                    {text: '自我评价填写', click: showDetail_Self_submit, icon: 'add'},
+                    {line: true},
+                    {text: '备注', click: showDetail_Remark_submit, icon: 'add'},
+                    {line: true},
+                    {text: '查看全部', click: re_allgrid_submit, icon: 'archives'},
+                    {line: true},
+                    {text: '导出', click: export_excel, icon: 'outbox'},
+                    {line: true}
+                ]
+            });
+            //个人考评，自动获得考评内容
             $.ajax({
                 loading: '正在查询中...',
                 type: 'POST',
-                url: '/queryuser',                  
-                data: {name:'个人考评'},
-                success: function (json)
-                {
-                    if(json!=null){      //展示考评内容，调用displayAllCheckContent方法
-                        displayAllCheckContent(json,1);                         
-                    } 
+                url: '/queryuser',
+                data: {name: '个人考评'},
+                success:
+                function (json) {
+                    if (json != null) {      //展示考评内容，调用displayAllCheckContent方法
+                        displayAllCheckContent(json, 1);
+                    }
                 },
-                error: function (message)
-                {
-                    LG.tip(message);                 
-                }
+                error:
+                    function (message) {
+                        LG.tip(message);
+                    }
             });
-            
-        } else if(tag==1){
-            $("#toptoolbar").ligerToolBar({ items: [       
-                    { text: '科室评价填写', click: showDetail_Dept_submit, icon:'add'},
-                    { line:true },          
-                    { text: '查看全部',  click: re_allgrid_submit, icon:'archives' },
-                    { line: true },
-                    { text: '导出',  click: export_excel, icon:'outbox' }
-                ] }); 
+        } else if (tag == 1) {
+            $("#toptoolbar").ligerToolBar({
+                items: [
+                    {text: '科室评价填写', click: showDetail_Dept_submit, icon: 'add'},
+                    {line: true},
+                    {text: '备注', click: showDetail_Remark_submit, icon: 'add'},
+                    {line: true},
+                    {text: '查看全部', click: re_allgrid_submit, icon: 'archives'},
+                    {line: true},
+                    {text: '导出', click: export_excel, icon: 'outbox'}
+                ]
+            });
         } else {
-            $("#toptoolbar").ligerToolBar({ items: [             
-                    { text: '单位评价填写', click: showDetail_Com_submit, icon:'add' },
-                    { line:true },   
-                    { text: '综合评价填写', click: showDetail_Complex_submit, icon:'add' },
-                    { line: true },
-                    { text: '归档', click:  archive_submit, icon:'add' },
-                    { line: true },
-                    { text: '查看全部',  click: re_allgrid_submit, icon:'archives' },
-                    { line: true },                
-                    { text: '导出',  click: export_excel, icon:'outbox' }
-                ]});
-        } 
-        
-        
-        //查看所有项目        
+            $("#toptoolbar").ligerToolBar({
+                items: [
+                    {text: '单位评价填写', click: showDetail_Com_submit, icon: 'add'},
+                    {line: true},
+                    {text: '综合评价填写', click: showDetail_Complex_submit, icon: 'add'},
+                    {line: true},
+                    {text: '批量填写', click: showDetail_Complex_submit_all, icon: 'add'},
+                    {line: true},
+                    {text: '备注', click: showDetail_Remark_submit, icon: 'add'},
+                    {line: true},
+                    {text: '归档', click: archive_submit, icon: 'add'},
+                    {line: true},
+                    {text: '查看全部', click: re_allgrid_submit, icon: 'archives'},
+                    {line: true},
+                    {text: '导出', click: export_excel, icon: 'outbox'}
+                ]
+            });
+        }
+        //查看所有项目
         allgrid = $("#allgrid").ligerGrid({
-            columns: [{ display: '发生日期', name: 'noteDate',type:'text',width: 80 },
-                { display: '姓名', name: 'realName', type:'text',width: 60 },
-                { display: '科室', name: 'deptName', type:'text',width: 80 },
-                { display: '事项', name: 'content',  align: 'left',type:'text',width: 150 },
-                { display: '分数', name: 'score', type:'text',width: 60 },
-                { display: '经办人', name: 'certifyMan', type:'text',width: 60 },
-                { display: '审核状态', name: 'approveLevelName', width: 60},
-                { display: '备注', name: 'approveComment', width: 100},
-                { display: '附件', name: 'fileSrc', width: 60, render: preView }
-            ],               
-            url: "",  
-            method: "GET",                             
-            title:"所有项目", 
-            width: '98%', height: '78%', pageSize: 20       
+            columns: [{display: '发生日期', name: 'noteDate', type: 'text', width: 80},
+                {display: '姓名', name: 'realName', type: 'text', width: 60},
+                {display: '科室', name: 'deptName', type: 'text', width: 80},
+                {display: '事项', name: 'content', align: 'left', type: 'text', width: 150},
+                {display: '分数', name: 'score', type: 'text', width: 60},
+                {display: '证明人', name: 'certifyMan', type: 'text', width: 60},
+                {display: '审核状态', name: 'approveLevelName', width: 60},
+                {display: '备注', name: 'approveComment', width: 100},
+                {display: '附件', name: 'fileSrc', width: 60, render: preView},
+                {display: '是否退回', name: 'approveLevel', width: 60
+                    ,render:function(row){
+                    var th = row.approveLevel;
+                    if(th==7||th==8){
+                        return '是';
+                    } else {
+                        return '否';
+                    }
+                }
+                }
+            ],
+            url: "",
+            method: "GET",
+            title: "所有项目",
+            width: '98%', height: '78%', pageSize: 20
         });
-        
-        function re_allgrid(id,year) {
-            var allurl= "notes/checkalljson?tag=1"+'&userid='+id+'&deptid=1&pageSize=10&checkYear='+year;
+        function re_allgrid(id, year) {
+            var allurl = "notes/checkalljson?tag=1" + '&userid=' + id + '&deptid=1&pageSize=10&checkYear=' + year;
             $("#allgrid").ligerGrid('option', 'url', allurl);
             allgrid.loadData(true);
-            
+
             detailWin_Allgrid = $.ligerDialog.open({
-                width: 820, height: 450, top:20,
-                target: $("#allgrid")               
+                width: 820, height: 450, top: 20,
+                target: $("#allgrid")
             });
         }
-        
-        function preView(row)
-        {        
-            var html = " ";                                   
-            if (row.fileSrc != null && row.fileSrc!="") {html = "<a target='_blank' href='" + row.fileSrc + "'>" + '预览</a>'; }                            
+        function preView(row) {
+            var html = " ";
+            if (row.fileSrc != null && row.fileSrc != "") {
+                html = "<a target='_blank' href='" + row.fileSrc + "'>" + '预览</a>';
+            }
             return html;
         }
-        
         var userid, year;
         function getQueryParam() {
-            userid=$("#userId").val();  
-            year=$("#checkYear").val();          
-            if(userid == null){
-                $.ligerDialog.warn('请选择填报对象！')               
+            userid = $("#userId").val();
+            year = $("#checkYear").val();
+            if (userid == null) {
+                $.ligerDialog.warn('请选择填报对象！')
                 return false;
             }
         }
-         //判断考评表是否已经归档
-        function getIsArchive() {  
-            var flag=false;
-             $.ajaxSettings.async = false;
-             $.getJSON("check_record/", {UserId:userid,Year:year},function(json){
-               if(json!=null&&json.status==1)
-               flag=true;
-             });
+        //2019-1-23王振雄填写
+        function getQueryParamall() {
+            var names = managerTree.getChecked();
+            var useridall = "";
+            var usernameall="";
+            for (var i = 0; i < names.length; i++)
+            {
+                var reg1=/^\d{4}[/-]\d{2}[/-]\d{2}$/;//日期正则
+                var reg2=/^[u].*$/; //验证以u开头
+                var name =names[i].data.id;
+                if(reg2.test(name)){
+                    useridall += names[i].data.id.replace("u","") + ";";
+                    usernameall+=names[i].data.text+";";
+                }
+            }
+            $("#userIdAll").val(useridall);
+            $("#nameAll").val(usernameall);
+            year=$("#checkYear").val();
+            if(useridall == null||useridall ==""){
+                $.ligerDialog.warn('请选择填报对象！')
+                return false;
+            }
+
+        }
+        //判断考评表是否已经归档
+        function getIsArchive() {
+            var flag = false;
+            $.ajaxSettings.async = false;
+            $.getJSON("check_record/", {UserId: userid, Year: year}, function (json) {
+                if (json != null && json.status == 1) {
+                    flag = true;
+                }
+            });
             return flag;
         }
-          //自我考评填报
-        function showDetail_Self_submit()  {       
-            if (getQueryParam()==false) return false;
-            if (getIsArchive()==true){ alert("考评表已归档，不能填报！"); return false;}    
-            $.getJSON("check_self/",{UserId:userid,Year:year}, function(json){                 
-                showDetail_Self(json,year);              
+        //判断批量考评表是否已经归档
+        //2019-1-23王振雄
+        function getIsArchiveAll() {
+            var flag=false;
+            var useridAll=$("#userIdAll").val();
+            var list =useridAll.split(";");
+            for(var i=0;i<list.length;i++){
+                userid=list[i];
+                $.ajaxSettings.async = false;
+                $.getJSON("check_record/", {UserId:userid,Year:year},function(json){
+                    if(json!=null&&json.status==1)
+                        flag=true;
+                });
+            }
+            return flag;
+        }
+        //自我考评填报
+        function showDetail_Self_submit() {
+            if (getQueryParam() == false) {
+                return false;
+            }
+            if (getIsArchive() == true) {
+                alert("考评表已归档，不能填报！");
+                return false;
+            }
+            $.getJSON("check_self/", {UserId: userid, Year: year}, function (json) {
+                showDetail_Self(json, year);
             });
         }
-         // 科室考评填报
-        function showDetail_Dept_submit(){        
-            if (getQueryParam()==false) return false;
-            if (getIsArchive()==true){ alert("考评表已归档，不能填报！"); return false;}
-            $.getJSON("check_dept/",{UserId:userid,Year:year}, function(json){                 
-                showDetail_Dept(json,year);                     
-            });                                 
-        }
-         
-        function  init_com_Evaluation(grade){
-            if (getQueryParam()==false) return false;     
-            $.getJSON("check_com/",{UserId:userid,Year:year}, function(json){                 
-                showDetail_Com(grade,json,year);                            
+        // 科室考评填报
+        function showDetail_Dept_submit() {
+            if (getQueryParam() == false) {
+                return false;
+            }
+            if (getIsArchive() == true) {
+                alert("考评表已归档，不能填报！");
+                return false;
+            }
+            $.getJSON("check_dept/", {UserId: userid, Year: year}, function (json) {
+                showDetail_Dept(json, year);
             });
         }
-         //单位考评填报
-        function showDetail_Com_submit(){                
-            if (getQueryParam()==false) return false; 
-            if (getIsArchive()==true){ alert("考评表已归档，不能填报！"); return false;}
-            var  Grade=null;
-            $.getJSON("check_com_grade/",{UserId:userid,Year:year}, function(json){                 
-                Grade=json; 
-                init_com_Evaluation(Grade);                        
+        function init_com_Evaluation(grade) {
+            if (getQueryParam() == false) {
+                return false;
+            }
+            $.getJSON("check_com/", {UserId: userid, Year: year}, function (json) {
+                showDetail_Com(grade, json, year);
             });
         }
-         //综合考评填报
-        function showDetail_Complex_submit(){           
-            if (getQueryParam()==false) return false;    
-            if (getIsArchive()==true){ alert("考评表已归档，不能填报！"); return false;}
-            $.getJSON("check_complex/",{UserId:userid,Year:year}, function(json){                 
-                showDetail_Complex(json,year);                         
-            });            
+        //单位考评填报
+        function showDetail_Com_submit() {
+            if (getQueryParam() == false) {
+                return false;
+            }
+            if (getIsArchive() == true) {
+                alert("考评表已归档，不能填报！");
+                return false;
+            }
+            var Grade = null;
+            $.getJSON("check_com_grade/", {UserId: userid, Year: year}, function (json) {
+                Grade = json;
+                init_com_Evaluation(Grade);
+            });
+        }
+        //综合考评填报
+        function showDetail_Complex_submit() {
+            if (getQueryParam() == false) {
+                return false;
+            }
+            if (getIsArchive() == true) {
+                alert("考评表已归档，不能填报！");
+                return false;
+            }
+            $.getJSON("check_complex/", {UserId: userid, Year: year}, function (json) {
+                showDetail_Complex(json, year);
+            });
+        }
+        //填报综合考评
+        //2019-1-23
+        function showDetail_Complex_submit_all(){
+            if (getQueryParamall()==false)
+                return false;
+            if (getIsArchiveAll()==true){
+                alert("考评表已归档，不能填报！");
+                return false;
+            }
+            var json="";
+            showDetail_ComplexAll(json,year);
+            //});
         }
         // 备注考评填报
-        function showDetail_Remark_submit(){             
-            if (getQueryParam()==false) return false;    
-            if (getIsArchive()==true){ alert("考评表已归档，不能填报！"); return false;}
-            $.getJSON("check_remark/",{UserId:userid,Year:year}, function(json){                 
-                showDetail_Remark(json,year);                         
-            });            
+        function showDetail_Remark_submit() {
+            if (getQueryParam() == false) {
+                return false;
+            }
+            if (getIsArchive() == true) {
+                alert("考评表已归档，不能填报！");
+                return false;
+            }
+            $.getJSON("check_remark/", {UserId: userid, Year: year}, function (json) {
+                showDetail_Remark(json, year);
+            });
         }
         //查看全部
         function re_allgrid_submit() {
-            if (getQueryParam()==false) return false;
-            
+            if (getQueryParam() == false) {
+                return false;
+            }
             re_allgrid(userid, year);
         }
         //导出
         function export_excel() {
-            if (getQueryParam()==false) return false;
-            location.href = "check_export_excel/?UserId=" + userid + "&Year=" + year;        
+            if (getQueryParam() == false) {
+                return false;
+            }
+            location.href = "check_export_excel/?UserId=" + userid + "&Year=" + year;
         }
-
-        //导出全部
-        function export_excel_all() {
-            if (getQueryParam()==false) return false;
-            location.href = "check_export_excel_all/?Year="+ year;        
-        }
-
+//        //导出全部
+//        function export_excel_all() {
+//            if (getQueryParam() == false) {
+//                return false;
+//            }
+//            location.href = "check_export_excel_all/?Year=" + year;
+//        }
         //考评表归档
-        function  archive_submit(){     
-            if (getQueryParam()==false) return false; 
-            if (getIsArchive()==true) { alert("考评表已归档！"); return false;}
-            $.ligerDialog.confirm('考评表不能再修改，是否确定归档？',function (r)  {          
-                if(r){  
-                    var isvotekill=$("#haveVoteKill").val();
-                    var sfby=$("#suifangBY").val();
-                    var sfpp=$("#suifangPP").val();
-                    var ydyfby=$("#ydyfBY").val();
-                    var ydyfpp=$("#ydyfPP").val();
+        function archive_submit() {
+            if (getQueryParam() == false) return false;
+            if (getIsArchive() == true) {
+                alert("考评表已归档！");
+                return false;
+            }
+            $.ligerDialog.confirm('考评表不能再修改，是否确定归档？', function (r) {
+                if (r) {
+                    var isvotekill = $("#haveVoteKill").val();
+                    var sfby = $("#suifangBY").val();
+                    var sfpp = $("#suifangPP").val();
+                    var ydyfby = $("#ydyfBY").val();
+                    var ydyfpp = $("#ydyfPP").val();
                     $.ajax({
                         loading: '归档保存中...',
                         type: 'POST',
-                        url: '/arsave',                  
-                        data:{ UserId:userid,Year:year,suifangBY:sfby,suifnagPP:sfpp,ydyfBY:ydyfby,ydyfPP:ydyfpp,isVotekill:isvotekill},
-                        success: function ()
-                        {
-                            LG.tip("归档成功！");  
+                        url: '/arsave',
+                        data: {
+                            UserId: userid,
+                            Year: year,
+                            suifangBY: sfby,
+                            suifnagPP: sfpp,
+                            ydyfBY: ydyfby,
+                            ydyfPP: ydyfpp,
+                            isVotekill: isvotekill
                         },
-                        error: function (message)
-                        {
-                            LG.tip(message);                 
-                        }
-                    });          
-                }            
-            });          
+                        success:
+                            function () {
+                                LG.tip("归档成功！");
+                            },
+                        error:
+                            function (message) {
+                                LG.tip(message);
+                            }
+                    });
+                }
+            });
         }
-    
         var detailWin_Self = null, curentData = null, currentIsAddNew;
         var detailWin_Dept = null, curentData1 = null, currentIsAddNew1;
-        // var detailWin_Peo = null, curentData2= null, currentIsAddNew2;
         var detailWin_Com = null, curentData3 = null, currentIsAddNew3;
         var detailWin_Complex = null, curentData4 = null, currentIsAddNew4;
+        var detailWin_ComplexAll = null, curentData4All = null, currentIsAddNew4All;
         var detailWin_Remark = null, curentData5 = null, currentIsAddNew5;
-        
-        
-        function showDetail_Self(data,year)
-        {                     
-            var userid=$("#userId").val();   
-            var name=$("#name").val();
-            var selfform=$("#selfform");
-            
-            if(detailWin_Self!=null){
-                detailWin_Self=null;
+        //自我评价
+        function showDetail_Self(data, year) {
+            var userid = $("#userId").val();
+            var name = $("#name").val();
+            var selfform = $("#selfform");
+            if (detailWin_Self != null) {
+                detailWin_Self = null;
             }
-            if (detailWin_Self)
-            {
-                detailWin_Self.show(); 
-            }
-            else
-            {   
+            if (detailWin_Self) {
+                detailWin_Self.show();
+            } else {
                 //创建表单结构
-                selfform.ligerForm({                    
+                selfform.ligerForm({
                     fields: [
-                        { name: "userID", type: "hidden" },                   
-                        { name: "record.year", type: "hidden" }, 
-                        {display: "当前对象", name: "currentObject", type: "text",
-                            labelWidth: 100, width: 220, space: 30,newline: true },
-                        { display: "自我评分", name: "recorddetail.score", newline: true, 
-                            labelWidth: 100, width: 220, space: 30,type: "text" } ,   
-                        { display: "自我评价", name: "recorddetail.remark", newline: true, 
-                            labelWidth: 100, width: 220, space: 30,type: "textarea" } ,                    
-                        { display: "评价时间", name: "recorddetail.recordTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30,type: "hidden", 
-                            validate: { required: true, maxlength: 50} }  ,
-                        { display: "医务人员签字", name: "recorddetail.signatory", newline: true, 
-                            labelWidth: 100, width: 220, space: 30,type: "text" } 
+                        {name: "userID", type: "hidden"},
+                        {name: "record.year", type: "hidden"},
+                        {
+                            display: "当前对象", name: "currentObject", type: "text",
+                            labelWidth: 100, width: 220, space: 30, newline: true
+                        },
+                        {
+                            display: "自我评分", name: "recorddetail.score", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "text"
+                        },
+                        {
+                            display: "自我评价", name: "recorddetail.remark", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "textarea"
+                        },
+                        {
+                            display: "评价时间", name: "recorddetail.recordTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "hidden",
+                            validate: {required: true, maxlength: 50}
+                        },
+                        {
+                            display: "考评对象签字", name: "recorddetail.signatory", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "text"
+                        }
                     ],
                     toJSON: JSON2.stringify
                 });
-                $("[name$=year]").val(year);           
+                $("[name$=year]").val(year);
                 $("[name$=userID]").val(userid);
-                $("[name$=currentObject]").val(name);  
+                $("[name$=currentObject]").val(name);
                 $("#currentObject").ligerGetTextBoxManager().setDisabled();
-                if(data){                
-                    $("[name$=remark]").val(data.remark);  
-                    $("[name$=recordTime]").val(data.recordTime);   
-                    $("[name$=signatory]").val(data.signatory);  
-                }else{                                       
-                    $("[name$=remark]").val('');  
-                   
-                    $("[name$=signatory]").val(logUserName);  
+                if (data) {
+                    $("[name$=remark]").val(data.remark);
+                    $("[name$=recordTime]").val(data.recordTime);
+                    $("[name$=signatory]").val(data.signatory);
+                    $("[name$=signatory]").ligerGetGridManager().setDisabled();
+
+                } else {
+                    $("[name$=remark]").val('');
+                    $("[name$=signatory]").val(logUserName);
                 }
-                
-                $.getJSON("checkautoscore/",{UserId:userid,Year:year,level:0}, function(json){   
-                    if(json!=null){                 
-                        $("[name$='recorddetail.score']").val(json);   
+                $.getJSON("checkautoscore/", {UserId: userid, Year: year, level: 0}, function (json) {
+                    if (json != null) {
+                        $("[name$='recorddetail.score']").val(json);
                         //设定分数不可改
-                       $("[name$='recorddetail.score']").attr('readonly', 'readonly');  
+                        $("[name$='recorddetail.score']").ligerGetGridManager().setDisabled();
                     }
                 });
-                
                 detailWin_Self = $.ligerDialog.open({
                     target: $("#self_Evaluation"),
-                    width: 300, height: 400, top:80,
+                    width: 300, height: 400, top: 80,
                     buttons: [
-                        { text: '确定', onclick: function () { save_Self(); } },
-                        { text: '取消', onclick: function () { detailWin_Self.hide(); } }
+                        {
+                            text: '确定', onclick:
+                                function () {
+                                    save_Self();
+                                }
+                        },
+                        {
+                            text: '取消', onclick:
+                                function () {
+                                    detailWin_Self.hide();
+                                }
+                        }
                     ]
-                });         
+                });
             }
-            
-            function save_Self()
-            {
-                $("#selfform").validate();      
+            //保存自我评价
+            function save_Self() {
+                $("#selfform").validate();
                 $.ajax({
                     loading: '正在保存数据中...',
                     type: 'POST',
-                    url: 'check_self',                  
+                    url: 'check_self',
                     data: $("#selfform").serialize(),
-                    success: function ()
-                    {
-                        detailWin_Self.hide();                     
-                        LG.tip('保存成功!');             
-                        init_check_self(userid,year);
-                    },
-                    error: function (message)
-                    {
-                        LG.tip(message);
-                    }
+                    success:
+                        function () {
+                            detailWin_Self.hide();
+                            LG.tip('保存成功!');
+                            init_check_self(userid, year);
+                        },
+                    error:
+                        function (message) {
+                            LG.tip(message);
+                        }
                 });
-            }         
+            }
         }
-        
-        function showDetail_Dept(data,year)
-        {     
-            var userid=$("#userId").val();  
-            var name=$("#name").val();
-            var deptform=$("#deptform");
-            
-            if(detailWin_Dept!=null){
-                detailWin_Dept=null;
+        //科室评价
+        function showDetail_Dept(data, year) {
+            var userid = $("#userId").val();
+            var name = $("#name").val();
+            var deptform = $("#deptform");
+            if (detailWin_Dept != null) {
+                detailWin_Dept = null;
             }
-            if (detailWin_Dept)
-            {
-                detailWin_Dept.show(); 
-            }
-            else
-            {  
+            if (detailWin_Dept) {
+                detailWin_Dept.show();
+            } else {
                 //创建表单结构
                 deptform.ligerForm({
-                    // inputWidth: 280,
                     fields: [
-                        { name: "userID1", type: "hidden" },
-                        { name: "record1.year", type: "hidden" },
-                        {display: "当前对象", name: "currentObject1", type: "text",
-                            labelWidth: 100, width: 220, space: 30,newline: true },
-                        { display: "科室评分", name: "recorddetail1.score", newline: true, 
-                            labelWidth: 100, width: 220, space: 30, type: "text" } ,
-                        { display: "科室评价", name: "recorddetail1.remark", newline: true, 
-                            labelWidth: 100, width: 220, space: 30, type: "textarea" } ,
-                        { display: "评价时间", name: "recorddetail1.recordTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30, type: "hidden", 
-                            validate: { required: true, maxlength: 50} },
-                        { display: "科室主任签字", name: "recorddetail1.signatory", newline: true, 
-                            labelWidth: 100, width: 220, space: 30, type: "text" } 
+                        {name: "userID1", type: "hidden"},
+                        {name: "record1.year", type: "hidden"},
+                        {
+                            display: "当前对象", name: "currentObject1", type: "text",
+                            labelWidth: 100, width: 220, space: 30, newline: true
+                        },
+                        {
+                            display: "科室评分", name: "recorddetail1.score", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "text"
+                        },
+                        {
+                            display: "科室评价", name: "recorddetail1.remark", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "textarea"
+                        },
+                        {
+                            display: "评价时间", name: "recorddetail1.recordTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "hidden",
+                            validate: {required: true, maxlength: 50}
+                        },
+                        {
+                            display: "科室主任签字", name: "recorddetail1.signatory", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "text"
+                        }
                     ],
-                    
                     toJSON: JSON2.stringify
                 });
-                $("[name$=year]").val(year);           
-                $("[name$=userID1]").val(userid);    
-                $("[name$=currentObject1]").val(name);  
+                $("[name$=year]").val(year);
+                $("[name$=userID1]").val(userid);
+                $("[name$=currentObject1]").val(name);
                 $("#currentObject1").ligerGetTextBoxManager().setDisabled();
-                if(data){              
-                    $("[name$=remark]").val(data.remark);  
-                    $("[name$=recordTime]").val(data.recordTime);  
-                    $("[name$=signatory]").val(data.signatory);  
-                }else{              
-                    $("[name$=remark]").val('');  
+                if (data) {
+                    $("[name$=remark]").val(data.remark);
+                    $("[name$=recordTime]").val(data.recordTime);
+                    $("[name$=signatory]").val(data.signatory);
+                } else {
+                    $("[name$=remark]").val('');
                     $("[name$=recordTime]").val('');
-                    $("[name$=signatory]").val(logUserName);  
+                    $("[name$=signatory]").val(logUserName);
                 }
-                $.getJSON("checkautoscore/",{UserId:userid,Year:year,level:1}, function(json){                 
-                    if(json!=null){                 
-                        $("[name$='recorddetail1.score']").val(json); 
+                $.getJSON("checkautoscore/", {UserId: userid, Year: year, level: 1}, function (json) {
+                    if (json != null) {
+                        $("[name$='recorddetail1.score']").val(json);
                         //设定科室评价分数不可改
-                        $("[name$='recorddetail1.score']").attr('readonly', 'readonly');   
+                        $("[name$='recorddetail1.score']").attr('readonly', 'readonly');
                     }
-                });           
+                });
                 detailWin_Dept = $.ligerDialog.open({
                     target: $("#dept_Evaluation"),
-                    //width: 300, height: 400, top:80,
                     buttons: [
-                        { text: '确定', onclick: function () { save_Dept(); } },
-                        { text: '取消', onclick: function () { detailWin_Dept.hide(); } }
+                        {
+                            text: '确定', onclick:
+                                function () {
+                                    save_Dept();
+                                }
+                        },
+                        {
+                            text: '取消', onclick:
+                                function () {
+                                    detailWin_Dept.hide();
+                                }
+                        }
                     ]
-                });         
+                });
             }
-            
-            function save_Dept()
-            {
-                $("#deptform").validate();      
+            //保存科室评价
+            function save_Dept() {
+                $("#deptform").validate();
                 $.ajax({
                     loading: '正在保存数据中...',
                     type: 'POST',
-                    url: 'check_dept',                  
+                    url: 'check_dept',
                     data: $("#deptform").serialize(),
-                    success: function ()
-                    {
-                        detailWin_Dept.hide();                     
-                        LG.tip('保存成功!');
-                        init_check_dept(userid,year);
-                    },
-                    error: function (message)
-                    {
-                        LG.tip(message);
-                    }
+                    success:
+                        function () {
+                            detailWin_Dept.hide();
+                            LG.tip('保存成功!');
+                            init_check_dept(userid, year);
+                        },
+                    error:
+                        function (message) {
+                            LG.tip(message);
+                        }
                 });
-            }         
+            }
         }
-      
-        function showDetail_Com(Grade,data,year)
-        {    
-            var userid=$("#userId").val(); 
-            var name=$("#name").val();
-            var comform=$("#comform");
-            
-            if(detailWin_Com!=null){
-                detailWin_Com=null;
+        //单位评价
+        function showDetail_Com(Grade, data, year) {
+            var userid = $("#userId").val();
+            var name = $("#name").val();
+            var comform = $("#comform");
+            if (detailWin_Com != null) {
+                detailWin_Com = null;
             }
-            if (detailWin_Com)
-            {
-                detailWin_Com.show(); 
-            }
-            else
-            {    
-                //创建表单结构
+            if (detailWin_Com) {
+                detailWin_Com.show();
+            } else {  //创建表单结构
                 comform.ligerForm({
-                    //   inputWidth: 280,
                     fields: [
-                        { name: "userID3", type: "hidden" },
-                        { name: "record3.year", type: "hidden" },   
-                        {display: "当前对象", name: "currentObject3", type: "text",
-                            labelWidth: 100, width: 220, space: 30,newline: true },
-                        {display: "单位评分", name: "recorddetail3.score", type: "text",
-                            labelWidth: 100, width: 220, space: 30,newline: true },
-                        { display: "单位评价等次", name: "gradeHide", comboboxName:"gradeCombox", newline: true, 
+                        {name: "userID3", type: "hidden"},
+                        {name: "record3.year", type: "hidden"},
+                        {
+                            display: "当前对象", name: "currentObject3", type: "text",
+                            labelWidth: 100, width: 220, space: 30, newline: true
+                        },
+                        {
+                            display: "单位评分", name: "recorddetail3.score", type: "text",
+                            labelWidth: 100, width: 220, space: 30, newline: true
+                        },
+                        {
+                            display: "单位评价等级", name: "gradeHide", comboboxName: "gradeCombox", newline: true,
                             labelWidth: 100, width: 220, space: 30, type: "select",
-                            options: {data: grades, valueField: 'id', textField: 'name'} },         
-                        { display: "评价时间", name: "recorddetail3.recordTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30, type: "hidden", 
-                            validate: { required: true, maxlength: 50} }],                
+                            options: {data: grades, valueField: 'id', textField: 'name'}
+                        },
+                        {
+                            display: "评价时间", name: "recorddetail3.recordTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "hidden",
+                            validate: {required: true, maxlength: 50}
+                        }],
                     toJSON: JSON2.stringify
                 });
-
-                $("[name$=year]").val(year);           
-                $("[name$=userID3]").val(userid); 
-                $("[name$=currentObject3]").val(name);  
-                $("#currentObject3").ligerGetTextBoxManager().setDisabled();   
-                if(Grade!=null){
-                    if(Grade.gradeId){             
-                        $("#gradeCombox").ligerGetComboBoxManager().setValue(Grade.gradeId);  
-                    } else{
-                        $("#gradeCombox").ligerGetComboBoxManager().setValue('');  
+                $("[name$=year]").val(year);
+                $("[name$=userID3]").val(userid);
+                $("[name$=currentObject3]").val(name);
+                $("#currentObject3").ligerGetTextBoxManager().setDisabled();
+                if (Grade != null) {
+                    if (Grade.gradeId) {
+                        $("#gradeCombox").ligerGetComboBoxManager().setValue(Grade.gradeId);
+                        //$("#gradeCombox").ligerGetComboBoxManager().setDisabled();
+                    } else {
+                        $("#gradeCombox").ligerGetComboBoxManager().setValue('');
                     }
+                } else {
+                    $("#gradeCombox").ligerGetComboBoxManager().setValue('');
                 }
-                else{
-                    $("#gradeCombox").ligerGetComboBoxManager().setValue('');                 
-                }
-                if(data){                                                
+                if (data) {
                     $("[name$=recordTime]").val(data.recordTime);
-                }else{                                                        
+                } else {
                     $("[name$=recordTime]").val(new Date().toLocaleDateString());
-                }         
-                $.getJSON("checkautoscore/",{UserId:userid,Year:year,level:2}, function(json){                 
-                   // if(json!=null){                 
-                        $("[name$='recorddetail3.score']").val(json.initscore); 
-                        //设定单位评价分数不可改
-                        $("[name$='recorddetail3.score']").attr('readonly', 'readonly');  
-                        if(!data){
-                            $("#gradeCombox").ligerGetComboBoxManager().setValue(json.initGrageId);  
-                        }
-                  //  }
-                });          
+                }
+                $.getJSON("checkautoscore/", {UserId: userid, Year: year, level: 2}, function (json) {
+                    $("[name$='recorddetail3.score']").val(json.initscore);
+                    //设定单位评价分数不可改
+                    //$("[name$='recorddetail3.score']").ligerGetComboBoxManager().setDisabled();
+
+                    if (!data) {
+                        $("#gradeCombox").ligerGetComboBoxManager().setValue(json.initGrageId);
+                        //$("#gradeCombox").attr('readonly', 'readonly');
+
+                    }
+                });
                 detailWin_Com = $.ligerDialog.open({
                     target: $("#com_Evaluation"),
-                    //   width: 300, height: 400, top:80,
                     buttons: [
-                        { text: '确定', onclick: function () { save_Com(); } },
-                        { text: '取消', onclick: function () { detailWin_Com.hide(); } }
+                        {
+                            text: '确定', onclick:
+                                function () {
+                                    save_Com();
+                                }
+                        },
+                        {
+                            text: '取消', onclick:
+                                function () {
+                                    detailWin_Com.hide();
+                                }
+                        }
                     ]
-                });         
+                });
             }
-            
-            function save_Com()
-            {
-                $("#comform").validate();      
+            //保存单位评价
+            function save_Com() {
+                $("#comform").validate();
                 $.ajax({
                     loading: '正在保存数据中...',
                     type: 'POST',
-                    url: 'check_com',                  
+                    url: 'check_com',
                     data: $("#comform").serialize(),
+                    success:
+                        function () {
+                            detailWin_Com.hide();
+                            LG.tip('保存成功!');
+                            init_check_com(userid, year);
+                        },
+                    error:
+                        function (message) {
+                            LG.tip(message);
+                        }
+                });
+            }
+        }
+        //showDetail_ComplexAll
+        ///2019-1-23
+        function showDetail_ComplexAll(data,year)
+        {
+            var userid=$("#userIdAll").val();
+            var name=$("#nameAll").val();
+            var complexformAll=$("#complexformAll");
+
+            if(detailWin_ComplexAll!=null){
+                detailWin_ComplexAll=null;
+            }
+            if (detailWin_ComplexAll)
+            {
+                detailWin_ComplexAll.show();
+            }
+            else
+            {
+                //创建表单结构
+                complexformAll.ligerForm({
+                fields: [
+                {name: "userID4All", type: "hidden"},
+                {name: "record4All.year", type: "hidden"},
+                {
+                    display: "当前对象", name: "currentObject4All", type: "text",
+                    labelWidth: 100, width: 220, space: 30, newline: false
+                },
+                {
+                    display: "综合考评结论", name: "record4All.conclusion", newline: true,
+                    labelWidth: 100, width: 220, space: 30, type: "textarea"
+                },
+                {
+                    display: "评价时间", name: "record4All.conclusionTime", newline: true,
+                    labelWidth: 100, width: 220, space: 30, type: "hidden",
+                    validate: {required: true, maxlength: 50}
+                }
+            ],
+                    toJSON: JSON2.stringify
+            });
+                $("[name$=year]").val(year);
+                $("[name$=userID4All]").val(userid);
+                $("[name$=currentObject4All]").val(name);
+                $("#currentObject4All").ligerGetTextBoxManager().setDisabled();
+                if (data) {
+                    $("[name$=conclusion]").val(data.conclusion);
+                    $("[name$=conclusionTime]").val(data.conclusionTime);
+                } else {
+                    $("[name$=conclusion]").val('');
+                    $("[name$=conclusionTime]").val('');
+                }
+                detailWin_ComplexAll = $.ligerDialog.open({
+                    target: $("#complex_EvaluationAll"),
+                    buttons: [
+                        { text: '确定', onclick: function () { save_ComplexAll(); } },
+                        { text: '取消', onclick: function () { detailWin_ComplexAll.hide(); } }
+                    ]
+                });
+            }
+
+            function save_ComplexAll()
+            {
+                $("#complexformAll").validate();
+                $.ajax({
+                    loading: '正在保存数据中...',
+                    type: 'POST',
+                    url: '/check_complexall',
+                    data: $("#complexformAll").serialize(),
                     success: function ()
                     {
-                        detailWin_Com.hide();                     
+                        detailWin_ComplexAll.hide();
                         LG.tip('保存成功!');
-                        init_check_com(userid,year);
                     },
                     error: function (message)
                     {
                         LG.tip(message);
                     }
                 });
-            }         
+            }
         }
-        
-        function showDetail_Complex(data,year)
-        {    
-            var userid=$("#userId").val();  
-            var name=$("#name").val();                        
-            var complexform=$("#complexform");
-            
-            if(detailWin_Complex!=null){
-                detailWin_Complex=null;
+
+        //综合评价
+        function showDetail_Complex(data, year) {
+            var userid = $("#userId").val();
+            var name = $("#name").val();
+            var complexform = $("#complexform");
+            if (detailWin_Complex != null) {
+                detailWin_Complex = null;
             }
-            if (detailWin_Complex)
-            {
-                detailWin_Complex.show(); 
-            }
-            else
-            {    
+            if (detailWin_Complex) {
+                detailWin_Complex.show();
+            } else {
                 //创建表单结构
                 complexform.ligerForm({
-                    //    inputWidth: 280,
                     fields: [
-                        { name: "userID4", type: "hidden" },
-                        { name: "record4.year", type: "hidden" },  
-                        {display: "当前对象", name: "currentObject4", type: "text",
-                            labelWidth: 100, width: 220, space: 30,newline: false },
-                        { display: "综合考评结论", name: "record4.conclusion", newline: true, 
-                            labelWidth: 100, width: 220, space: 30, type: "text"},                          
-                        { display: "评价时间", name: "record4.conclusionTime", newline: true,
-                            labelWidth: 100, width: 220, space: 30, type: "hidden", 
-                            validate: { required: true, maxlength: 50} }],                 
+                        {name: "userID4", type: "hidden"},
+                        {name: "record4.year", type: "hidden"},
+                        {
+                            display: "当前对象", name: "currentObject4", type: "text",
+                            labelWidth: 100, width: 220, space: 30, newline: false
+                        },
+                        {
+                            display: "综合考评结论", name: "record4.conclusion", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "textarea"
+                        },
+                        {
+                            display: "评价时间", name: "record4.conclusionTime", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "hidden",
+                            validate: {required: true, maxlength: 50}
+                        }
+                    ],
                     toJSON: JSON2.stringify
                 });
-                
-                $("[name$=year]").val(year);           
-                $("[name$=userID4]").val(userid);     
-                $("[name$=currentObject4]").val(name);  
+                $("[name$=year]").val(year);
+                $("[name$=userID4]").val(userid);
+                $("[name$=currentObject4]").val(name);
                 $("#currentObject4").ligerGetTextBoxManager().setDisabled();
-                if(data){                
-                    $("[name$=conclusion]").val(data.conclusion);                
+                if (data) {
+                    $("[name$=conclusion]").val(data.conclusion);
                     $("[name$=conclusionTime]").val(data.conclusionTime);
-                }else{                                       
-                    $("[name$=conclusion]").val('');                
+                } else {
+                    $("[name$=conclusion]").val('');
                     $("[name$=conclusionTime]").val('');
                 }
                 detailWin_Complex = $.ligerDialog.open({
                     target: $("#complex_Evaluation"),
-                    //   width: 300, height: 400, top:80,
                     buttons: [
-                        { text: '确定', onclick: function () { save_Complex(); } },
-                        { text: '取消', onclick: function () { detailWin_Complex.hide(); } }
+                        {
+                            text: '确定', onclick:
+                                function () {
+                                    save_Complex();
+                                }
+                        },
+                        {
+                            text: '取消', onclick:
+                                function () {
+                                    detailWin_Complex.hide();
+                                }
+                        }
                     ]
-                });         
+                });
             }
-            
-            function save_Complex()
-            {
-                $("#complexform").validate();      
+            //保存综合评价
+            function save_Complex() {
+                $("#complexform").validate();
                 $.ajax({
                     loading: '正在保存数据中...',
                     type: 'POST',
-                    url: 'check_complex',                  
+                    url: 'check_complex',
                     data: $("#complexform").serialize(),
-                    success: function ()
-                    {
-                        detailWin_Complex.hide();                     
-                        LG.tip('保存成功!');
-                        displayComplex(userid,year);
-                    },
-                    error: function (message)
-                    {
-                        LG.tip(message);
-                    }
+                    success:
+                         function () {
+                            detailWin_Complex.hide();
+                            LG.tip('保存成功!');
+                            init_check_complex(userid, year);
+                         },
+                    error:
+                        function (message) {
+                            LG.tip(message);
+                        }
                 });
-            }         
+            }
         }
-        
-        function showDetail_Remark(data,year)
-        {    
-            var userid=$("#userId").val();   
-            var name=$("#name").val();
-            var remarkform=$("#remarkform");
-            
-            if(detailWin_Remark!=null){
-                detailWin_Remark=null;
+        function showDetail_Remark(data, year) {
+            var userid = $("#userId").val();
+            var name = $("#name").val();
+            var remarkform = $("#remarkform");
+            if (detailWin_Remark != null) {
+                detailWin_Remark = null;
             }
-            if (detailWin_Remark)
-            {
-                detailWin_Remark.show(); 
-            }
-            else
-            {    
+            if (detailWin_Remark) {
+                detailWin_Remark.show();
+            } else {
                 //创建表单结构
                 remarkform.ligerForm({
-                    // inputWidth: 280,
                     fields: [
-                        
-                        { name: "userID5", type: "hidden" },
-                        { name: "record5.year", type: "hidden" },  
-                        {display: "当前对象", name: "currentObject5", type: "text",
-                            labelWidth: 100, width: 220, space: 30,newline: true },
-                        {display: "备注", name: "record5.remark", newline: true, 
-                            labelWidth: 100, width: 220, space: 30, type: "textarea"}                        
-                    ],                 
+                        {name: "userID5", type: "hidden"},
+                        {name: "record5.year", type: "hidden"},
+                        {
+                            display: "当前对象", name: "currentObject5", type: "text",
+                            labelWidth: 100, width: 220, space: 30, newline: true
+                        },
+                        {
+                            display: "备注", name: "record5.remark", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "textarea"
+                        }
+                    ],
                     toJSON: JSON2.stringify
                 });
-                
-                $("[name$=year]").val(year);           
-                $("[name$=userID5]").val(userid);   
-                $("[name$=currentObject5]").val(name);  
+                $("[name$=year]").val(year);
+                $("[name$=userID5]").val(userid);
+                $("[name$=currentObject5]").val(name);
                 $("#currentObject5").ligerGetTextBoxManager().setDisabled();
-                if(data){                
-                    $("[name$=remark]").val(data.remark);                              
-                }else{                                       
-                    $("[name$=remark]").val('');                              
+                if (data) {
+                    $("[name$=remark]").val(data.remark);
+                } else {
+                    $("[name$=remark]").val('');
                 }
-                
                 detailWin_Remark = $.ligerDialog.open({
                     target: $("#remark_Evaluation"),
-                    //    width: 300, height: 400, top:80,
                     buttons: [
-                        { text: '确定', onclick: function () { save_Remark(); } },
-                        { text: '取消', onclick: function () { detailWin_Remark.hide(); } }
+                        {
+                            text: '确定', onclick:
+                                function () {
+                                    save_Remark();
+                                }
+                        },
+                        {
+                            text: '取消', onclick:
+                                function () {
+                                    detailWin_Remark.hide();
+                                }
+                        }
                     ]
-                });         
+                });
             }
-            
-            function save_Remark()
-            {
-                $("#remarkform").validate();      
+            function save_Remark() {
+                $("#remarkform").validate();
                 $.ajax({
                     loading: '正在保存数据中...',
                     type: 'POST',
-                    url: 'check_remark',                  
+                    url: 'check_remark',
                     data: $("#remarkform").serialize(),
-                    success: function ()
-                    {
-                        detailWin_Remark.hide();                     
+                    success: function () {
+                        detailWin_Remark.hide();
                         LG.tip('保存成功!');
-                        displayRemark(userid,year);
+                        init_check_remark(userid, year);
                     },
-                    error: function (message)
-                    {
+                    error: function (message) {
                         LG.tip(message);
                     }
                 });
-            }         
+            }
         }
-        
-    });    
-    function EnterPress(event){             //IE8支持此方法
-        if(event.keyCode==13){              //回车键作为执行查询操作
-            var name=$("#queryByName").val();  
-            document.mainform.reset();   
-            $.ajax({
-                loading: '正在查询中...',
-                type: 'POST',
-                url: '/queryuser',                  
-                data: {name:name},
-                success: function (json)
-                {
-                    if(json!=null){
-                        managerTree.selectNode ("u"+json.id) ;    //让人员处于选中状态 
-                        displayAllCheckContent(json,1);           //显示                                               
-                    } else{
-                        LG.tip("查询无结果!");
-                    }                  
-                    // LG.tip('保存成功!');
-                },
-                error: function (message)
-                {
-                    LG.tip(message);                 
+    });
+    function EnterPress(event) {             //IE8支持此方法
+    if (event.keyCode == 13) {              //回车键作为执行查询操作
+        var name = $("#queryByName").val();
+        document.mainform.reset();
+        $.ajax({
+            loading: '正在查询中...',
+            type: 'POST',
+            url: '/queryuser',
+            data: {name: name},
+            success: function (json) {
+                if (json != null) {
+                    managerTree.selectNode("u" + json.id);    //让人员处于选中状态
+                    displayAllCheckContent(json, 1);           //显示
+                } else {
+                    LG.tip("查询无结果!");
                 }
-            });
-        }
-    }  
-    
-    document.onselectstart=function(){return false;}
-    
-    
-   
-    
-    
-    
-  
-    
+                // LG.tip('保存成功!');
+            },
+            error: function (message) {
+                LG.tip(message);
+            }
+        });
+    }
+    }
+    document.onselectstart = function () {
+    return false;
+    }
 </script>
-<!--
-<img name="A1" id="A1" src="/public/ligerUI/images/1.jpg"   height="120" width="100" />
-<img name="A2" id="A2" src="/public/ligerUI/images/2.jpg"   height="120" width="100" />
-<img name="A3" id="A3" src="/public/ligerUI/images/3.jpg"   height="120" width="100" />
-<img name="A4" id="A4" src="/public/ligerUI/images/4.jpg"   height="120" width="100" />
-<img name="A5" id="A5" src="/public/ligerUI/images/5.jpg"   height="120" width="100" />
-<img name="A6" id="A6" src="/public/ligerUI/images/6.jpg"   height="120" width="100" />
-<img name="A7" id="A7" src="/public/ligerUI/images/7.jpg"   height="120" width="100" />
--->
-
-<div id="navtab1" style="width: 880px; overflow:hidden; border:1px solid #A3C0E8; " >
+<div id="navtab1" style="width: 880px; overflow:hidden; border:1px solid #A3C0E8; ">
     <div id="layout1" class="layout1">
-        <div position="left" title="条件选择"  >
-            #{include '/components/choose.html'/}
-        </div>         
+        <div position="left" title="条件选择">
+        #{include '/components/choose.html'/}
+        </div>
         <div id="layout_commands" position="center" title="医务人员医德考评表">
             <div id="toptoolbar"></div>
             <div id="self_Evaluation" style="display:none">
-                <form id="selfform"  method="post"></form>
+                <form id="selfform" method="post"></form>
             </div>
             <div id="dept_Evaluation" style="display:none">
-                <form id="deptform"  method="post"></form>
+                <form id="deptform" method="post"></form>
             </div>
-            <!--   <div id="peo_Evaluation" style="display:none">
-                   <form id="peoform"  method="post"></form>
-               </div>-->
             <div id="com_Evaluation" style="display:none">
-                <form id="comform"  method="post"></form>
+                <form id="comform" method="post"></form>
             </div>
             <div id="complex_Evaluation" style="display:none">
-                <form id="complexform"  method="post"></form>
+                <form id="complexform" method="post"></form>
+            </div>
+            <div id="complex_EvaluationAll" style="display:none">
+                <form id="complexformAll"  method="post"></form>
             </div>
             <div id="remark_Evaluation" style="display:none">
-                <form id="remarkform"  method="post"></form>
+                <form id="remarkform" method="post"></form>
             </div>
             <div id="allgrid" style="display:none"></div>
-
-            <p align="center" style="display:none"><strong>医务人员医德考评表</strong><strong> </strong></p>                                         
+            <p align="center" style="display:none"><strong>医务人员医德考评表</strong><strong> </strong></p>   
             <form id="mainform" name="mainform">
-                <input  id="userId" name="userId"  value=""  type="hidden" />  
-
+                <input id="userId" name="userId" value="" type="hidden"/>
+                <input  id="userIdAll" name="userIdAll"  value=""  type="hidden" />
+                <input  id="nameAll" name="nameAll"  value=""  type="hidden" />
                 <table border="1" cellspacing="1" cellpadding="1" width="600px">
-                    <tr><td  width="100%" colspan="6"  align="center">
-                            <b><font size="4">医务人员医德考评表</font> </b>
-                        </td>          
-                    </tr>                 
                     <tr>
-                        <td width="11%" rowspan="6"><br />
-                            &nbsp;&nbsp;&nbsp;医 <br />
-                            &nbsp;&nbsp;&nbsp;师 <br />
-                            &nbsp;&nbsp;&nbsp;基 <br />
-                            &nbsp;&nbsp;&nbsp;本 <br />
-                            &nbsp;&nbsp;&nbsp;信 <br />
-                            &nbsp;&nbsp;&nbsp;息 </td>
-                        <td width="18%"  align="center"><p>&nbsp;姓名：</p></td>
-                        <td width="18%"  align="center"><input  id="name" name="name" class="Base_input" value=""  type="text" size="10" readonly="readonly"/></td>
-                        <td width="18%" align="center"><p> &nbsp;性别：</p></td>
-                        <td width="18%" align="center">
-                            <!--  不采用下拉框的方式显示
-                            <select id="sex" name="sex"  >
-                                <option value=""></option>
-                                <option value="男">男</option>
-                                <option value="女">女</option>
-                            </select>-->
-                            <input  id="sex" name="sex" class="Base_input" value=""  type="text" size="10" readonly="readonly"/>
-                        </td>
-                        <td width="16%" rowspan="6" >
-                            <div>&nbsp;&nbsp;<img name="imageSrc" id="img" src="" width="110" height="135" value=""  /></div>      
-                          <input type='hidden' id="imgSrc" name="imgSrc" value=""/>
-                          <!--
-                          &nbsp;&nbsp;照 <br />
-                            &nbsp;&nbsp; <br />
-                            &nbsp;&nbsp; <br />
-                            &nbsp;&nbsp; <br />
-                            &nbsp;&nbsp; <br />
-                            &nbsp;&nbsp;片
-                        -->
+                        <td width="100%" colspan="6" align="center">
+                            <b><font size="4">医务人员医德考评表</font> </b>
                         </td>
                     </tr>
-                    <tr>   
                     <tr>
-                        <td  ><p>&nbsp;科室：</p></td>
-                        <td align="center">
-                            <input  id="dept" name="dept" class="Base_input" value=""  type="text" size="10" readonly="readonly"/>
+                        <td width="11%" rowspan="6"><br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;医 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;师 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;基 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;信 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;息
                         </td>
-                        <td  ><p>&nbsp;专业类别：</p></td>
-                        <td align="center">
-                            <input  id="category" name="category" class="Base_input" value=""  type="text" size="10" readonly="readonly"/>
+                        <td width="18%" align="center">
+                            <p>
+                                &nbsp;姓名：
+                            </p>
                         </td>
-                        <!-- <td width="72%" colspan="4" valign="top">  <p>&nbsp;专业类别：
-                                 <input type="radio" name="category" value="医师"  /> 医师
-                                 <input type="radio" name="category" value="护士" /> 护士    
-                                 <input type="radio" name="category" value="医技人员" /> 医技人员        
-                                 <input type="radio" name="category" value="其他" /> 其他  </p>  
-                         </td>-->
-                    </tr>   
-                    <td  ><p>&nbsp;技术职务：</p></td>
-                    <td align="center">
-                        <input  id="job" name="job" class="Base_input" value=""  type="text" size="10" readonly="readonly"/>
-                    </td>
-                    <td  valign="top"><p> &nbsp;工作时间：</p> </td>
-                    <td align="center">
-                        <input   id="jobInTime" name="jobInTime" class="Base_input" value=""  type="text" size="10" readonly="readonly"/>
-                        </tr>
+                        <td width="18%" align="center">
+                            <input id="name" name="name" class="Base_input" value="" type="text" size="10" readonly="readonly"/>
+                        </td>
+                        <td width="18%" align="center">
+                            <p>
+                                &nbsp;性别：
+                            </p>
+                        </td>
+                        <td width="18%" align="center">
+                            <input id="sex" name="sex" class="Base_input" value="" type="text" size="10" readonly="readonly"/>
+                        </td>
+                        <td width="16%" rowspan="6">
+                            <div>&nbsp;&nbsp;
+                                <img name="imageSrc" id="img" src="" width="110" height="135" value=""/>
+                            </div>
+                            <input type='hidden' id="imgSrc" name="imgSrc" value=""/>
+                        </td>
+                    </tr>
                     <tr>
-                        <td width="72%" colspan="4" valign="top"><p> &nbsp;资格证书号码（医师）：
-                                <input  id="qcn" name="qcn" value="" class="Base_input"  type="text" size="18" readonly="readonly"/>
+                        <td>
+                            <p>
+                                &nbsp;科室：
+                            </p>
+                        </td>
+                        <td align="center">
+                            <input id="dept" name="dept" class="Base_input" value="" type="text" size="10" readonly="readonly"/>
+                        </td>
+                        <td>
+                            <p>
+                                &nbsp;专业类别：
+                            </p>
+                        </td>
+                        <td align="center">
+                            <input id="category" name="category" class="Base_input" value="" type="text" size="10" readonly="readonly"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                &nbsp;技术职务：
+                            </p>
+                        </td>
+                        <td align="center">
+                            <input id="job" name="job" class="Base_input" value="" type="text" size="10" readonly="readonly"/>
+                        </td>
+                        <td valign="top">
+                            <p>
+                                &nbsp;工作时间：
+                            </p>
+                        </td>
+                        <td align="center">
+                            <input id="jobInTime" name="jobInTime" class="Base_input" value="" type="text" size="10" readonly="readonly"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="72%" colspan="4" valign="top">
+                            <p>
+                                &nbsp;资格证书号码（医师）：
+                                <input id="qcn" name="qcn" value="" class="Base_input" type="text" size="18" readonly="readonly"/>
                             </p>
                         </td>
                     </tr>
                     <tr>
-                        <td width="72%" colspan="4" valign="top"><p> &nbsp;执业证书号码(医师或护士)： 
-                                <input    id="pcn" name="pcn" value=""  class="Base_input" type="text" size="18" readonly="readonly"/>
-                            </p></td>
-                    </tr>
-
-                    <tr>
-                        <td width="100%" colspan="6" valign="top"><p> &nbsp;考评年度：  <input   name="year" id="year" class="Base_input" readonly="readonly" />
-                            </p></td>      
+                        <td width="72%" colspan="4" valign="top">
+                            <p>
+                                &nbsp;执业证书号码(医师或护士)：
+                                <input id="pcn" name="pcn" value="" class="Base_input" type="text" size="18" readonly="readonly"/>
+                            </p>
+                        </td>
                     </tr>
                     <tr>
-                        <td width="100%" colspan="6" valign="top"><p>&nbsp;执业医疗机构名称： 
-                                <input    id="hospital_name" name="hospital_name" value=""  type="text" size="30" class="Base_input" readonly="readonly"/>
-                            </p></td>
+                        <td width="100%" colspan="6" valign="top">
+                            <p>
+                                &nbsp;考评年度： 
+                                <input name="year" id="year" class="Base_input" readonly="readonly"/>
+                            </p>
+                        </td>
                     </tr>
                     <tr>
-                        <td width="9%" rowspan="5"><p align="center">&nbsp;&nbsp;&nbsp;考 <br />
-                                &nbsp;&nbsp;&nbsp;评 <br />
-                                &nbsp;&nbsp;&nbsp;意 <br />
-                                &nbsp;&nbsp;&nbsp;见 </p></td>
-                        <td width="12%"><p align="center">&nbsp;&nbsp;自我 <br />
-                                &nbsp;&nbsp;评价 </p></td> 
-                        <td width="77%" colspan="4" ><br>&nbsp;自我评价得分： <input class= "input_bottom"  id="self_score" name="self_score" value=""  type="text" size="8"  readonly="readonly"/><br><br>
-                            &nbsp;自我评价：<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<textarea id="self_Remark" name="self_Remark"  cols ="65" rows = "8"  class="TextArea" readonly="readonly"></textarea>                
-                            <p>&nbsp;</p><br>
-                            <p align="center">                         医务人员签字：<input class= "input_bottom"  id="self_user" name="self_user" value=""  type="text"  readonly="readonly"/> <br />
-                                &nbsp;年 <input class= "input_bottom"  id="selfMonth" name="selfMonth" value=""  type="text" size="3" readonly="readonly"/>月 <input class= "input_bottom"  id="selfDay" name="selfDay" value=""  type="text" size="3" readonly="readonly"/>日
-                            </p></td>
+                        <td width="100%" colspan="6" valign="top">
+                            <p>
+                                &nbsp;执业医疗机构名称：
+                                <input id="hospital_name" name="hospital_name" value="" type="text" size="30" class="Base_input" readonly="readonly"/>
+                            </p>
+                        </td>
                     </tr>
                     <tr>
-                        <td width="12%"><p align="center">&nbsp;&nbsp;科室 <br />
-                                &nbsp;&nbsp;评价 </p></td>
-                        <td width="77%" colspan="4" ><br>&nbsp;科室评价得分：<input class= "input_bottom" id="dept_score" name="dept_score" value=""  type="text" size="8" readonly="readonly"/>  <br /><br>
-                            &nbsp;科室评价：<br><br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<textarea id="dept_Remark" name="dept_Remark"  cols ="65" rows = "8" class="TextArea" readonly="readonly"></textarea>   
-                            <p>&nbsp;</p><br>
-                            <p align="center">                     科室主任签字：<input class= "input_bottom"  id="dept_user" name="dept_user" value=""  type="text" readonly="readonly"/> <br />
-                                &nbsp; 年 <input class= "input_bottom"  id="deptMonth" name="deptMonth" value=""  type="text" size="3" readonly="readonly"/>月 <input class= "input_bottom"  id="deptDay" name="deptDay" value=""  type="text" size="3" readonly="readonly"/>日 
-                            </p></td>
-
+                        <td width="9%" rowspan="5">
+                            <p align="center">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;考 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;评 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;意 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;见
+                            </p>
+                        </td>
+                        <td width="12%">
+                            <p align="center">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;自 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;我 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;评 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;价
+                            </p>
+                        </td>
+                        <td width="77%" colspan="4">
+                            <br/>&nbsp;自我评价得分： 
+                            <input class="input_bottom" id="self_score" name="self_score" value="" type="text" size="8" readonly="readonly"/>
+                            <br/>
+                            <br/>&nbsp;自我评价：
+                            <br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea id="self_Remark"name="self_Remark" cols="65" rows="8" class="TextArea" readonly="readonly">
+                            </textarea>
+                            <p>&nbsp;</p>
+                            <br/>
+                            <p align="center">考评对象签字：
+                                <input class="input_bottom" id="self_user" name="self_user" value="" type="text" readonly="readonly"/>
+                                <br/>&nbsp;
+                                 <input class="input_bottom" id="selfYear" name="selfYear" value="" type="text" size="3" readonly="readonly"/>
+                                年 <input class="input_bottom" id="selfMonth" name="selfMonth" value="" type="text" size="3" readonly="readonly"/>
+                                月 <input class="input_bottom" id="selfDay" name="selfDay" value="" type="text" size="3" readonly="readonly"/>
+                                日
+                            </p>
+                        </td>
                     </tr>
-                    <!--  <tr>
-                          <td width="12%"><p align="center">&nbsp;&nbsp;群众 <br />
-                                  &nbsp;&nbsp;评价 </p></td>
-                          <td width="77%" colspan="4" ><br>&nbsp;群众对个人评价和科室评价意见：<br><br>
-                              &nbsp;同意人数：  <input class= "input_bottom" id="agreeNumber" name="agreeNumber" value=""  type="text" size="8" readonly="readonly"/>    <br /><br>
-                              &nbsp;不同意人数：  <input class= "input_bottom" id="notAgreeNumber" name="notAgreeNumber" value=""  type="text" size="8" readonly="readonly"/>  <br><br>
-                              &nbsp;不同意原因：  <input class= "input_bottom" id="notAgreeCause" name="notAgreeCause" value=""  type="text" size="30" readonly="readonly"/>  
-                              <p>     <br />
-                              
-                                  <br />
-                                  &nbsp;年 <input class= "input_bottom"  id="peoMonth" name="peoMonth" value=""  type="text" size="3" readonly="readonly"/>月 <input class= "input_bottom"  id="peoDay" name="peoDay" value=""  type="text" size="3" readonly="readonly"/>日 </p></td>
-                         </tr>-->
                     <tr>
-                        <td width="12%"><p align="center">&nbsp;&nbsp;其它平台 <br />
-
-                                &nbsp;&nbsp;评价 </p></td> 
+                        <td width="12%">
+                            <p align="center">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;科 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;室 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;评 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;价
+                            </p>
+                        </td>
+                        <td width="77%" colspan="4">
+                            <br/>&nbsp;科室评价得分：
+                            <input class="input_bottom" id="dept_score" name="dept_score" value="" type="text" size="8" readonly="readonly"/> 
+                            <br/><br/>
+                            &nbsp;科室评价：<br/><br/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea id="dept_Remark" name="dept_Remark" cols="65" rows="8" class="TextArea" readonly="readonly">
+                            </textarea>
+                            <p>&nbsp;</p><br/>
+                            <p align="center"> 科室主任签字：<input class="input_bottom" id="dept_user" name="dept_user" value="" type="text" readonly="readonly"/>
+                                <br/>&nbsp;
+                                <input class="input_bottom" id="deptYear" name="deptYear" value="" type="text" size="3" readonly="readonly"/>
+                                年<input class="input_bottom" id="deptMonth" name="deptMonth" value="" type="text" size="3" readonly="readonly"/>
+                                月<input class="input_bottom" id="deptDay" name="deptDay" value="" type="text" size="3" readonly="readonly"/>
+                                日
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="12%">
+                            <p align="center">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;单 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;位 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;评 <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;价 
+                            </p>
+                        </td>
                         <td width="77%" colspan="4" valign="top">
-
-                            <br><p>&nbsp;随访评价：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;表扬人次：<input class= "input_bottom" id="suifangBY" name="suifangBY" value=""  type="text" size="6" readonly="readonly"/>    
-                                &nbsp;批评人次：<input class= "input_bottom" id="suifangPP" name="suifangPP" value=""  type="text" size="6" readonly="readonly"/>  
-                                <br>&nbsp;医德医风评价：&nbsp;表扬人次：<input class= "input_bottom" id="ydyfBY" name="ydyfBY" value=""  type="text" size="6" readonly="readonly"/>    
-                                &nbsp;批评人次：<input class= "input_bottom" id="ydyfPP" name="ydyfPP" value=""  type="text" size="6" readonly="readonly"/> </p>  
-                            <br>
-                            <br>
-
-
-
+                            <br/>
+                            <p>
+                                &nbsp;单位评价得分：<input class="input_bottom" id="com_score" name="com_score" value="" type="text" size="8" readonly="readonly"/>    <br/>
+                                &nbsp;单位评价等次：<input type="text" class="input_bottom" id="grade" name="grade" value="" size="8" readonly="readonly"/>
+                                <br/>
+                                <br/>&nbsp;
+                                <input class="input_bottom" id="comYear" name="comYear" value="" type="text" size="3" readonly="readonly"/>
+                                年<input class="input_bottom" id="comMonth" name="comMonth" value="" type="text" size="3" readonly="readonly"/>
+                                月<input class="input_bottom" id="comDay" name="comDay" value="" type="text" size="3" readonly="readonly"/>
+                                日
+                            </p>
+                        </td>
+                    </tr>
+                    *{<tr>}*
+                        *{<td width="12%">}*
+                            *{<p align="center">}*
+                                *{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;随 <br/>}*
+                                *{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;访 <br/>}*
+                                *{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;评 <br/>}*
+                                *{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;价}*
+                            *{</p>}*
+                        *{</td>}*
+                        *{<td width="77%" colspan="4" valign="top">}*
+                            *{<br/>}*
+                            *{<p>&nbsp;随访评价：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}*
+                                *{表扬人次：<input class="input_bottom" id="suifangBY" name="suifangBY" value="" type="text" size="6" readonly="readonly"/>&nbsp;}*
+                                *{批评人次：<input class="input_bottom" id="suifangPP" name="suifangPP" value="" type="text" size="6" readonly="readonly"/><br/>}*
+                                *{&nbsp;医德医风评价：&nbsp;}*
+                                *{表扬人次：<input class="input_bottom" id="ydyfBY" name="ydyfBY" value="" type="text" size="6" readonly="readonly"/>&nbsp;}*
+                                *{批评人次：<input class="input_bottom" id="ydyfPP" name="ydyfPP" value="" type="text" size="6" readonly="readonly"/> }*
+                            *{</p>  }*
+                            *{<br/>}*
+                            *{<br/>}*
+                        *{</td>}*
+                    *{</tr>}*
+                    <tr>
+                        <td width="12%">
+                            <p align="center">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;有无一票否决<br/>
+                            </p>
+                        </td>
+                        <td width="77%" colspan="4" valign="center">&nbsp;&nbsp;
+                            <input type="text" class="Base_input" id="haveVoteKill" name="haveVoteKill" size="10" readonly="readonly"/>
+                        </td>
                     </tr>
                     <tr>
-                        <td width="12%"><p align="center"> &nbsp;有无一票否决<br></p><br></td> 
-                        <td width="77%" colspan="4" valign="center">&nbsp;&nbsp
-                            <input type="text" class= "Base_input" id="haveVoteKill" name="haveVoteKill" value="无" size="10" readonly="readonly"/> </td>
+                        <td width="9%"><p align="center">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;考 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;核 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;结 <br/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;果 </p>
+                        </td>
+                        <td width="90%" colspan="5" valign="top">
+                            <p>&nbsp;综合考评结论 ： 
+                                <input class="input_bottom" id="conclusion" name="conclusion" value="" type="text" size="40" readonly="readonly"/>  
+                            </p>
+                            <p align="center"> 
+                                <br/><br/>&nbsp;
+                                 <input class="input_bottom" id="conclusionYear" name="conclusionYear" value="" type="text" size="3" readonly="readonly"/>
+                                年 <input class="input_bottom" id="conclusionMonth" name="conclusionMonth" value="" type="text" size="3" readonly="readonly"/>
+                                月 <input class="input_bottom" id="conclusionDay" name="conclusionDay" value="" type="text" size="3" readonly="readonly"/>
+                                日
+                            </p>
+                        </td>
                     </tr>
                     <tr>
-                        <td width="12%"><p align="center">&nbsp;&nbsp;单位 <br />
-                                &nbsp;&nbsp;评价 </p></td> 
-                        <td width="77%" colspan="4" valign="top"><br><p>&nbsp;单位评价得分：<input class= "input_bottom" id="com_score" name="com_score" value=""  type="text" size="8" readonly="readonly"/>    <br />
-                                &nbsp;单位评价等次：
-                                <input type="text" class= "input_bottom" id="grade" name="grade" value="" size="8" readonly="readonly"/> 
-                                <br >
-                                <br>
-
-                                <!-- &nbsp;考评机构（公章） <br />-->
-                                &nbsp;年  <input class= "input_bottom"  id="comMonth" name="comMonth" value=""  type="text" size="3" readonly="readonly"/>月 <input class= "input_bottom"  id="comDay" name="comDay" value=""  type="text" size="3" readonly="readonly"/>日 </p></td>
-
-                    </tr>
-
-                    <tr>
-                        <td width="9%"><p align="center">&nbsp;&nbsp;&nbsp;考 <br />
-                                &nbsp;&nbsp;&nbsp;核 <br />
-                                &nbsp;&nbsp;&nbsp;结 <br />
-                                &nbsp;&nbsp;&nbsp;果 </p></td>
-                        <td width="90%" colspan="5" valign="top"><p>&nbsp;综合考评结论 ： 
-                                <input class="input_bottom" id="conclusion" name="conclusion" value="" type="text" size="40" readonly="readonly"/>      
-                                       </p>
-                            <p align="center">     <!--                            考评机构（公章） --><br><br>
-                                &nbsp;年 <input class= "input_bottom"  id="conclusionMonth" name="conclusionMonth" value=""  type="text" size="3" readonly="readonly"/>月 <input class= "input_bottom"  id="conclusionDay" name="conclusionDay" value=""  type="text" size="3" readonly="readonly"/>日                              
-                            </p></td>
-                    </tr>
-                    <tr>
-                        <td width="9%"><p align="center">&nbsp;&nbsp;&nbsp;备 <br />
-                                <br>
-                                &nbsp;&nbsp;&nbsp;注 
-                            </p>    
+                        <td width="9%">
+                            <p align="center">
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;备 <br/><br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注
+                            </p>
                         </td>
                         <td width="90%" colspan="5" align="left">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<textarea id="Remark" name="Remark"  rows = "3" cols ="78" class="TextArea" readonly="readonly"></textarea>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea id="Remark" name="Remark" rows="3" cols="78" class="TextArea" readonly="readonly">
+                            </textarea>
                         </td>
                     </tr>
-                    <!-- <tr>
-                         <td  width="100%" colspan="7" align="center">
-                             <input type="Button" value="保 存" id="Button1" style="width:100px" onclick="save()" />
-                         </td>     
-                     </tr>-->
                 </table>
-
-                <!--<p>注：1.考评不合格原因填入备注栏；2.对考评结果不服并提出复核申请的处理情况填入备注栏；3.其它需说明的问题记入备注栏。 </p>-->
                 <p>注：1.对考评结果不服并提出复核申请的处理情况填入备注栏；2.其它需说明的问题记入备注栏。 </p>
-
             </form>
         </div>
-    </div>    
+    </div>
 </div>
 

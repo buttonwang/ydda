@@ -108,5 +108,7 @@ public class Roles extends Controller {
          UserRole.findByUserRole(id,userid)._delete();
          renderJSON("");
     }
+
+
     
 }

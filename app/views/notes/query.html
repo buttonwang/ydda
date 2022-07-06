@@ -1,163 +1,255 @@
 #{extends 'main.html'/}
-
-<div id="layout1">
-    <div  position="center" title="档案查询">
-      <!--  <div id="state"  style="background-color:#C4E1FF;height:18px;font-size:2; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择：</div>  --> 
-        <div class="l-clear"></div>
-        <div id="navtab1" style="width: 860px;overflow:hidden; border:1px solid #A3C0E8; ">          
-            <div  title="查询条件" style="">
-                <div id="detail"  style="margin-top:1px">
-                    <form id="queryform"  method="post">
-   
-                    </form>               
-               </div>  <br> <br/>  
-               <table width="60%">
-                   <tr>
-                       <td width="50%">&nbsp;</td><td><input id="btnSet" type="button" value="查　询" onclick="query();"></td>
-                       <td >&nbsp;&nbsp;</td>
-                       <td><input id="btnReset" type="button" value="重　置" onclick="resetform();"></td>                     
-                   </tr>
-                   <tr><td>&nbsp;</td></tr>
-               </table>
-            </div> 
-            
-        </div>  
-        <div id="navtab1" style="width: 860px;overflow:hidden; border:1px solid #A3C0E8; ">
-            <div   title="档案列表">
-                <div id="maingrid" style="margin-top:1px"></div> <br />
-                <div style="display:none;"></div>             
-            </div>    
-        </div> 
-    </div>
-</div>
-
-<script type="text/javascript">  
-    $(function () {    
-        var tag=${tag};
-       /* if (tag==0) {
-            $("#userTreeDiv").hide() ;      
-        } else{
-            $("#userTreeDiv").show();
-        }*/
-        
+<link rel="stylesheet" href="../../public/stylesheets/chosen.css">
+<link rel="stylesheet" href="../../public/stylesheets/bootstrap.min.css">
+<script type="text/javascript" src="../../public/javascripts/jquery/chosen.jquery.js"></script>
+<script type="text/javascript">
+    var flag = false;
+    var tag =-1;
+    $(function () {
+         tag=${tag};
         var manager, grid;
-        $("#layout1").ligerLayout({leftWidth: 160,height: 600});
+        $("#layout1").ligerLayout({});
         $("#navtab1").ligerTab();
-
-        var depts=[];
-        var users=[];
-        var categorys=[{"id":1,name:"减分项目"},{"id":2,name:"加分项目"},{"id":3,name:"一票否决"}];
-
         var queryform = $("#queryform");
-        function f_initGrid()
-        {     
+        if(tag==0){
+            $("#nameCondition").hide();
+        }
+        if(tag==0){
+        }else{
+            $("#btnscoret").hide();
+        }
+        //加载科室
+        $.getJSON('/depts/findAll', function(data) {
+            for(var p in data){
+                $("#dept").append("<option value='"+data[p].id+"'>"+data[p].name+"</option>");
+            }
+            $(function(){
+                $('.dept_select').chosen();
+            });
+        });
+        //加载人员
+        $.getJSON('/users/findAll', function(data) {
+            for(var p in data){
+                $("#realName").append("<option value='"+data[p].id+"'>"+data[p].realName+"</option>");
+            }
+            $(function(){
+                $('.realName_select').chosen();
+            });
+        });
+
+        //加载档案类别与档案状态
+        $(function () {
+            $('.category_select').chosen();
+            $('.approveLevel_select').chosen();
+        });
+        //加载档案列表
+        function f_initGrid() {
             grid = manager = $("#maingrid").ligerGrid({
                 columns: [
+//                  { display: '序号', name:'id', width: 80,  type: 'textarea' },
+                    { display: '时间', name: 'noteDate', width: 100, type: 'textarea' },
                     { display: '姓名', name:'realName', width: 80,  type: 'textarea' },
                     { display: '科室', name: 'deptName', width: 80,  type: 'textarea' },
-                    { display: '考评类别', name: 'category', width: 80,  type: 'textarea' ,              
-                      render: function (item)
-                     {          
-                            if (parseInt(item.category) == 1) return '减分项目';
-                            if (parseInt(item.category) == 2) return '加分项目';
-                            if (parseInt(item.category) == 3) return '一票否决';
-                            return '';
-                    }},
-                    { display: '项目', name: 'checkTitle', width: 150, type: 'textarea' },
-                    { display: '时间', name: 'noteDate', width: 100, type: 'textarea' },
+                    { display: '考评类别', name: 'category', width: 80,  type: 'textarea' ,
+                        render: function (item) {
+                            if (parseInt(item.category) == 1) {
+                                return '减分项目';
+                            }
+                            if (parseInt(item.category) == 2){
+                                return '加分项目';
+                            }
+                            if (parseInt(item.category) == 3) {
+                                return '一票否决';
+                            }else {
+                                return '';
+                            }
+                        }
+                    },
                     { display: '内容', name: 'content', width: 200, type: 'textarea' },
-                    { display: '分数', name: 'score', width: 50, type: 'textarea' },
-                    { display: '证明人', name: 'certifyMan', width: 60, type: 'textarea' }
-                  ],
-               // url:'detailfilejson?tag='+tag, 
-                method: "GET", title: "档案列表",	            
-                width: '100%',height:"100%", pageSize: 30, showTitle: true, checkbox: false, checkboxColWidth: 50
+                    { display: '分数', name: 'score', width: 50, type: 'textarea' ,totalSummary: {type: 'sum'}},
+                    { display: '证明人', name: 'certifyMan', width: 60, type: 'textarea' },
+                    { display: '项目', name: 'checkTitle', width: 150, type: 'textarea' },
+                    { display: '附件', name: 'fileSrc', width: 80, render: preView },
+                    {
+                        display: '档案状态', name: 'approveLevel', width: 60, type: 'textarea',
+                        render: function (item) {
+                            if (parseInt(item.approveLevel) == 0) {
+                                return '新建';
+                            }
+                            if (parseInt(item.approveLevel) == 1) {
+                                return '科室已审核';
+                            }
+                            if (parseInt(item.approveLevel) == 2) {
+                                return '医院已审核';
+                            }
+                            if ((parseInt(item.approveLevel) == 7) || (parseInt(item.approveLevel) == 8)) {
+                                return '退回';
+                            } else {
+                                return '';
+                            }
+                        }
+                    }
+                ],
+                method: "GET", title: "档案列表",
+                rownumbers:true,
+                width: '99%',height:"90%", pageSize: 30, showTitle: true,  checkbox: false
             });
         }
-        
         f_initGrid();
-        var  fieldsarr=[];
-        function f_initquery() {
-            if(tag>0){
-               fieldsarr=[                                          
-                    { display: "填报起始时间", name: "begindate", newline: true, 
-                        labelWidth: 100, width: 120, space: 30, type: "date"},
-                    { display: "填报截止时间", name: "enddate",  newline: false, 
-                        labelWidth: 100, width: 120, space: 30, type: "date"},
-                    { display: "姓名", name: "userHide", comboboxName: "userCombox",newline: false, 
-                        labelWidth: 100, width: 120, space: 30, type: "select",
-                        options: {data: users,valueField: 'id', textField: 'realName'} },
-                    { display: "科室", name: "deptHide", comboboxName: "deptCombox", newline: true, 
-                        labelWidth: 100, width: 120, space: 30, type: "select",
-                        options: {data: depts, valueField: 'id', textField: 'name'} },	
-                    { display: "职称", name: "title",  newline: false, 
-                        labelWidth: 100, width: 120, space: 30, type: "text"},                    
-                    { display: "考评分类", name: "category", comboboxName: "categoryCombox",newline: false, 
-                        labelWidth: 100, width: 120, space: 0, type: "select" ,align :"left",
-                        options: {data: categorys, valueField: 'id', textField: 'name'} }                         
-                ];
-            } else{
-                   fieldsarr=[                                          
-                    { display: "填报起始时间", name: "begindate", newline: true, 
-                        labelWidth: 100, width: 120, space: 30, type: "date"},
-                    { display: "填报截止时间", name: "enddate",  newline: false, 
-                        labelWidth: 100, width: 120, space: 30, type: "date"},                         
-                    { display: "考评分类", name: "category", comboboxName: "categoryCombox",newline: false, 
-                        labelWidth: 100, width: 120, space: 0, type: "select" ,align :"left",
-                        options: {data: categorys, valueField: 'id', textField: 'name'} }                         
-                ];
-            }
-            queryform.ligerForm({
-                inputWidth: 280,
-                fields: fieldsarr,
-                pageSize: 50,       				
-                toJSON: JSON2.stringify
+        function preView(row) {
+            var html = " ";
+            if (row.fileSrc != null && row.fileSrc!="") {html = "<a target='_blank' href='../" + row.fileSrc + "'>" + '预览</a>'; }
+            return html;
+        }
+        getscore =function(){
+            //加载分数
+            $.getJSON('/checks/score', function(data) {
+                alert("当前已通过医院审核分数:"+data+"分");
             });
         }
 
-        $.getJSON('/depts/findAll', function(data) {                          
-            depts = data;         
-        });
-
-        $.getJSON('/users/findAll', function(data) {                          
-            users = data;
-            f_initquery();         
-        });
-        
-        function f_reload() {
-            grid.loadData();
-        }
-       
-        query = function (){              
+        //提交查询
+        query = function (){
+            var    beginDate =$("#beginDate").val();
+            var    endDate =$("#endDate").val();
             $.ajax({
                 loading: '正在查询中...',
                 type: 'POST',
-                url: 'detailfilejson?tag='+tag+'&pagesize=30',                  
+                url: 'queryNotes?tag='+tag+'&pagesize=30&beginDate='+beginDate+'&endDate='+endDate,
                 data: $("#queryform").serialize(),
                 dataType:"json",
                 success: function (jsonStr){
                     if(jsonStr.Total == 0){
                         alert("查询无结果！");
                     }
-                    grid.setOptions({ data: jsonStr }); 
-                    grid.loadData();  
-                    
+                    grid.setOptions({ data: jsonStr });
+                    grid.loadData();
+                    flag = true;
                 },
-                error: function (message)
-                {
-                    LG.tip(message);              
+                error: function (message) {
+                    LG.tip(message);
                 }
-            });    
+            });
         }
-        
-        resetform = function (){   
-            $("[name$=begindate]").ligerGetComboBoxManager().setValue();
-            $("[name$=enddate]").ligerGetComboBoxManager().setValue();  
-            $("#categoryCombox").ligerGetComboBoxManager().setValue();  
-            $("[name$=title]").val();  
-            $("#userCombox").ligerGetComboBoxManager().setValue();      
-            $("#deptCombox").ligerGetComboBoxManager().setValue();    
-        }
+
     })
-           
+    function restFrom(){
+        $("#beginDate").val("");
+        $("#endDate").val("");
+        $(".dept_select").val('').trigger("chosen:updated");
+        $(".realName_select").val('').trigger("chosen:updated");
+        $(".category_select").val('').trigger("chosen:updated");
+        $(".approveLevel_select").val('').trigger("chosen:updated");
+    }
+    //导出excel
+    var beginDate,endDate,category,approveLevel,name,dept;
+    function exportQueryNotesExcel() {
+        beginDate = $("#beginDate").val();
+        endDate = $("#endDate").val();
+        name = $("#realName").val();
+        dept = $("#dept").val();
+        category = $("#category").val();
+        approveLevel = $("#approveLevel").val();
+        location.href = "export_query_notes_excel/?beginDate="+beginDate+"&endDate=" + endDate+"&category="
+                +category+"&approveLevel="+approveLevel+"&realName="+name+"&dept="+dept+"&tag="+tag;
+    }
+
 </script>
+<!-- loyout1开始-->
+    <div id="layout1">
+        <!-- 档案查询开始-->
+        <div  position="center" title="档案查询">
+            <div class="l-clear"></div>
+            <!-- navtab1 查询条件 开始-->
+            <div id="navtab1" style="z-index: 1; width: 76%; height: 45%; overflow:hidden; border:1px solid #A3C0E8; ">
+                <!-- 查询条件 start-->
+                <div  title="查询条件">
+                    <!-- detail start-->
+                    <div id="detail"  style="margin-top:1px">
+                        <form id="queryform"  method="post">
+                            <!-- 科室条件 Start -->
+                            <div style="position:fixed; z-index:9999">
+                                <!--时间条件 start-->
+                                <div id="timeCondition">
+                                    <span style="color: red;line-height: 35px;">注：日期格式：2017-01-01</span>
+                                    <br>
+                                    起始时间：<input type="text" id="beginDate" style="width:205px;"/>
+                                    结束时间：<input type="text" id="endDate"style="width:205px;" />
+                               </div>
+                              <!--时间条件 start-->
+                                <div>&nbsp;</div>
+                                <!--姓名科室条件 start-->
+                                <div id="nameCondition">
+                                    姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：
+                                    <select name="realName" style="width:210px;" id="realName" class="realName_select"  >
+                                            <option value="">请输入姓名</option>
+                                    </select>
+                                    科&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;室：
+                                    <select name="dept" style="width:210px;" id="dept" class="dept_select" >
+                                    <option value="">请输入科室</option>
+                                   </select>
+                               </div>
+                                <!--姓名科室条件 end-->
+                                <div>&nbsp;</div>
+                                <!--类别与状态条件 start-->
+                                <div id="typeCondition">
+                                    考评类别：
+                                    <select name="category" style="width:210px;" id="category" class="category_select" >
+                                        <option value="">请选择考评类别</option>
+                                        <option value="1">减分项目</option>
+                                        <option value="2">加分项目</option>
+                                        <option value="3">一票否决</option>
+                                    </select>
+                                    档案状态：
+                                    <select name="approveLevel" style="width:210px;" id="approveLevel" class="approveLevel_select" >
+                                        <option value="">请选择档案状态</option>
+                                        <option value="0">新建</option>
+                                        <option value="1">科室已审核</option>
+                                        <option value="2">医院已审核</option>
+                                        <option value="7">退回</option>
+                                    </select>
+                                </div>
+                                <!--类别与状态条件 end-->
+                                <div>&nbsp;</div>
+                                <div >
+                                    <div style="margin-left: 100px;">
+                                        <input id="btnSet" type="button" value="查　询" onclick="query();" >
+                                    </div>
+                                    <div style="margin-left: 300px; margin-top: -36px">
+                                        <input id="btnReset" type="button" value="重　置" onclick="restFrom();">
+                                    </div>
+                                    <div style="margin-left: 500px; margin-top: -36px">
+                                        <input id="btnReset" type="button" value="导  出" onclick="exportQueryNotesExcel();">
+                                    </div>
+                                    <div style="margin-left: 700px; margin-top: -36px">
+                                        <input id="btnscoret" type="button" value="查询当前分数" onclick="getscore();">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 科室条件 end -->
+                        </form>
+                    </div>
+                    <!-- detail emd-->
+                </div>
+                <!-- 查询条件 end-->
+            </div>
+            <!-- navtab1查询条件 结束-->
+            <!-- navtab1查询结果  开始-->
+            <div id="navtab1" style="  width: 76%; overflow:hidden; border:1px solid #A3C0E8; ">
+                <!-- 档案列表 开始-->
+                <div   title="档案列表">
+                    <div id="maingrid" style="margin-top:1px"></div> <br />
+                    <div style="display:none;"></div>
+                <!-- 档案列表 end-->
+                 </div>
+            </div>
+             <!--  navtab1查询结果 end-->
+        </div>
+        <!-- 档案查询 结束-->
+    </div>
+<!-- loyout1 结束-->
+
+
+
+
+

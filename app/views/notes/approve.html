@@ -1,20 +1,59 @@
 #{extends 'main.html'/}
 <div class="l-clear"></div>
+<div id="navtab1"  style="width:100%;border:1px solid #A3C0E8; ">
+    <table >
+        <tr>
+            <td colspan="3"><div style="margin-top:10px" id="queryDiv">
+                &nbsp;&nbsp;科室搜索：&nbsp;&nbsp<input id="deptQuery" name="deptQuery" type="text" value="" size="13" onkeydown="EnterPress(event,2)"/>
+                &nbsp;&nbsp;姓名检索：&nbsp;&nbsp<input id="realNameQuery" name="realNameQuery" type="text" value="" size="13" onkeydown="EnterPress(event,1)"/>
+                <i>
+                    <font color="blue">(Enter键查询)</font>
+                </i>
+                </br><br/>
+            </div>
+            </td>
+        </tr>
+    </table>
+</div>
 <div id="maingrid" style="margin-top:1px"></div> <br />
 <div style="display:none;"></div>
+<div id="navtab2"  style="width:100%;border:1px solid #A3C0E8; ">
+    <table >
+        <tr>
+            <td colspan="3"><div style="margin-top:10px" id="queryDiv">
+                &nbsp;&nbsp;科室搜索：&nbsp;&nbsp<input id="deptQueryY" name="deptQueryY" type="text" value="" size="13" onkeydown="EnterPress(event,4)"/>
+                &nbsp;&nbsp;姓名检索：&nbsp;&nbsp<input id="realNameQueryY" name="realNameQueryY" type="text" value="" size="13" onkeydown="EnterPress(event,3)"/>
+                <i>
+                    <font color="blue">(Enter键查询)</font>
+                </i>
+                </br><br/>
+            </div>
+            </td>
+        </tr>
+    </table>
+</div>
 <div id="approvedgrid" style="margin-top:1px"></div> <br />
 <div style="display:none;"></div>
-
 <div id="detail" style="display:none;"><form id="mainform" method="post"></form></div>
 <div id="comment" style="display:none;"><form id="commentform" method="post"></form></div>
+<script type="text/javascript">
 
-<script type="text/javascript">  
-    $(function () {
-        var manager, grid, approvedgrid;       
-          
-        function f_initGrid()
-        {
-              
+    var manager, grid, approvedgrid;
+    var ischeck=0;
+    var WTG=1;
+    var YTG=3;
+    $(document).ready(function(){
+        var level =${level};
+        var level2=level+1;
+        function  refurbishParent(level){
+            if(level==0){
+                location.href="approve?level=0";
+            } else {
+                location.href="approve?level=1";
+            }
+        }
+
+        function f_initGrid() {
             grid = manager = $("#maingrid").ligerGrid({
                 columns: [
                     { display: '时间', name: 'noteDate', width: 80, type: 'textarea' },
@@ -24,116 +63,132 @@
                     { display: '项目', name: 'checkTitle', width: 150, type: 'textarea' },
                     { display: '内容', name: 'content', width: 200, type: 'textarea' },
                     { display: '物品', name: 'goods', width:80, type: 'textarea' },
-                    { display: '分数', name: 'score', width:50, type: 'textarea' }, 
+                    { display: '金额', name: 'money', width:80, type: 'textarea' },
+                    { display: '分数', name: 'score', width:50, type: 'textarea' },
                     { display: '填报人', name: 'createdManName', width:60, type: 'textarea' },
-                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' }
+                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' },
+                    { display: '附件', name: 'fileSrc', width: 60, render: preView }
                    // ,{ display: '备注', name: 'approveComment', width: 100, type: 'textarea' }
                 ],
-                url: "approvejson?level="+level+'&isapprove=0', method: "GET", title: "未审核的填报档案",	            
+                url: "approvejson?level="+level+'&isapprove=0', method: "GET", title: "未审核的填报档案",
                 width: '100%',height:"59%", pageSize: 20, showTitle: true, checkbox: true, checkboxColWidth: 50,
                 toolbar: { items: [
-                        { text: '查看', click: viewRow, icon: 'bluebook' },   
-                        { line: true },      
+                        { text: '查看', click: viewRow, icon: 'bluebook' },
+                        { line: true },
                         { text: '审核通过', click: confirmRow, icon: 'ok' },
-                        { line: true }, 
+                        { line: true },
                         { text: '退回', click: cancelRow, icon: 'modify' },
                         { line: true },
-                        { text: '批量审核', click: multiRow, icon: 'ok' },                 
+                        { text: '批量退回', click: batchReturn, icon: 'modify' },
+                        { line: true },
+                        { text: '批量审核', click: multiRow, icon: 'ok' },
                         { line: true }
-                      
+
                     ] }
             });
-         	
-            approvedgrid=$("#approvedgrid").ligerGrid({
+                approvedgrid=$("#approvedgrid").ligerGrid({
                 columns: [
                     { display: '时间', name: 'noteDate', width: 80, type: 'textarea' },
                     { display: '姓名', name: 'realName', width: 80,  type: 'textarea' },
                     { display: '科室', name: 'deptName', width: 80,  type: 'textarea' },
-                    { display: '考评类别', name: 'categoryName', width: 80, type: 'textarea' },      
-                    { display: '项目', name: 'checkTitle', width: 100, type: 'textarea' },    
+                    { display: '考评类别', name: 'categoryName', width: 80, type: 'textarea' },
+                    { display: '项目', name: 'checkTitle', width: 100, type: 'textarea' },
                     { display: '内容', name: 'content', width: 200, type: 'textarea' },
                     { display: '物品', name: 'goods', width:80, type: 'textarea' },
-                    { display: '分数', name: 'score', width:50, type: 'textarea' }, 
+                    { display: '金额', name: 'money', width:80, type: 'textarea' },
+                    { display: '分数', name: 'score', width:50, type: 'textarea' },
                     { display: '填报人', name: 'createdManName', width:60, type: 'textarea' },
-                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' }
+                    { display: '状态', name: 'approveLevelName', width: 120, type: 'textarea' },
+                    { display: '附件', name: 'fileSrc', width: 60, render: preView }
                    // ,{ display: '备注', name: 'approveComment', width: 100, type: 'textarea' }
                 ],
-                url: "approvejson?level="+level2+'&isapprove=1', method: "GET", title: "已审核的填报档案",	            
+                url: "approvejson?level="+level2+'&isapprove=1', method: "GET", title: "已审核的填报档案",
                 width: '100%', pageSize: 20
-                
             });
         }
-        
         f_initGrid();
-        
         function f_reload() {
-            grid.loadData();
+            if(ischeck=0){
+                grid.loadData();
+            }else {
+                checkload(WTG);
+            }
+
         }
         function app_reload() {
-            approvedgrid.loadData();
+            if(ischeck=0){
+                approvedgrid.loadData();
+            }else {
+                checkload(YTG);
+            }
         }
-        
-        function getSelected()
-        { 
+
+        function getSelected() {
             var row = manager.getSelectedRow();
-            if (!row) { alert('请选择行'); return; }
+            if (!row) {
+                alert('请选择行');
+                return;
+            }
             alert(JSON.stringify(row));
         }
-        
-        function getData()
-        { 
+
+        function getData() {
             var data = manager.getData();
             alert(JSON.stringify(data));
         }
-        
-        function viewRow()
-        { 
+
+        function preView(row) {
+            var html = " ";
+            if (row.fileSrc != null && row.fileSrc!="") {html = "<a target='_blank' href='../" + row.fileSrc + "'>" + '预览</a>'; }
+            return html;
+        }
+
+        function viewRow() {
             var selected = grid.getSelected();
-            if (!selected) { LG.tip('请选择考评项目!'); return }    
-            
+            if (!selected) { LG.tip('请选择考评项目!'); return }
+
             showDetailWindow({
                 id: selected.id,
-                noteDate: selected.noteDate,  
+                noteDate: selected.noteDate,
                 realName:selected.realName,
                 deptName:selected.deptName,
                 content:selected.content,
                 certifyMan:selected.certifyMan,
                 checkListId:selected.checkId,
                 checkListtitle:selected.checkTitle,
-                category:selected.category             
+                category:selected.category
             }, false);
-          
+
         }
-        
-        function modifyRow()
-        {         
+
+        function modifyRow() {
             var selected = grid.getSelected();
             if (!selected) { LG.tip('请选择行!'); return }
-            
+
             var parent = grid.getParent(selected);
-           
-            showDetail({   
-                checkListId: selected.id,                
-                checkListtitle: selected.title                  
+
+            showDetail({
+                checkListId: selected.id,
+                checkListtitle: selected.title
             }, false);
         }
-        
-        function deleteRow()
-        {
+
+        function deleteRow() {
             jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
-                if (confirm) f_delete(); });
+                if (confirm){
+                    f_delete();
+                }
+            });
         }
-        
-        function f_delete() 
-        {
+        var detailWin_com = null, curentData_com = null, currentIsAddNew_com;
+        function f_delete() {
             var selected = grid.getSelected();
             if (selected) {
                 $.ajax({
                     url: 'checklist/' + selected.id,
-                    type: 'DELETE',                  
-                    loading: '正在删除中...',                  
+                    type: 'DELETE',
+                    loading: '正在删除中...',
                     success: function () {
-                        //LG.showSuccess('删除成功');
                         LG.tip('删除成功!');
                         f_reload();
                     },
@@ -141,29 +196,24 @@
                         LG.showError(message);
                     }
                 });
-            }
-            else {
+            } else {
                 LG.tip('请选择行!');
             }
         }
-        
+        //审核通过
         function confirmRow(){
-          
-            //var isSend = window.confirm("审核通过该信息吗？");
-            //if (!isSend) return;
-           
-            var selected = grid.getSelected();        
-            if (!selected) { alert('请选择行'); return; }
-              
-            $.ligerDialog.confirm("审核通过该信息吗？" ,function (r) { if(r){
-           
+            var selected = grid.getSelected();
+            if (!selected) {
+                alert('请选择行');
+                return;
+            }
+            $.ligerDialog.confirm("审核通过该信息吗？" ,function (r) {
+                if(r){
                     $.ajax({
                         url: 'approve/' + selected.id,
-                        type: 'GET',                  
-                        loading: '正在审核中...',                  
+                        type: 'GET',
+                        loading: '正在审核中...',
                         success: function () {
-                            //LG.showSuccess('删除成功');
-                            //detailWin.hide();                 
                             LG.tip('审核成功!');
                             f_reload();
                             app_reload();
@@ -171,30 +221,28 @@
                         error: function (message) {
                             LG.showError(message);
                         }
-                    })}
-                else      
-                    return} );              
-            }  
-       
-            function multiRow(){
-          
-                //var isSend = window.confirm("审核通过该信息吗？");
-                //if (!isSend) return;
+                    })
+                } else {
+                    return;
+                }
+            } );
+            }
+        //批量审核
+        function multiRow(){
                 var selecteds="";
-                var selRows = grid.getSelectedRows();    
+                var  selRows = grid.getSelectedRows();
                 var len=selRows.length;
-                if (len==0) { alert('请选择行'); return; }           
+                if (len==0) { alert('请选择行'); return; }
                 $.each(selRows, function (i){
                     selecteds=selecteds+selRows[i].id+",";
-                });         
-                $.ligerDialog.confirm("共有"+len+"条记录，审核通过这些信息吗？" ,function (r) { if(r){
-           
+                });
+                $.ligerDialog.confirm("共有"+len+"条记录，审核通过这些信息吗？" ,function (r) {
+                    if(r){
                         $.ajax({
                             url: 'approvemulti?selecteds='+selecteds,
-                            type: 'GET',                  
-                            loading: '正在审核中...',                  
+                            type: 'GET',
+                            loading: '正在审核中...',
                             success: function () {
-                                //LG.showSuccess('删除成功');
                                 LG.tip('批量审核成功!');
                                 f_reload();
                                 app_reload();
@@ -202,163 +250,322 @@
                             error: function (message) {
                                 LG.showError(message);
                             }
-                        })}
-                    else      
-                        return} );              
-                }  
-                function cancelRow(){
-                    var selected =   grid.getSelected();
-                    if (!selected) { LG.tip('请选择行!'); return }      
-                    showDetail({
-                        id: selected.id
-         
-                    }, false);
-                }      
-	
-        
-                var detailWin_com = null, curentData_com = null, currentIsAddNew_com;
-                var commentform = $("#commentform");	        
-             
-                function showDetail(data_com, isAddNew_com)
-                {  
-                    currentData_com = data_com;
-                    currentIsAddNew_com = isAddNew_com;
-                    if (detailWin_com)
-                    {  
-                        detailWin_com.show(); 
+                        })
+                    } else{
+                        return
                     }
-                    else
-                    {  
-                        //创建表单结构       
-                        commentform.ligerForm({
-                            inputWidth: 280,
-                            fields: [
-                                { name: "note.id", type: "hidden" },
-                                { display: "审核意见", name: "comment", newline: true, 
-                                    labelWidth: 100, width: 220, space: 30, type: "textarea" } 
-                            ],
-                            toJSON: JSON2.stringify
-                        });
+                 });
+                }
+        //退回档案
+        function cancelRow(){
+            var selected =   grid.getSelected();
+            if (!selected) { LG.tip('请选择行!'); return }
+            showDetail({
+                id: selected.id
+            }, false);
+        }
+        //批量退回档案
+        function batchReturn() {
+            var selecteds = "";
+            var selRows = grid.getSelectedRows();
 
-                        detailWin_com = $.ligerDialog.open({
-                            target: $("#comment"),
-                            width: 300, height: 200, top:80,
-                            buttons: [
-                                { text: '确定', onclick: function () { save(); } },
-                                { text: '取消', onclick: function () { detailWin_com.hide(); } }
-                            ]
-                        });
+            var len = selRows.length;
+            if (len == 0) {
+                alert('请选择行');
+                return;
+            }
+            $.each(selRows, function (i) {
+                selecteds = selecteds + selRows[i].id + ",";
+            });
+            showBatch(selecteds,false);
+        }
+        var commentform = $("#commentform");
+        function showBatch(data_com, isAddNew_com) {
+            currentData_com = data_com;
+            currentIsAddNew_com = isAddNew_com;
+            if (detailWin_com) {
+                detailWin_com.show();
+            } else {//创建表单结构
+                commentform.ligerForm({
+                    inputWidth: 280,
+                    fields: [
+                        { display: "审核意见", name: "comment", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "textarea" }
+                    ],
+                    toJSON: JSON2.stringify
+                });
+                detailWin_com = $.ligerDialog.open({
+                    target: $("#comment"),
+                    width: 300, height: 200, top:80,
+                    buttons: [
+                        { text: '确定', onclick: function () { saveBatch(data_com); } },
+                        { text: '取消', onclick: function () { detailWin_com.hide(); } }
+                    ]
+                });
+            }
+            function saveBatch(data_com) {
+                var str = $('[name=comment]').val();
+//                alert("退回原因："+str);
+                $.ajax({
+                    loading: '正在保存数据中...',
+                    type: 'GET',
+                    url: 'batchReturn?selecteds='+data_com+'&comment='+str,
+                    data: $("#commentform"),
+                    success: function () {
+                        detailWin_com.hide();
+                        grid.loadData();
+                        LG.tip('退回成功!');
+                        refurbishParent(level);//刷新整个页面
+                    },
+                    error: function (message) {
+                        LG.tip(message);
                     }
-          
-                    if (currentData_com)
-                    {   
-                        $("[name$=id]").val(currentData_com.id)     	          
-                        $("[name$=comment]").focus();
+                });
+            }
+            function batchRest(){
+                alert("清空选中值！");
+                selRows ="";
+                $("[name$=content]").val("");
+            }
+        }
+
+
+
+        //单个退回
+        function showDetail(data_com, isAddNew_com) {
+//            alert("单个退回");
+            currentData_com = data_com;
+            currentIsAddNew_com = isAddNew_com;
+            if (detailWin_com) {
+                detailWin_com.show();
+            } else {
+                //创建表单结构
+                commentform.ligerForm({
+                    inputWidth: 280,
+                    fields: [
+                        { name: "note.id", type: "hidden" },
+                        { display: "审核意见", name: "comment", newline: true,
+                            labelWidth: 100, width: 220, space: 30, type: "textarea" }
+                    ],
+                    toJSON: JSON2.stringify
+                });
+                detailWin_com = $.ligerDialog.open({
+                    target: $("#comment"),
+                    width: 300, height: 200, top:80,
+                    buttons: [
+                        { text: '确定', onclick: function () { save(); } },
+                        { text: '取消', onclick: function () { detailWin_com.hide(); } }
+                    ]
+                });
+            }
+            if (currentData_com) {
+                $("[name$=id]").val(currentData_com.id)
+                $("[name$=comment]").focus();
+            }
+            function save() {
+                $("#commentform").validate();
+                $.ajax({
+                    loading: '正在保存数据中...',
+                    type: 'POST',
+                    url: 'approvefail',
+                    data: $("#commentform").serialize(),
+                    success: function () {
+                        detailWin_com.hide();
+                        LG.tip('退回成功!');
+                        refurbishParent(level);//刷新整个页面
+                    },
+                    error: function (message) {
+                        LG.tip(message);
                     }
-       
-                    function save()
-                    {
-                        $("#commentform").validate();
-             
-                        $.ajax({
-                            loading: '正在保存数据中...',
-                            type: 'POST',
-                            url: 'approvefail',                  
-                            data: $("#commentform").serialize(),
-                            success: function ()
-                            {
-                                detailWin_com.hide();
-                                grid.loadData();             
-                                LG.tip('退回成功!');
-                            },
-                            error: function (message)
-                            {
-                                LG.tip(message);
-                            }
-                        });
-                    }
-                }
-              
-              
-                var detailWin = null, curentData = null, currentIsAddNew;
-                var mainform = $("#mainform");
-                function showDetailWindow(data, isAddNew)
-                {
-                    var mainform = $("#mainform");    
-                    currentData = data;
-                    //currentIsAddNew = isAddNew;
-                    if (detailWin)
-                    {     
-                        detailWin.show(); 
-                    }
-                    else
-                    {   
-                        //创建表单结构           
-                        mainform.ligerForm({
-                            inputWidth: 500,
-                            fields:
-                                [  
-                                { name: "note.id", type: "hidden" },
-                                { name: "note.checkList.id", type: "hidden" },
-                                { name: "note.approveLevel", type: "hidden" },
-                                { name: "note.category", type: "hidden" },
-                                { display: "考评项目", name: "checkListTitle", newline: true, 
-                                    labelWidth: 120, width: 220, space: 30, type: "text"},
-                                { display: "发生日期", name: "note.noteDate", newline: true,
-                                    labelWidth: 120, width: 220, space: 30, type: "text", 
-                                    validate: { required: true, maxlength: 50} }, 
-                                { display: "姓名", name: "realName", newline: true,
-                                    labelWidth: 120, width: 220, space: 30, type: "text"},    
-                                { display: "科室", name: "deptName", newline: true,
-                                    labelWidth: 120, width: 220, space: 30, type: "false"},    
-                                { display: "内容", name: "note.content", newline: true,
-                                    labelWidth: 120, width: 220, space: 30, type: "textarea" } ,
-                                { display: "经办人(证明人)", name: "note.certifyMan", newline: true,
-                                    labelWidth: 120, width: 220, space: 30, type: "text"}],        			
-                            toJSON: JSON2.stringify
-                        });
-             
-                        detailWin = $.ligerDialog.open({
-                            target: $("#detail"), top:10,
-                            //width: 300, height: 300, 
-                            buttons: [
-                                { text: '审核', onclick: function () { Approval(); } },
-                                { text: '取消', onclick: function () { detailWin.hide(); } }
-                            ]
-                        });
-                    }
-          
-                    if (currentData)
-                    {     
-                        $("[name$=id]").val(currentData.id)
-                        $("#checkListTitle").val(currentData.checkListtitle);
-                        $("[name$='checkList.id']").val(currentData.checkListId);
-                        $("[name$=noteDate]").val(currentData.noteDate); 
-                        $("[name$=realName]").val(currentData.realName);
-                        $("[name$=deptName]").val(currentData.deptName);
-                        $("[name$=content]").val(currentData.content);
-                        $("[name$=certifyMan]").val(currentData.certifyMan);  
-                        $("[name$=category]").val(currentData.category);
-                        // $("[name$=content]").focus();
-                    }
-          
-                    $("#checkListTitle").ligerGetTextBoxManager().setDisabled();
-                    $("[name$=noteDate]").ligerGetTextBoxManager().setDisabled();
-                    $("[name$=realName]").ligerGetTextBoxManager().setDisabled();
-                    $("[name$=deptName]").ligerGetTextBoxManager().setDisabled();                                                   
-                    $("[name$=certifyMan]").ligerGetTextBoxManager().setDisabled();
-                    
-                    $("[name$=content]").attr('readonly', 'readonly');
-                    $("[name$=content]").addClass("l-text-disabled");
-                   
-                    function Approval(){
-                        confirmRow();
-                        detailWin.hide();
-                    }            
-                }
-            })
-            
-            var level = ${level};
+                });
+            }
+        }
+        var detailWin = null, curentData = null, currentIsAddNew;
+        var mainform = $("#mainform");
+        function showDetailWindow(data, isAddNew) {
+            var mainform = $("#mainform");
+            currentData = data;
+            //currentIsAddNew = isAddNew;
+            if (detailWin) {
+                detailWin.show();
+            } else { //创建表单结构
+                mainform.ligerForm({
+                    inputWidth: 500,
+                    fields:
+                        [
+                            { name: "note.id", type: "hidden" },
+                            { name: "note.checkList.id", type: "hidden" },
+                            { name: "note.approveLevel", type: "hidden" },
+                            { name: "note.category", type: "hidden" },
+                            { display: "考评项目", name: "checkListTitle", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "text"},
+                            { display: "发生日期", name: "note.noteDate", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "text",
+                                validate: { required: true, maxlength: 50} },
+                            { display: "姓名", name: "realName", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "text"},
+                            { display: "科室", name: "deptName", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "false"},
+                            { display: "内容", name: "note.content", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "textarea" } ,
+                            { display: "经办人(证明人)", name: "note.certifyMan", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "text"}
+                        ],
+                    toJSON: JSON2.stringify
+                });
+
+                detailWin = $.ligerDialog.open({
+                    target: $("#detail"), top:10,
+                    buttons: [
+                        { text: '审核', onclick: function () { Approval(); } },
+                        { text: '取消', onclick: function () { detailWin.hide(); } }
+                    ]
+                });
+            }
+            if (currentData) {
+                $("[name$=id]").val(currentData.id)
+                $("#checkListTitle").val(currentData.checkListtitle);
+                $("[name$='checkList.id']").val(currentData.checkListId);
+                $("[name$=noteDate]").val(currentData.noteDate);
+                $("[name$=realName]").val(currentData.realName);
+                $("[name$=deptName]").val(currentData.deptName);
+                $("[name$=content]").val(currentData.content);
+                $("[name$=certifyMan]").val(currentData.certifyMan);
+                $("[name$=category]").val(currentData.category);
+            }
+            $("#checkListTitle").ligerGetTextBoxManager().setDisabled();
+            $("[name$=noteDate]").ligerGetTextBoxManager().setDisabled();
+            $("[name$=realName]").ligerGetTextBoxManager().setDisabled();
+            $("[name$=deptName]").ligerGetTextBoxManager().setDisabled();
+            $("[name$=certifyMan]").ligerGetTextBoxManager().setDisabled();
+            $("[name$=content]").attr('readonly', 'readonly');
+            $("[name$=content]").addClass("l-text-disabled");
+
+            function Approval(){
+                confirmRow();
+                detailWin.hide();
+            }
+        }
+
+
+    });
+    //根据用户名、姓名、科室查询
+    function EnterPress(event,type){             //IE8支持此方法
+        if(event.keyCode==13){    //回车键作为执行查询操作
+            ischeck=1;
+            var level =${level};
             var level2=level+1;
+            var name="";
+            var plevel;
+            var pisapprove;
+            if(type==1){
+                name=$("#realNameQuery").val();
+                WTG=1;
+                plevel=level;
+                pisapprove=0;
+            } else if(type==2){
+                name=$("#deptQuery").val();
+                WTG=2;
+                plevel=level;
+                pisapprove=0;
+            } else if(type==3){
+                name=$("#realNameQueryY").val();
+                YTG=3
+                plevel=level2;
+                pisapprove=1;
+            } else if(type==4){
+                name=$("#deptQueryY").val();
+                YTG=4
+                plevel=level2;
+                pisapprove=1;
+            }
+            $.ajax({
+                loading: '正在查询中...',
+                type: 'POST',
+                url: '/notes/approvejsoncheck',
+                data: {name:name,type:type,plevel:plevel,pisapprove:pisapprove,sortname:'',sortorder:''},
+                success: function (jsondata)
+                {
+                    if(jsondata!=null){
+                        if(type==1||type==2){
+                            grid.setOptions({ data: jsondata });
+                            grid.loadData();
+                        }else{
+                            approvedgrid.setOptions({ data: jsondata });
+                            approvedgrid.loadData();
+                        }
+
+
+                    } else{
+                        LG.tip("查询无结果!");
+                    }
+                    // LG.tip('保存成功!');
+                },
+                error: function (message)
+                {
+                    LG.tip(message);
+                }
+            });
+        }
+    }
+
+    function checkload(type){
+        var level =${level};
+        var level2=level+1;
+        var name="";
+        var plevel;
+        var pisapprove;
+        if(type==1){
+            name=$("#realNameQuery").val();
+            plevel=level;
+            pisapprove=0;
+        } else if(type==2){
+            name=$("#deptQuery").val();
+            plevel=level;
+            pisapprove=0;
+        } else if(type==3){
+            name=$("#realNameQueryY").val();
+            plevel=level2;
+            pisapprove=1;
+        } else if(type==4){
+            name=$("#deptQueryY").val();
+            plevel=level2;
+            pisapprove=1;
+        }
+        $.ajax({
+            loading: '正在查询中...',
+            type: 'POST',
+            url: '/notes/approvejsoncheck',
+            data: {name:name,type:type,plevel:plevel,pisapprove:pisapprove,sortname:'',sortorder:''},
+            success: function (jsondata)
+            {
+                if(jsondata!=null){
+                    if(type==1||type==2){
+                        grid.setOptions({ data: jsondata });
+                        grid.loadData();
+                    }else{
+                        approvedgrid.setOptions({ data: jsondata });
+                        approvedgrid.loadData();
+                    }
+
+
+                } else{
+                    LG.tip("查询无结果!");
+                }
+                // LG.tip('保存成功!');
+            },
+            error: function (message)
+            {
+                LG.tip(message);
+            }
+        });
+    }
+
+
+
+
+
+    ///notes/approve?level=0
+
            
 </script>

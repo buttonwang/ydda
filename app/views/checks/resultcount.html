@@ -1,124 +1,132 @@
 #{extends 'main.html'/}
 <div id="layout1">
     <div  position="center" title="年度考评结果统计">
-        <!--  <div id="state"  style="background-color:#C4E1FF;height:18px;font-size:2; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择：</div>  --> 
+        <!--  <div id="state"  style="background-color:#C4E1FF;height:18px;font-size:2; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择：</div>  -->
         <div class="l-clear"></div>
-        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">          
+        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">
             <div  title="查询条件" style="">
+            *{增加导出Excel按钮}*
+                <div id="toptoolbar"></div>
                 <div id="detail"  style="margin-top:1px">
-                    <form id="queryform"  method="post"></form>               
-                </div>  <br> <br/>  
+                    <form id="queryform"  method="post"></form>
+                </div>  <br> <br/>
                 <table width="60%">
                     <tr>
                         <td width="50%">&nbsp;</td><td><input id="btnSet" type="button" value="查　询" onclick="query();" /></td>
                         <td >&nbsp;&nbsp;</td>
-                        <td><input id="btnReset" type="button"  value="重　置" onclick="resetform();"/></td>         
+                        <td><input id="btnReset" type="button"  value="重　置" onclick="resetform();"/></td>
                     </tr>
                     <tr><td>&nbsp;</td></tr>
                 </table>
-            </div> 
+            </div>
 
-        </div>  
-        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">                  
+        </div>
+        <div id="navtab1" style="width: 800px;overflow:hidden; border:1px solid #A3C0E8; ">
             <div   title="档案列表">
                 <div id="maingrid" style="margin-top:1px"></div> <br />
-                <div style="display:none;"></div>             
-            </div>    
-        </div>  
+                <div style="display:none;"></div>
+            </div>
+        </div>
     </div>
 </div>
 
-<script type="text/javascript">  
-    $(function () {    
-        
+<script type="text/javascript">
+    $(function () {
+
         var manager, grid;
-        $("#layout1").ligerLayout({ leftWidth: 160,height: 640});
-        $("#navtab1").ligerTab(); 
+        $("#layout1").ligerLayout({ leftWidth: 160,height: 960});
+        $("#navtab1").ligerTab();
 
         var depts=[];
-      
-        //var grades=[{"id":1,name:"优秀"},{"id":2,name:"良好"},{"id":3,name:"一般"},{"id":3,name:"较差"}];
-
         var queryform = $("#queryform");
-        function f_initGrid()
-        {     
+        //        增加导出Excel按钮
+        $("#toptoolbar").ligerToolBar({
+            items: [
+                {text: '导出',id:'excel', icon:'outbox',click:export_ResultCountExcel}
+            ]
+        });
+        function f_initGrid() {
             grid = manager = $("#maingrid").ligerGrid({
                 columns: [
-                   // { display: '序号', name:'0', width: 60,  type: 'textarea' },
                     { display: '年度', name:'1', width: 100,  type: 'textarea' },
                     { display: '科室', name:'2', width: 120,  type: 'textarea' },
                     { display: '优秀', name: '3', width: 100,  type: 'textarea' },
                     { display: '良好', name: '4', width: 100, type: 'textarea' },
                     { display: '一般', name: '5', width: 100, type: 'textarea' },
-                    { display: '较差', name: '6', width: 100, type: 'textarea' }
+                    { display: '较差', name: '6', width: 100, type: 'textarea' },
+                    { display: '年度得分', name: '7', width: 100, type: 'textarea' }
                 ],
-                //url:'detailfilejson?tag='+tag, 
-                method: "GET", title: "年度档案考评列表",	            
+                method: "GET", title: "年度档案考评列表",
                 width: '100%',height:"98%", pageSize: 30, showTitle: true, checkbox: false, checkboxColWidth: 50
             });
         }
-        
+
         f_initGrid();
         var  fieldsarr=[];
-        function f_initquery() {       
-            fieldsarr=[                                          
-                { display: "年度", name: "year", newline: true, 
-                    labelWidth: 100, width: 120, space: 30, type: "text"},                                
-                { display: "科室", name: "deptHide", comboboxName: "deptCombox", newline: false, 
+        function f_initquery() {
+            fieldsarr=[
+                { display: "年度", name: "year", newline: true,
+                    labelWidth: 100, width: 120, space: 30, type: "text"},
+                { display: "科室", name: "deptHide", comboboxName: "deptCombox", newline: false,
                     labelWidth: 100, width: 120, space: 30, type: "select",
-                    options: {data: depts, valueField: 'id', textField: 'name'} }	                    
-                                     
+                    options: {data: depts, valueField: 'id', textField: 'name'} }
+
             ];
-         
+
             queryform.ligerForm({
                 inputWidth: 280,
                 fields: fieldsarr,
-                pageSize: 50,       				
+                pageSize: 50,
                 toJSON: JSON2.stringify
             });
-	  
+
             //自动设置年度
             var d=new Date();
             var fullyear=d.getFullYear();
-            $("[name$=year]").val(fullyear);    
+            $("[name$=year]").val(fullyear);
         }
 
-        $.getJSON('/depts/findAll', function(data) {                          
-            depts = data;  
-            f_initquery();     
+        $.getJSON('/depts/findAll', function(data) {
+            depts = data;
+            f_initquery();
         });
-        
+
         function f_reload() {
             grid.loadData();
         }
-       
-        query = function (){              
+        //导出excel
+        function export_ResultCountExcel() {
+            var deptCombox_val,year,dept;
+            year = $("[name$=year]").val();
+            dept = $("[name=deptCombox]").val();
+            deptCombox_val =dept;
+            location.href = "export_resultCount_excel/?year="+year+"&deptCombox=" + deptCombox_val+"&dept="+dept;
+        }
+        query = function (){
             $.ajax({
                 loading: '正在查询中...',
                 type: 'POST',
-                url: 'resultcountjson',                  
+                url: 'resultcountjson',
                 data: $("#queryform").serialize(),
                 dataType:"json",
-                success: function (jsondata){                  
-                    grid.setOptions({ data: jsondata }); 
-                    grid.loadData();  
-                    
+                success: function (jsondata){
+                    grid.setOptions({ data: jsondata });
+                    grid.loadData();
+
                 },
                 error: function (message)
                 {
-                    LG.tip(message);              
+                    LG.tip(message);
                 }
-            });    
+            });
         }
-        
-        resetform = function (){   
-            $("[name$=year]").val("");         
-            $("#deptCombox").ligerGetComboBoxManager().setValue();    
-        }
-            
 
+        resetform = function (){
+//            $("[name$=year]").val("");
+            $("#deptCombox").ligerGetComboBoxManager().setValue();
+        }
     })
-           
+
 </script>
 
 

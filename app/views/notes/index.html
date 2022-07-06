@@ -6,997 +6,1130 @@
     var dept = -1;
     var names = "";
     var today = new Date();
-    var todayStr = today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate();
+    var todayStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
     $(function () {
-       $("#uploadp").hide();
-        var tag=${tag};       
-        if (tag==0) {
-            $("#userTreeDiv").hide() ; 
-            $("#queryDiv").hide() ;           
-        } else{
+        $("#uploadp").hide();
+        var tag=${tag};
+        if (tag == 0) {
+            $("#userTreeDiv").hide();
+            $("#queryDiv").hide();
+        } else {
             $("#userTreeDiv").show();
-            $("#queryDiv").show() ;  
+            $("#queryDiv").show();
         }
-       
-        $("#layout1").ligerLayout({  leftWidth: 182, height: 900});
-        $("#navtab1").ligerTab(); 
 
-        var manager, grid, plusgrid, votegrid, allgrid;
-        var detailGrid; 
-        var depts=[];
-       
+        $("#layout1").ligerLayout({leftWidth: 182, height:800});
 
-        $.getJSON('depts/findAll', function(data) {		 				  
-            depts =data;    
+        $("#navtab1").ligerTab();
+        var manager, grid, plusgrid, votegrid, allgrid,basegrid;
+        var detailGrid;
+        var depts = [];
+        $.getJSON('depts/findAll', function (data) {
+            depts = data;
         });
-      
-        $.getJSON('users/findAll', function(u_data) {		 				  
-            users =u_data;    
+        $.getJSON('users/findAll', function (u_data) {
+            users = u_data;
         });
-      
-     
-        var date=new Date();
-        var fullyear=date.getFullYear();        
-        var options=document.getElementById("checkYear").options;  //下拉框           
-        var len=options.length;
-        for(var i=0;i<len;i++){                 
-            if (options[i].value==fullyear){              
-                options[i].selected=true;
+        var date = new Date();
+        var fullyear = date.getFullYear();
+        var options = document.getElementById("checkYear").options;  //下拉框
+        var len = options.length;
+        for (var i = 0; i < len; i++) {
+            if (options[i].value == fullyear) {
+                options[i].selected = true;
                 break;
             }
         }
-        //var checkYear=$("#checkYear").val(); 
 
-        function f_initGrid(                                                                                                                                                                                                       )
-        { 
-          //考评主项
-          if(tag>0)
-          {
-                 grid = manager = $("#maingrid").ligerGrid({
-                columns: [
-                    { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
-                    { display: '项目', name: 'title', width: 600, type: 'textarea', align:'left'}
-                ],
-                url: "checklists/leafjson",  method: "GET",
-                groupColumnName: 'parentTitle', groupColumnDisplay: '考评主项', alternatingRow:false,
-                detail: { onShowDetail: f_showNote,onExtend:f_showNote,height:'auto' },
-                // title:"wwwww",
-                width: '100%', pageSize: 50,
-                toolbar: { items: [
-                        { text: '添加', click: addRow, icon: 'add' },
-                        { line: true },
-                        { text: '添加多人', click: addRowMore, icon: 'add'},
-                        { line: true},
-                        { text: '修改', click: modifyRow, icon: 'modify' },
-                        { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' },
-                        { line: true},
-                        { text: '附件上传', click: uploadFile, icon: 'up' }
-                    ] }
-            });
-                   //加分项目
-            plusgrid = $("#plusgrid").ligerGrid({
-                columns: [
-                    { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
-                    { display: '项目', name: 'title', width: 600, type: 'textarea', align:'left'}
-                ],
-                url: "adjustlists/json",  method: "GET",                   
-                detail: { onShowDetail: f_showNote_plus,onExtend:f_showNote_plus,height:'auto' },
-                title:"加分项目", 
-                width: '100%', pageSize: 50,
-                toolbar: { items: [
-                        { text: '添加', click: addRow_plus, icon: 'add' },
-                        { line: true },
-                        { text:'添加多人', click: addRow_plusMore, icon: 'add' },
-                        { line:true },
-                        { text: '修改', click: modifyRow, icon: 'modify' },
-                        { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' },
-                        { line: true},
-                        { text: '附件上传', click: uploadFile, icon: 'up' }
-                    ] }
-            });
-             //一票否决项目
-            votegrid = $("#votegrid").ligerGrid({
-                columns: [
-                    { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
-                    { display: '项目', name: 'title', width: 600, type: 'textarea', align:'left'}
-                ],
-                url: "votekills/json",  method: "GET",                   
-                detail: { onShowDetail: f_showNote_vote,onExtend:f_showNote_vote,height:'auto' },
-                title:"一票否决项目", 
-                width: '100%', pageSize: 50,
-                toolbar: { items: [
-                        { text: '添加', click: addRow_vote, icon: 'add' },
-                        { line: true },
-                        { text:'添加多人', click:addRow_voteMore, icon:'add'},
-                        { line: true},
-                        { text: '修改', click: modifyRow, icon: 'modify' },
-                        { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' },
-                        { line: true},
-                        { text: '附件上传', click: uploadFile, icon: 'up' }
-                    ] }
-            });
-        }else
-        {
+        function f_initGrid() {
+            //考评主项
+            if (tag > 0||tag==0) {
+                var basedate=[{"id":1,"orderNum":"1","parent":0,"score":10.0,"title":"救死扶伤，全心全意为人民服务方面，基础得分为10分。",
+                    children: [
+                        { orderNum: '1.1', title: '加强政治理论和职业道德学习，树立救死扶伤、以病人为中心、全心全意为人民服务的宗旨意识和服务意识，大力弘扬白求恩精神；' },
+                        { orderNum: '1.2', title: '增强工作责任心，热爱本职，坚守岗位，尽职尽责。' }
+                            ]},
+                    {"id":2,"orderNum":"2","parent":0,"score":10.0,"title":"尊重患者的人格和权利，为患者保守医疗秘密方面，基础得分为10分。",
+                        children: [
+                            { orderNum: '2.1', title: '对待患者不分民族、性别、职业、地位、贫富，一视同仁；' },
+                            { orderNum: '2.2', title: '维护患者的合法权益，尊重患者知情权、选择权和隐私权，为患者保守医疗秘密。' }
+                        ]},
+                    {"id":3,"orderNum":"3","parent":0,"score":10.0,"title":"文明礼貌，优质服务，构建和谐医患关系方面，基础得分为10分。",
+                        children: [
+                            { orderNum: '3.1', title: '关心、体贴患者，做到热心、耐心、爱心、细心；' },
+                            { orderNum: '3.2', title: '着装整齐，举止端庄，服务用语文明规范，服务态度好，无“生、冷、硬、顶、推、拖”现象；' },
+                            { orderNum: '3.3', title: '认真践行医疗服务承诺，加强与患者的交流沟通，自觉接受监督，构建和谐医患关系。' }
+                        ]},
+                    {"id":4,"orderNum":"4","parent":0,"score":15.0,"title":"遵纪守法，廉洁行医方面，基础得分为15分。",
+                        children: [
+                            { orderNum: '4.1', title: '严格遵守卫生法律法规，严格执行各项医疗护理工作制度及技术操作规程，坚持依法执业，廉洁行医，保证医疗质量和安全；' },
+                            { orderNum: '4.2', title: '在医疗服务活动中，不索要患者及其亲友的财物；为患者看病、住院、手术等提供便利后,不得接受患者及家属为表达感谢的请吃等；' },
+                            { orderNum: '4.3', title: '不利用工作之便谋取私利，不收受药品、医用设备、医用耗材等生产、经营企业或经销人员给予的财物、回扣以及其他不正当利益，不得接受上述生产、经营企业或经销人员的请吃等，不以介绍患者到其他单位检查、治疗和购买药品、医疗器械等为由，从中牟取不正当利益；' },
+                            { orderNum: '4.4', title: '不开具虚假医学证明，不参与虚假医疗广告宣传和药品医疗器械促销，不隐匿、伪造或违反规定涂改、销毁医学文书及有关资料；' },
+                            { orderNum: '4.5', title: '不违反规定私自外出行医。' },
+                        ]},
+                    {"id":5,"orderNum":"5","parent":0,"score":15.0,"title":"因病施治，规范医疗服务行为方面，基础得分为15分。",
+                        children: [
+                            { orderNum: '5.1', title: '不违反规定私自外出行医。' },
+                            { orderNum: '5.2', title: '认真落实有关控制医药费用的制度措施；' },
+                            { orderNum: '5.2', title: '严格执行医疗服务和药品价格政策，不多收、乱收和私自收取费用。' }
+                        ]},
+                    {"id":6,"orderNum":"6","parent":0,"score":10.0,"title":"顾全大局，团结协作，和谐共事方面，基础得分为10分。",
+                        children: [
+                            { orderNum: '6.1', title: '积极参加上级安排的指令性医疗任务和社会公益性的扶贫、义诊、助残、支农、援外等医疗活动；' },
+                            { orderNum: '6.2', title: '正确处理同行、同事间的关系，互相尊重，互相配合，取长补短，共同进取。' }
+                        ]},
+                    {"id":7,"orderNum":"7","parent":0,"score":10.0,"title":"严谨求实，努力提高专业技术水平方面，基础得分为10分。",
+                        children: [
+                            { orderNum: '7.1', title: '积极参加各类培训，刻苦钻研业务技术，努力学习新知识、新技术，提高专业技术水平；' },
+                            { orderNum: '7.2', title: '增强责任意识，防范医疗差错、医疗事故的发生。' }
+                        ]}
+                ];
+                basegrid  = $("#basegrid").ligerGrid({
+                    columns: [
+                        {id:'orderNum',display: '序号', name: 'orderNum', width: 100, type: 'text'},
+                        {display: '项目', name: 'title', width: 900, type: 'textarea', align: 'left'}
+                    ],
+                    tree: {
+                        columnId: 'orderNum',
+                        isExtend:false
+                    },
+                    data: { Rows: basedate },
+//                    url: "checklists/leafjson", method: "GET",
+                     groupColumnDisplay: '基础考评内容与标准', alternatingRow: false,userPage:false,
+//                    detail: {onShowDetail: f_showBaseNote,height:'auto'},
+                    width: '100%'
+                });
                 grid = manager = $("#maingrid").ligerGrid({
-                columns: [
-                    { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
-                    { display: '项目', name: 'title', width: 600, type: 'textarea', align:'left'}
-                ],
-                url: "checklists/leafjson",  method: "GET",
-                groupColumnName: 'parentTitle', groupColumnDisplay: '考评主项', alternatingRow:false,
-                //detail: { onShowDetail: f_showNote, onExtend:reloadNote,onCollapse:deleteNote,height:'auto' },
-                detail: { onShowDetail: f_showNote,onExtend:f_showNote,height:'auto' },
-                // title:"wwwww",
-                width: '100%', pageSize: 50,
-                toolbar: { items: [
-                        { text: '添加', click: addRow, icon: 'add' },
-                        { line: true },
-                        { text: '修改', click: modifyRow, icon: 'modify' },
-                        { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' },
-                        { line: true },
-                        { text: '附件上传', click: uploadFile, icon: 'up' }
-                    ] }
-            });
-            
-            //加分项目
-            plusgrid = $("#plusgrid").ligerGrid({
-                columns: [
-                    { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
-                    { display: '项目', name: 'title', width: 600, type: 'textarea', align:'left'}
-                ],
-                url: "adjustlists/json",  method: "GET",                   
-                detail: { onShowDetail: f_showNote_plus,onExtend:f_showNote_plus,height:'auto' },
-                //title:"加分项目", 
-                width: '100%', pageSize: 50,
-                toolbar: { items: [
-                        { text: '添加', click: addRow_plus, icon: 'add' },
-                        { line: true },
-                        { text: '修改', click: modifyRow, icon: 'modify' },
-                        { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' },
-                        { line: true },
-                        { text: '附件上传', click: uploadFile, icon: 'up' }
-                    ] }
-            });
-             //一票否决项目
-            votegrid = $("#votegrid").ligerGrid({
-                columns: [
-                    { display: '序号', name: 'orderNum', width: 100,  type: 'text' },
-                    { display: '项目', name: 'title', width: 600, type: 'textarea', align:'left'}
-                ],
-                url: "votekills/json",  method: "GET",                   
-                detail: { onShowDetail: f_showNote_vote,onExtend:f_showNote_vote,height:'auto' },
-                //title:"一票否决项目", 
-                width: '100%', pageSize: 50,
-                toolbar: { items: [
-                        { text: '添加', click: addRow_vote, icon: 'add' },
-                        { line: true },
-                        { text: '修改', click: modifyRow, icon: 'modify' },
-                        { line: true },
-                        { text: '删除', click: deleteRow, icon: 'delete' },
-                        { line: true },
-                        { text: '附件上传', click: uploadFile, icon: 'up' }
-                    ] }
-            });
+                    columns: [
+                        {display: '序号', name: 'orderNum', width: 100, type: 'text'},
+                        {display: '项目', name: 'title', width: 600, type: 'textarea', align: 'left'}
+                    ],
+                    url: "checklists/leafjson", method: "GET",
+                    groupColumnName: 'parentTitle', groupColumnDisplay: '考评主项', alternatingRow: false,
+                    detail: {onShowDetail: f_showNote, onExtend: f_showNote,height:'auto'},
+                    width: '100%', pageSize: 50,
+                    toolbar: {
+                        items: [
+                            {text: '添加', click: addRow, icon: 'add'},
+                            {line: true},
+                            {text: '添加多人', click: addRowMore, icon: 'add'},
+                            {line: true},
+                            {text: '修改', click: modifyRow, icon: 'modify'},
+                            {line: true},
+                            {text: '删除', click: deleteRow, icon: 'delete'}
+                            ,//泸州修改附件上传位置
+                            {line: true},
+                            {text: '附件上传', click: uploadFile, icon: 'up'}
+                        ]
+                    }
+                });
+                //加分项目
+                plusgrid = $("#plusgrid").ligerGrid({
+                    columns: [
+                        {display: '序号', name: 'orderNum', width: 100, type: 'text'},
+                        {display: '项目', name: 'title', width: 600, type: 'textarea', align: 'left'}
+                    ],
+                    url: "adjustlists/json", method: "GET",
+                    detail: {onShowDetail: f_showNote_plus, onExtend: f_showNote_plus,height:'auto'},
+                    title: "加分项目",
+                    width: '100%', pageSize: 50,height:'100%',
+                    toolbar: {
+                        items: [
+                            {text: '添加', click: addRow_plus, icon: 'add'},
+                            {line: true},
+                            {text: '添加多人', click: addRow_plusMore, icon: 'add'},
+                            {line: true},
+                            {text: '修改', click: modifyRow, icon: 'modify'},
+                            {line: true},
+                            {text: '删除', click: deleteRow, icon: 'delete'}
+                            ,//泸州修改附件上传位置
+                            {line: true},
+                            {text: '附件上传', click: uploadFile, icon: 'up'}
+                        ]
+                    }
+                });
+                //一票否决项目
+                votegrid = $("#votegrid").ligerGrid({
+                    columns: [
+                        {display: '序号', name: 'orderNum', width: 100, type: 'text'},
+                        {display: '项目', name: 'title', width: 600, type: 'textarea', align: 'left'}
+                    ],
+                    url: "votekills/json", method: "GET",
+                    detail: {onShowDetail: f_showNote_vote, onExtend: f_showNote_vote,height:'auto'},
+                    title: "一票否决项目",
+                    width: '100%', pageSize: 50,height:'100%',
+                    toolbar: {
+                        items: [
+                            {text: '添加', click: addRow_vote, icon: 'add'},
+                            {line: true},
+                            {text: '添加多人', click: addRow_voteMore, icon: 'add'},
+                            {line: true},
+                            {text: '修改', click: modifyRow, icon: 'modify'},
+                            {line: true},
+                            {text: '删除', click: deleteRow, icon: 'delete'}
+                            ,//泸州修改附件上传位置
+                            {line: true},
+                            {text: '附件上传', click: uploadFile, icon: 'up'}
+                        ]
+                    }
+                });
+            } else {
+                grid = manager = $("#maingrid").ligerGrid({
+                    columns: [
+                        {display: '序号', name: 'orderNum', width: 100, type: 'text'},
+                        {display: '项目', name: 'title', width: 600, type: 'textarea', align: 'left'}
+                    ],
+                    url: "checklists/leafjson", method: "GET",
+                    groupColumnName: 'parentTitle', groupColumnDisplay: '考评主项', alternatingRow: false,
+                    detail: {onShowDetail: f_showNote, onExtend: f_showNote,height:'auto'},
+                    width: '100%', pageSize: 50,height:'100%',
+                    toolbar: {
+                        items: [
+                            {text: '添加', click: addRow, icon: 'add'},
+                            {line: true},
+                            {text: '修改', click: modifyRow, icon: 'modify'},
+                            {line: true},
+                            {text: '删除', click: deleteRow, icon: 'delete'}
+                            ,//泸州修改附件上传位置
+                            {line: true},
+                            {text: '附件上传', click: uploadFile, icon: 'up'}
+                        ]
+                    }
+                });
+                //加分项目
+                plusgrid = $("#plusgrid").ligerGrid({
+                    columns: [
+                        {display: '序号', name: 'orderNum', width: 100, type: 'text'},
+                        {display: '项目', name: 'title', width: 600, type: 'textarea', align: 'left'}
+                    ],
+                    url: "adjustlists/json", method: "GET",
+                    detail: {onShowDetail: f_showNote_plus, onExtend: f_showNote_plus,height:'auto'},
+                    //title:"加分项目",
+                    width: '100%', pageSize: 50,height:'100%',
+                    toolbar: {
+                        items: [
+                            {text: '添加', click: addRow_plus, icon: 'add'},
+                            {line: true},
+                            {text: '修改', click: modifyRow, icon: 'modify'},
+                            {line: true},
+                            {text: '删除', click: deleteRow, icon: 'delete'}
+                            ,//泸州修改附件上传位置
+                            {line: true},
+                            {text: '附件上传', click: uploadFile, icon: 'up'}
+                        ]
+                    }
+                });
+                //一票否决项目
+                votegrid = $("#votegrid").ligerGrid({
+                    columns: [
+                        {display: '序号', name: 'orderNum', width: 100, type: 'text'},
+                        {display: '项目', name: 'title', width: 600, type: 'textarea', align: 'left'}
+                    ],
+                    url: "votekills/json", method: "GET",
+                    detail: {onShowDetail: f_showNote_vote, onExtend: f_showNote_vote,height:'auto'},
+                    //title:"一票否决项目",
+                    width: '100%', pageSize: 50,height:'100%',
+                    toolbar: {
+                        items: [
+                            {text: '添加', click: addRow_vote, icon: 'add'},
+                            {line: true},
+                            {text: '修改', click: modifyRow, icon: 'modify'},
+                            {line: true},
+                            {text: '删除', click: deleteRow, icon: 'delete'}
+                            ,//泸州修改附件上传位置
+                            {line: true},
+                            {text: '附件上传', click: uploadFile, icon: 'up'}
+                        ]
+                    }
+                });
             }
-
             //所有项目
-            allgrid = $("#allgrid").ligerGrid({    
+            allgrid = $("#allgrid").ligerGrid({
                 columns: [
-                    { display: '发生日期', name: 'noteDate',type:'text', width: 80, format: "yyyy-dd"},
-                    { display: '姓名', name: 'realName', type:'text',width: 60 },
-                    { display: '科室', name: 'deptName', type:'text',width: 80 },
-                    { display: '考评类别', name: 'categoryName',  type:'text',width: 80},
-                    { display: '考评项目', name: 'checkTitle',type:'text',width: 150},
-                    { display: '事项', name: 'content',  align: 'left',type:'text',width: 100 },
-                    { display: '物品', name: 'goods', type:'text',width: 60 },
-                    { display: '分数', name: 'score', type:'text',width: 60 },
-                    { display: '经办人', name: 'certifyMan', type:'text',width: 60 },
-                    { display: '填报人', name: 'createdManName', type:'text',width: 60 },
-                    { display: '审核状态', name: 'approveLevelName', width: 60},
-                    { display: '备注', name: 'approveComment', width: 60},
-                    { display: '附件', name: 'fileSrc', width: 60, render: preView }
-                ],  
-                // url: "notes/checkalljson?tag="+tag+'&userid='+user+'&deptid='+dept+'&checkYear='+checkYear,  
-                method: "GET",                             
-                //title:"所有项目", 
-                width: '100%',height:"80%" ,pageSize: 50       
-            });    
+                    {display: '发生日期', name: 'noteDate', type: 'text', width: 80, format: "yyyy-dd"},
+                    {display: '姓名', name: 'realName', type: 'text', width: 60},
+                    {display: '科室', name: 'deptName', type: 'text', width: 80},
+                    {display: '考评类别', name: 'categoryName', type: 'text', width: 80},
+                    {display: '考评项目', name: 'checkTitle', type: 'text', width: 150},
+                    {display: '事项', name: 'content', align: 'left', type: 'text', width: 100},
+                    {display: '物品', name: 'goods', type: 'text', width: 60},
+                    {display: '分数', name: 'score', type: 'text', width: 60},
+                    {display: '证明人', name: 'certifyMan', type: 'text', width: 60},
+                    {display: '填报人', name: 'createdManName', type: 'text', width: 60},
+                    {display: '审核状态', name: 'approveLevelName', width: 60},
+                    {display: '是否退回', name: 'approveLevel', width: 60
+                        ,render:function(row){
+                        var th = row.approveLevel;
+                       if(th==7||th==8){
+                            return '是';
+                       } else {
+                           return '否';
+                       }
+                    }
+                    },
+                    {display: '备注', name: 'approveComment', width: 60},
+                    {display: '附件', name: 'fileSrc', width: 60, render: preView}
+                ],
+                method: "GET",
+                width: '100%', pageSize: 50,height:'100%',
+            });
+
         }
-        
         f_initGrid();
-      
         function f_reload() {
             detailGrid.loadData(true);
         }
-
-        function preView(row)
-        {        
-            var html = " ";                                   
-            if (row.fileSrc != null && row.fileSrc!="") {html = "<a target='_blank' href='" + row.fileSrc + "'>" + '预览</a>'; }                            
+        function preView(row) {
+            var html = "";
+            if (row.fileSrc != null && row.fileSrc != "") {
+                html = "<a target='_blank' href='" + row.fileSrc + "'>" + '预览</a>';
+            }
             return html;
         }
-
         function all_reload() {
-            var checkYear=$("#checkYear").val(); 
-            var url = "notes/checkalljson?tag="+tag+'&userid='+user+'&deptid='+dept+'&checkYear='+checkYear+'&pageSize=50' ;
+            var checkYear = $("#checkYear").val();
+            var url = "notes/checkalljson?tag=" + tag + '&userid=' + user + '&deptid=' + dept + '&checkYear=' + checkYear + '&pageSize=20';
             $.getJSON(
-                url,              
-                function(jsondata) {    
-                    allgrid.setOptions({ data: jsondata });
-                    allgrid.loadData();
-            });
+                    url,
+                    function (jsondata) {
+                        allgrid.setOptions({data: jsondata});
+                        allgrid.loadData();
+                    }
+            );
         }
-       
-        function getSelected()
-        { 
+
+        function getSelected() {
             var row = manager.getSelectedRow();
-            if (!row) { alert('请选择行'); return; }
+            if (!row) {
+                alert('请选择行');
+                return;
+            }
             alert(JSON.stringify(row));
         }
-        
-        function getData()
-        { 
+        function getData() {
             var data = manager.getData();
             alert(JSON.stringify(data));
         }
-       
-        function addRow()
-        {  
-          
+        function addRow() {
             var selected = grid.getSelected();
-            if (!selected) { LG.tip('请选择考评项目!'); return }            
-            if(selected.title=='随访平台批评评价'||selected.title=='医德医风平台批评评价'){
-                 $.ligerDialog.warn('该考评项目不能增加！');
-                 return;
+            if (!selected) {
+                LG.tip('请选择考评项目!');
+                return
             }
-            showDetail({             
-                checkListId: selected.id,                
+            if (selected.title == '随访平台批评评价' || selected.title == '医德医风平台批评评价') {
+                $.ligerDialog.warn('该考评项目不能增加！');
+                return;
+            }
+            showDetail({
+                checkListId: selected.id,
                 checkListtitle: selected.title,
-                category: 1 ,//填报分类
-                userId:user,
-                deptId:dept         
+                category: 1,//填报分类
+                userId: user,
+                deptId: dept
             }, false);
         }
-         //基础考评填报多人
-        function addRowMore()
-        {
+        //基础考评填报多人
+        function addRowMore() {
             var names = managerTree.getChecked();
             var usersid = "";
             var fileSrc = "";
-            for (var i = 0; i < names.length; i++)
-            {
-                usersid += names[i].data.id.replace("u","") + ";";
-                if(names[i].data.id.replace("d","") == dept)
-                    {
-                        usersid = usersid.substring(6);
-                    }
-            } 
-            var selected = grid.getSelected();
-            if (!selected) { LG.tip('请选择考评项目!'); return }            
-            if(selected.title=='随访平台批评评价'||selected.title=='医德医风平台批评评价'){
-                 $.ligerDialog.warn('该考评项目不能增加！');
-                 return;
+            for (var i = 0; i < names.length; i++) {
+                usersid += names[i].data.id.replace("u", "") + ";";
+                if (names[i].data.id.replace("d", "") == dept) {
+                    usersid = usersid.substring(6);
+                }
             }
-            showDetail({             
-                checkListId: selected.id,                
+            var selected = grid.getSelected();
+            if (!selected) {
+                LG.tip('请选择考评项目!');
+                return
+            }
+            if (selected.title == '随访平台批评评价' || selected.title == '医德医风平台批评评价') {
+                $.ligerDialog.warn('该考评项目不能增加！');
+                return;
+            }
+            showDetail({
+                checkListId: selected.id,
                 checkListtitle: selected.title,
                 category: 1,//填报分类
                 userId: usersid,
                 deptId: dept,
-                fileSrc: fileSrc         
+                fileSrc: fileSrc
             }, false);
         }
         //加分项目填报个人
-        function addRow_plus( )
-        {   
+        function addRow_plus() {
             var fileSrc = "";
             var selected = plusgrid.getSelected();
-            if (!selected) { LG.tip('请选择考评项目!'); return }   
-            if(selected.title=='随访平台表扬评价'||selected.title=='医德医风平台表扬评价'){
-                 $.ligerDialog.warn('该考评项目不能增加！');
-                 return;
+            if (!selected) {
+                LG.tip('请选择考评项目!');
+                return
+            }
+            if (selected.title == '随访平台表扬评价' || selected.title == '医德医风平台表扬评价') {
+                $.ligerDialog.warn('该考评项目不能增加！');
+                return;
             }
             showDetail({
-                checkListId: selected.id,                
+                checkListId: selected.id,
                 checkListtitle: selected.title,
-                category:2,
-                userId:user,
-                deptId:dept,
+                category: 2,
+                userId: user,
+                deptId: dept,
                 fileSrc: fileSrc
-            }, false);                     
+            }, false);
         }
         //加分项目填报多人
-        function addRow_plusMore()
-        {
+        function addRow_plusMore() {
             var names = managerTree.getChecked();
             var usersid = "";
-            for (var i = 0; i < names.length; i++)
-            {
-                usersid += names[i].data.id.replace("u","") + ";";
-                if(names[i].data.id.replace("d","") == dept)
-                    {
-                        usersid = usersid.substring(6);
-                    }
-            } 
+            for (var i = 0; i < names.length; i++) {
+                usersid += names[i].data.id.replace("u", "") + ";";
+                if (names[i].data.id.replace("d", "") == dept) {
+                    usersid = usersid.substring(6);
+                }
+            }
             var selected = plusgrid.getSelected();
-            if (!selected) { LG.tip('请选择考评项目!'); return }   
-            if(selected.title=='随访平台批评评价'||selected.title=='医德医风平台批评评价'){
-                 $.ligerDialog.warn('该考评项目不能增加！');
-                 return;
+            if (!selected) {
+                LG.tip('请选择考评项目!');
+                return
+            }
+            if (selected.title == '随访平台批评评价' || selected.title == '医德医风平台批评评价') {
+                $.ligerDialog.warn('该考评项目不能增加！');
+                return;
             }
             showDetail({
-                checkListId: selected.id,                
+                checkListId: selected.id,
                 checkListtitle: selected.title,
-                category: 2 ,
-                userId:usersid,
-                deptId:dept
+                category: 2,
+                userId: usersid,
+                deptId: dept
             }, false);
         }
 
-        function addRow_vote( )
-        {    
+        function addRow_vote() {
             var selected = votegrid.getSelected();
-            if (!selected) { LG.tip('请选择否决项目!'); return }  
+            if (!selected) {
+                LG.tip('请选择否决项目!');
+                return
+            }
             showDetail({
-                checkListId: selected.id,                
+                checkListId: selected.id,
                 checkListtitle: selected.title,
-                category: 3 ,
-                userId:user,
-                deptId:dept
-            }, false);             
+                category: 3,
+                userId: user,
+                deptId: dept
+            }, false);
         }
 
-        function addRow_voteMore()
-        {
+        function addRow_voteMore() {
             var names = managerTree.getChecked();
             var usersid = "";
-            for (var i = 0; i < names.length; i++)
-            {
-                usersid += names[i].data.id.replace("u","") + ";";
-                if(names[i].data.id.replace("d","") == dept)
-                    {
-                        usersid = usersid.substring(6);
-                    }
-            } 
+            for (var i = 0; i < names.length; i++) {
+                usersid += names[i].data.id.replace("u", "") + ";";
+                if (names[i].data.id.replace("d", "") == dept) {
+                    usersid = usersid.substring(6);
+                }
+            }
             var selected = votegrid.getSelected();
-            if (!selected) { LG.tip('请选择否决项目!'); return }  
+            if (!selected) {
+                LG.tip('请选择否决项目!');
+                return
+            }
             showDetail({
-                checkListId: selected.id,                
+                checkListId: selected.id,
                 checkListtitle: selected.title,
-                category:3,
-                userId:usersid,
-                deptId:dept
+                category: 3,
+                userId: usersid,
+                deptId: dept
             }, false);
         }
-        
-        function modifyRow()
-        {         
+        function modifyRow() {
             var fileSrc = "";
-            var selected=(detailGrid==null)?null:detailGrid.getSelected();
-            if (!selected) { LG.tip('请选择行!'); return }         
-        
-            if(selected.approveLevel>0||selected.createdManName==null||selected.createdManName==''){
-                  $.ligerDialog.warn('该条记录不能被修改！');
-                  return ;
+            var selected = (detailGrid == null) ? null : detailGrid.getSelected();
+            if (!selected) {
+                LG.tip('请选择行!');
+                return
             }
-            
+            if (selected.approveLevel > 0 || selected.createdManName == null || selected.createdManName == '') {
+                $.ligerDialog.warn('该条记录不能被修改！');
+                return;
+            }
             showDetail({
                 id: selected.id,
-                noteDate: selected.noteDate,  
-                userId:selected.userId,
-                deptId:selected.deptId,
-                content:selected.content,
-                certifyMan:selected.certifyMan,
-                checkListId:selected.checkId,
-                checkListtitle:selected.checkTitle,
-                category:selected.category,
-                score:selected.score,
-                goods:selected.goods,
+                noteDate: selected.noteDate,
+                userId: selected.userId,
+                deptId: selected.deptId,
+                content: selected.content,
+                certifyMan: selected.certifyMan,
+                checkListId: selected.checkId,
+                checkListtitle: selected.checkTitle,
+                category: selected.category,
+                score: selected.score,
+                goods: selected.goods,
                 fileSrc: fileSrc
-            }, false);         
+            }, false);
         }
-          
-        function deleteRow()
-        {   
-            var selected=(detailGrid==null)?null:detailGrid.getSelected();          
-            if (!selected) { LG.tip('请选择行!'); return }       
-            if(selected.approveLevel>0){                      
+
+        function deleteRow() {
+            var selected = (detailGrid == null) ? null : detailGrid.getSelected();
+            if (!selected) {
+                LG.tip('请选择行!');
+                return
+            }
+            if (selected.approveLevel > 0) {
                 $.ligerDialog.alert('该条记录不能被删除！');
                 return;
-            } 
-            
+            }
             jQuery.ligerDialog.confirm('确定删除吗?', function (confirm) {
-                if (confirm) f_delete(); });
+                if (confirm) f_delete();
+            });
         }
-        
+
         function f_delete() {
-            var selected = detailGrid.getSelected();                  
-            if (selected) {     
+            var selected = detailGrid.getSelected();
+            if (selected) {
                 $.ajax({
-                    url: 'note/'+selected.id,
+                    url: 'note/' + selected.id,
                     type: 'DELETE',
-                    loading: '正在删除中...',                  
+                    loading: '正在删除中...',
                     success: function (err) {
-                         if(err!=null){
+                        if (err != null) {
                             $.ligerDialog.warn(err.name);
-                         } else{
+                        } else {
                             detailGrid.deleteSelectedRow();
-                            LG.tip('删除成功!');                 
+                            LG.tip('删除成功!');
                             f_reload();
-                       }
+                        }
                     },
-                    error: function (message) {                   
+                    error: function (message) {
                         LG.showError(message);
                     }
                 });
-            }
-            else {
+            }else {
                 LG.tip('请选择行!');
             }
         }
-
-        function uploadFile()
-        {
-            var selected=(detailGrid==null)?null:detailGrid.getSelected();
-            if (!selected) { LG.tip('请选择行!'); return }         
-        
-            if(selected.approveLevel>0||selected.createdManName==null||selected.createdManName==''){
-                  $.ligerDialog.warn('该条记录不能被修改！');
-                  return ;
+        function uploadFile() {
+            var selected = (detailGrid == null) ? null : detailGrid.getSelected();
+            if (!selected) {
+                LG.tip('请选择行!');
+                return
             }
-
+            if (selected.approveLevel > 0 || selected.createdManName == null || selected.createdManName == '') {
+                $.ligerDialog.warn('该条记录不能被修改！');
+                return;
+            }
             $.ligerDialog.open({
-                height:200,
-                url: 'noteUpload?noteId='+selected.id,
+                height: 200,
+                url: 'noteUpload?noteId=' + selected.id,
                 isResize: true,
                 title: '上传附件',
                 width: null, modal: true
-            }); 
+            });
         }
-                  
         var detailWin = null, curentData = null, currentIsAddNew;
-        var mainform = $("#mainform");    
-        function showDetail(data, isAddNew)
-        {    
-            
+        var mainform = $("#mainform");
+        function showDetail(data, isAddNew) {
             currentData = data;
-            currentIsAddNew = isAddNew; 
-            var goods=[]; //物品       
-                
-            var checkmethods=[];
-            if(currentData.category==1){   
-                    //routes上面的路径是 checkmethods/findMthod      
-                    $.getJSON('checkmethods/findMethod',{id: currentData.checkListId},
-                      function(jsondata){
-                        init_detailWin(jsondata);
-                    })
-            } else if(currentData.category==2){                                                 
-                   init_detailWin(checkmethods);                       
-            }else{               
-                   init_detailWin(checkmethods);
+            currentIsAddNew = isAddNew;
+            var goods = []; //物品
+            var checkmethods = [];
+            if (currentData.category == 1) {
+                //routes上面的路径是 checkmethods/findMthod
+                $.getJSON('checkmethods/findMethod', {id: currentData.checkListId},
+                        function (jsondata) {
+                            init_detailWin(jsondata);
+                        })
+            } else if (currentData.category == 2) {
+                init_detailWin(checkmethods);
+            } else {
+                init_detailWin(checkmethods);
             }
-            
-            function init_detailWin(data){
-       
-                checkmethods=data;
 
-                if (detailWin)
-                {  
-                    detailWin.show(); 
-                }
-                else
-                {     
+            function init_detailWin(data) {
+                checkmethods = data;
+                if (detailWin) {
+                    detailWin.show();
+                }else {
                     //创建表单结构
-                    var  fieldsarr=[];               
-                    if(tag>0){               
-                        fieldsarr= [{appendID:"true"},
-                            { name: "notes.id", type: "hidden" },
-                            { name: "notes.checkList.id", type: "hidden" },
-                            { name: "notes.adjustList.id", type: "hidden" },
-                            { name: "notes.voteKill.id", type: "hidden" },
-                            { name: "note.approveLevel", type: "hidden" },
-                            { name: "notes.category", type: "hidden" },
-                            { display: "考评项目", name: "checkListTitle", newline: false, 
-                                labelWidth: 120, width:220, space: 30, type: "textarea"},
-                            { display: "发生日期", name: "notes.noteDate", newline: true,
-                                labelWidth: 120, width: 220, space: 30, type: "date", 
-                                validate: { required: true, maxlength: 50} },
-                             { display: "科室", name: "notes.deptHide", comboboxName: "deptCombox", newline: true,
+                    var fieldsarr = [];
+                    if (tag > 0) {
+                        fieldsarr = [{appendID: "true"},
+                            {name: "notes.id", type: "hidden"},
+                            {name: "notes.checkList.id", type: "hidden"},
+                            {name: "notes.adjustList.id", type: "hidden"},
+                            {name: "notes.voteKill.id", type: "hidden"},
+                            {name: "note.approveLevel", type: "hidden"},
+                            {name: "notes.category", type: "hidden"},
+                            {
+                                display: "考评项目", name: "checkListTitle", newline: false,
+                                labelWidth: 120, width: 220, space: 30, type: "textarea"
+                            },
+                            {
+                                display: "发生日期", name: "notes.noteDate", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "date",
+                                validate: {required: true, maxlength: 50}
+                            },
+                            {
+                                display: "科室", name: "notes.deptHide", comboboxName: "deptCombox", newline: true,
                                 labelWidth: 120, width: 220, space: 30, type: "select",
-                                options: {data: depts, valueField: 'id', textField: 'name'}}, 
-                            { display: "姓名", name: "note.userHide", comboboxName: "userCombox", newline: true,
+                                options: {data: depts, valueField: 'id', textField: 'name'}
+                            },
+                            {
+                                display: "姓名", name: "note.userHide", comboboxName: "userCombox", newline: true,
                                 labelWidth: 120, width: 220, space: 30, type: "select",
-                                options: {data: users, valueField: 'id', textField: 'realName'}},
-                            { display: "内容", name: "notes.content", newline: true, 
-                                labelWidth: 120, width: 220, space: 30, type: "textarea" } ,
-                            { display: "物品", name: "note.goodsHide", comboboxName: "goodsCombox", newline: true, 
+                                options: {data: users, valueField: 'id', textField: 'realName'}
+                            },
+                            {
+                                display: "内容", name: "notes.content", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "textarea"
+                            },
+                            {
+                                display: "物品", name: "note.goodsHide", comboboxName: "goodsCombox", newline: true,
                                 labelWidth: 120, width: 220, space: 30, type: "select",
-                                options: {data: goods, valueField: 'name', textField: 'name'} },	                                         
-                            { display: "考评方法参考", name: "checkmethodHide", comboboxName: "checkmethodsel", newline: true, 
-                                labelWidth: 120, width: 220, space: 30, type: "select",
-                                options: {data: checkmethods, valueField: 'id', textField: 'title',onSelected:function(value,text){alert(1);}} },	
-                            { display: "分数", name: "notes.score", newline: true, 
-                                labelWidth: 120, width: 220, space: 30, type: "text" } ,
-                            { display: "经办人(证明人)", name: "notes.certifyMan", newline: true,
-                                labelWidth: 120, width: 220, space: 30, type: "text"}   ];                                 
-                    } else {                 
-                        fieldsarr=[
-                            { name: "notes.id", type: "hidden" },
-                            { name: "notes.checkList.id", type: "hidden" },
-                            { name: "notes.adjustList.id", type: "hidden" },
-                            { name: "notes.voteKill.id", type: "hidden" },
-                            { name: "note.approveLevel", type: "hidden" },
-                            { name: "notes.category", type: "hidden" },
-                            { display: "考评项目", name: "checkListTitle", newline: false, disabled: true,
-                                labelWidth: 100, width: 220, space: 30, type: "textarea"},
-                            { display: "发生日期", name: "notes.noteDate", newline: true,
-                                labelWidth: 100, width: 220, space: 30, type: "date", 
-                                validate: { required: true, maxlength: 50} },
-                            { display: "内容", name: "notes.content", newline: true, 
-                                labelWidth: 100, width: 220, space: 30, type: "textarea" } ,
-                            { display: "物品", name: "note.goodsHide", comboboxName: "goodsCombox", newline: true, 
+                                options: {data: goods, valueField: 'name', textField: 'name'}
+                            },
+                            {
+                                display: "金额", name: "notes.money", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "text"
+                            },
+                            {
+                                display: "考评方法参考",
+                                name: "checkmethodHide",
+                                comboboxName: "checkmethodsel",
+                                newline: true,
+                                labelWidth: 120,
+                                width: 220,
+                                space: 30,
+                                type: "select",
+                                options: {
+                                    data: checkmethods,
+                                    valueField: 'id',
+                                    textField: 'title',
+                                    onSelected: function (value, text) {
+                                        alert(1);
+                                    }
+                                }
+                            },
+                            {
+                                display: "分数", name: "notes.score", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "text"
+                            },
+                            {
+                                display: "证明人", name: "notes.certifyMan", newline: true,
+                                labelWidth: 120, width: 220, space: 30, type: "text"
+                            }];
+                    } else {
+                        fieldsarr = [
+                            {name: "notes.id", type: "hidden"},
+                            {name: "notes.checkList.id", type: "hidden"},
+                            {name: "notes.adjustList.id", type: "hidden"},
+                            {name: "notes.voteKill.id", type: "hidden"},
+                            {name: "note.approveLevel", type: "hidden"},
+                            {name: "notes.category", type: "hidden"},
+                            {
+                                display: "考评项目", name: "checkListTitle", newline: false, disabled: true,
+                                labelWidth: 100, width: 220, space: 30, type: "textarea"
+                            },
+                            {
+                                display: "发生日期", name: "notes.noteDate", newline: true,
+                                labelWidth: 100, width: 220, space: 30, type: "date",
+                                validate: {required: true, maxlength: 50}
+                            },
+                            {
+                                display: "内容", name: "notes.content", newline: true,
+                                labelWidth: 100, width: 220, space: 30, type: "textarea"
+                            },
+                            {
+                                display: "物品", name: "note.goodsHide", comboboxName: "goodsCombox", newline: true,
                                 labelWidth: 100, width: 220, space: 30, type: "select",
-                                options: {data: goods, valueField: 'name', textField: 'name'} },
-                            { display: "考评方法参考", name: "checkmethHide", comboboxName: "checkmethSel", newline: true, 
+                                options: {data: goods, valueField: 'name', textField: 'name'}
+                            },
+                            {
+                                display: "金额", name: "notes.money", newline: true,
+                                labelWidth: 100, width: 220, space: 30, type: "text"
+                            },
+                            {
+                                display: "考评方法参考", name: "checkmethHide", comboboxName: "checkmethSel", newline: true,
                                 labelWidth: 100, width: 220, space: 30, type: "select",
-                                options: {data: checkmethods, valueField: 'id', textField: 'title'}},                 
-                            { display: "分数", name: "notes.score", newline: true, 
-                                labelWidth: 100, width: 220, space: 30, type: "text" } ,   	  
-                            { display: "经办人(证明人)", name: "notes.certifyMan", newline: true,
-                                labelWidth: 100, width: 220, space: 30, type: "text"}
-                            ];                                                      
-                    }   
-                    
+                                options: {data: checkmethods, valueField: 'id', textField: 'title'}
+                            },
+                            {
+                                display: "分数", name: "notes.score", newline: true,
+                                labelWidth: 100, width: 220, space: 30, type: "text"
+                            },
+                            {display:"附件上传",name:"" ,newline:true, type:"file"},
+                            {
+                                display: "证明人", name: "notes.certifyMan", newline: true,
+                                labelWidth: 100, width: 220, space: 30, type: "text"
+                            }
+                        ];
+                    }
                     mainform.ligerForm({
-                        //inputWidth: 280,
                         fields: fieldsarr,
                         toJSON: JSON2.stringify
                     });
-                                        
                     detailWin = $.ligerDialog.open({
                         target: $("#detail"),
                         show: false,
-                        width: 360, height: 440, 
-                        top:20,
-                        buttons: [                            
-                            { text: '确定', onclick: function () { save(); } },
-                            { text: '取消', onclick: function () { detailWin.hide(); } }
+                        width: 400, height: 510,
+                        top: 20,
+                        buttons: [
+                            {
+                                text: '确定', onclick: function () {
+                                save();
+                            }
+                            },
+                            {
+                                text: '取消', onclick: function () {
+                                detailWin.hide();
+                            }
+                            }
                         ]
-                    });              
+                    });
                 }
-
                 var goodsCombox = $("#goodsCombox").ligerGetComboBoxManager();
-                $("#goodsCombox").val(""); 
-                if (currentData.category==2) {                             
-                    $.getJSON('adjustlists/findadjust',{id: currentData.checkListId},
-                        function(jsondata){
-                        $("[name$='notes.score']").attr('readonly', 'readonly');
-                            if(jsondata.score!=null){  
-                              $("[name$=score]").val(jsondata.score);
-                        }}
+                $("#goodsCombox").val("");
+                if (currentData.category == 2) {
+                    $.getJSON('adjustlists/findadjust', {id: currentData.checkListId},
+                            function (jsondata) {
+                                $("[name$='notes.score']").ligerGetGridManager().setDisabled();//加分项目
+                                if (jsondata.score != null) {
+                                    $("[name$=score]").val(jsondata.score);
+                                }
+                            }
                     );
-
                     goodsCombox.setEnabled();
-                    $.getJSON('adjustlists/findgoods', {id:currentData.checkListId}, 
-                        function(jsondata) {                               
-                            goodsCombox.setData(jsondata);                           
-                        });
-                } else if (currentData.category==3) {                             
+                    $.getJSON('adjustlists/findgoods', {id: currentData.checkListId},
+                            function (jsondata) {
+                                goodsCombox.setData(jsondata);
+                            }
+                    );
+                } else if (currentData.category == 3) {
                     goodsCombox.setEnabled();
-                    $.getJSON('votekills/findgoods', {id:currentData.checkListId}, 
-                        function(jsondata) {                               
-                            goodsCombox.setData(jsondata);                           
-                        });
-                } else
-                {
-                    goodsCombox.setData([]);                   
+                    $.getJSON('votekills/findgoods', {id: currentData.checkListId},
+                            function (jsondata) {
+                                goodsCombox.setData(jsondata);
+                            }
+                    );
+                } else {
+                    goodsCombox.setData([]);
                     goodsCombox.setDisabled();
                 }
-
                 var checkMethodMgr = $("#checkmethSel").ligerGetComboBoxManager() || $("#checkmethodsel").ligerGetComboBoxManager();
                 checkMethodMgr.setData(data);
-                checkMethodMgr.bind('Selected', 
-                    function checkMethodSelect(value, text) 
-                    {               
-                        var checkData = checkMethodMgr.data;
-
-                        for (var i = 0; i < checkData.length; i++) {
-                            if (checkData[i].id == value)
-                            {
-                                $("[name$='notes.score']").attr('readonly', 'readonly');
-                                $("[name$=score]").val(checkData[i].score);
+                checkMethodMgr.bind('Selected',
+                        function checkMethodSelect(value, text) {
+                            var checkData = checkMethodMgr.data;
+                            for (var i = 0; i < checkData.length; i++) {
+                                if (checkData[i].id == value) {
+//                                    $("[name$='notes.score']").attr('readonly', 'readonly');//减分项目
+                                    $("[name$='notes.score']").ligerGetGridManager().setDisabled();
+                                    $("[name$=score]").val(checkData[i].score);
+                                }
                             }
-                        };
-                        return false;
-                    }
-                );    
-
-                if (currentData)
-                {           
+                            return false;
+                        }
+                );
+                if (currentData) {
                     var checkMethodMgr = $("#checkmethSel").ligerGetComboBoxManager() || $("#checkmethodsel").ligerGetComboBoxManager();
                     var scoreMgr = $("#notes\\.score").ligerGetComboBoxManager();
                     var noteDateMgr = $("#notes\\.noteDate").ligerGetComboBoxManager();
 
-                    $("[name$=id]").val(currentData.id)              
-                    if(currentData.category==1){
-                        $("[name$='notes.checkList.id']").val(currentData.checkListId); 
+                    $("[name$=id]").val(currentData.id)
+                    if (currentData.category == 1) {
+                        $("[name$='notes.checkList.id']").val(currentData.checkListId);
                         checkMethodMgr.setEnabled();
-                        scoreMgr.setEnabled();                   
-                    }else if(currentData.category==2){
-                        $("[name$='notes.adjustList.id']").val(currentData.checkListId);                        
-                        checkMethodMgr.setValue();                         
+                        scoreMgr.setEnabled();
+                    } else if (currentData.category == 2) {
+                        $("[name$='notes.adjustList.id']").val(currentData.checkListId);
+                        checkMethodMgr.setValue();
                         checkMethodMgr.setDisabled();
-                        scoreMgr.setEnabled();                                         
-                    }else{
-                        $("[name$='notes.voteKill.id']").val(currentData.checkListId);                
+                        scoreMgr.setEnabled();
+                    } else {
+                        $("[name$='notes.voteKill.id']").val(currentData.checkListId);
                         checkMethodMgr.setValue();
                         checkMethodMgr.setDisabled();
                         scoreMgr.setDisabled();
                     }
-                    $("#checkListTitle").val(currentData.checkListtitle);    
-
-                    if (currentData.noteDate) {$("[name$=noteDate]").val(currentData.noteDate); }
-                    else{ $("[name$=noteDate]").val(todayStr); };
-                    //noteDateMgr.setDisabled();
-
-                    $("[name$=content]").val(currentData.content);          
-                    $("[name$=certifyMan]").val(currentData.certifyMan);  
-                    $("[name$=category]").val(currentData.category);               
-                    $("[name$=score]").val(currentData.score);  
-                    $("[name$=fileSrc]").val(currentData.fileSrc);  
-                    $("#goodsCombox").ligerGetComboBoxManager().setValue(currentData.goods);         
-                    $("[name$=content]").focus();                    
-                    if(tag>0){
-                        $("#userCombox").ligerGetComboBoxManager().setValue(currentData.userId);    
-                        $("#deptCombox").ligerGetComboBoxManager().setValue(currentData.deptId);   
-                    }       
-                }
-                
-                //$("#checkListTitle").ligerGetTextAreaManager().setDisabled();
-                $("#checkListTitle").attr('readonly', 'readonly');           
-                        
-                function save()
-                {
-                    $("#mainform").validate();
-                    if(currentData.category ==1){
-                         if(!$("[name$=score]").val()){
-                         LG.tip('请选择考评方法!');
-                        return;
-                     }
+                    $("#checkListTitle").val(currentData.checkListtitle);
+                    $("#checkListTitle").attr("disabled","disabled");
+                    if (currentData.noteDate) {
+                        $("[name$=noteDate]").val(currentData.noteDate);
+                    } else {
+                        $("[name$=noteDate]").val(todayStr);
+                    };
+                    $("[name$=content]").val(currentData.content);
+                    $("[name$=certifyMan]").val(currentData.certifyMan);
+                    $("[name$=category]").val(currentData.category);
+                    $("[name$=score]").val(currentData.score);
+                    $("[name$=fileSrc]").val(currentData.fileSrc);
+                    $("#goodsCombox").ligerGetComboBoxManager().setValue(currentData.goods);
+                    $("[name$=content]").focus();
+                    if (tag > 0) {
+                        $("#userCombox").ligerGetComboBoxManager().setValue(currentData.userId);
+                        $("#deptCombox").ligerGetComboBoxManager().setValue(currentData.deptId);
                     }
- 
-                    if(currentData.category==1){
-                        if($("[name$=score]").val()>0){                        
+                }
+                function save() {
+                    $("#mainform").validate();
+                    if (currentData.category == 1) {
+                        if (!$("[name$=score]").val()) {
+                            LG.tip('请选择考评方法!');
+                            return;
+                        }
+                    }
+                    if (currentData.category == 1) {
+                        if ($("[name$=score]").val() > 0) {
                             LG.tip('分数输入有误!');
                             return;
                         }
                     }
-                    
                     $.ajax({
                         loading: '正在保存数据中...',
                         type: 'POST',
-                        url: 'note',                  
+                        url: 'note',
                         data: $("#mainform").serialize(),
-                        success: function ()
-                        {
+                        success: function () {
                             detailWin.hide();
-                            grid.loadData();             
-                            LG.tip('保存成功!');
+                            grid.loadData();
+                            LG.tip('保存成功!,请及时上传附件!');
                         },
-                        error: function (message)
-                        {
+                        error: function (message) {
                             LG.tip(message);
                         }
                     });
                 }
             }
-        }    
-
-        var grid_d;  
-
-        //基础考评
-        function f_showNote(row, detailPanel, callback)
-        {      
-            $(detailPanel).html('');
-            grid_d = document.createElement('div');           
-            $(detailPanel).append(grid_d);   
-            var checkYear=$("#checkYear").val();         
-            $.getJSON('notes/checkjson?tag='+tag,
-            {id: row.id,              
-                userid:user,
-                deptid:dept,
-                checkYear:checkYear,
-                category:1,
-                pagesize:20
-            },
-            function(jsondata) {    
-                if (jsondata.Total>0) {        
-                    detailGrid = $(grid_d).css('margin',6).ligerGrid({                              
-                        columns: [{ display: '发生日期', name: 'noteDate',type:'float',width: 80 },
-                            { display: '姓名', name: 'realName', type:'float',width: 60 },
-                            { display: '科室', name: 'deptName', type:'float',width: 80 },
-                            { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },
-                            { display: '分数', name: 'score', width: 60,type:'float' },
-                            { display: '经办人(证明人)', name: 'certifyMan', type:'float' },
-                            { display: '审核状态', name: 'approveLevelName', type:'float'},
-                            { display: '备注', name: 'approveComment', type:'float'}
-                        ],         
-                        isScroll: false, showToggleColBtn: false, width: '95%',
-                        pageSize: 20, data: jsondata,
-                        showTitle: true, columnWidth: 100,
-                        onAfterShowData: callback,frozen:true                            
-                    });
-                } else {
-                    $(grid_d).remove();                                                     
-                    $(detailPanel).append($("<div >此考评项目没有记事</div>").css('margin', 10));
-                }
-            }
-        );
         }
-        
-        //加分项目
-        function f_showNote_plus(row, detailPanel, callback)
-        {            
+        var grid_d;
+        //基础考评
+        function f_showBaseNote(row, detailPanel, callback) {
             $(detailPanel).html('');
-            grid_d = document.createElement('div');           
-            $(detailPanel).append(grid_d);  
-            var checkYear=$("#checkYear").val();          
+            grid_d = document.createElement('div');
+            $(detailPanel).append(grid_d);
+            var checkYear = $("#checkYear").val();
             $.getJSON('notes/checkjson?tag='+tag,
-            {id: row.id,              
-                userid:user,
-                deptid:dept,
-                checkYear:checkYear,
-                category:2,
-                pagesize:20
-            },
-            function(jsondata) {    
-                if (jsondata.Total>0) {        
-                    detailGrid = $(grid_d).css('margin',6).ligerGrid({                         
-                        columns: [
-                            { display: '发生日期', name: 'noteDate',type:'float',width: 80 },
-                            { display: '姓名', name: 'realName', type:'float',width: 60 },
-                            { display: '科室', name: 'deptName', type:'float',width: 80 },
-                            { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },
-                            { display: '物品', name: 'goods', width: 60, type:'float' },
-                            { display: '分数', name: 'score', width: 60, type:'float' }, 
-                            { display: '经办人(证明人)', name: 'certifyMan', type:'float' },
-                            { display: '审核状态', name: 'approveLevelName', type:'float'},
-                            { display: '备注', name: 'approveComment', type:'float'}
-                        ],                   
-                        isScroll: false, showToggleColBtn: false, width: '95%',
-                        pageSize: 20, data: jsondata,
-                        showTitle: true, columnWidth: 100,
-                        onAfterShowData: callback,frozen:false                              
-                    });
-                } else {
-                    $(grid_d).remove();                                                     
-                    $(detailPanel).append($("<div >此考评项目没有记事</div>").css('margin', 10));
-                }
-            }
-        );
+                    {
+                        id: row.id,
+                        userid: user,
+                        deptid: dept,
+                        checkYear: checkYear,
+                        category: 1,
+                        pagesize: 20
+                    },
+                    function (jsondata) {
+                        if (jsondata.Total > 0) {
+                            detailGrid = $(grid_d).css('margin', 6).ligerGrid({
+                                columns: [{display: '发生日期', name: 'noteDate', type: 'float', width: 80},
+                                    {display: '姓名', name: 'realName', type: 'float', width: 60},
+                                    {display: '科室', name: 'deptName', type: 'float', width: 80},
+                                    {display: '事项', name: 'content', width: 200, align: 'left', type: 'float'},
+                                    {display: '分数', name: 'score', width: 60, type: 'float'},
+                                    {display: '证明人', name: 'certifyMan', type: 'float'},
+                                    {display: '审核状态', name: 'approveLevelName', type: 'float'},
+                                    {display: '备注', name: 'approveComment', type: 'float'}
+                                ],
+                                isScroll: false, showToggleColBtn: false, width: '95%',
+                                pageSize: 20, data: jsondata,
+                                showTitle: true, columnWidth: 100,
+                                onAfterShowData: callback, frozen: true
+                            });
+                        } else {
+                            $(grid_d).remove();
+                            $(detailPanel).append($("<div >此考评项目没有记事</div>").css('margin', 10));
+                        }
+                    }
+            );
+        }
+        //减分项目
+        function f_showNote(row, detailPanel, callback) {
+            $(detailPanel).html('');
+            grid_d = document.createElement('div');
+            $(detailPanel).append(grid_d);
+            var checkYear = $("#checkYear").val();
+            $.getJSON('notes/checkjson?tag=' + tag,
+                    {
+                        id: row.id,
+                        userid: user,
+                        deptid: dept,
+                        checkYear: checkYear,
+                        category: 1,
+                        pagesize: 20
+                    },
+                    function (jsondata) {
+                        if (jsondata.Total > 0) {
+                            detailGrid = $(grid_d).css('margin', 6).ligerGrid({
+                                columns: [{display: '发生日期', name: 'noteDate', type: 'float', width: 80},
+                                    {display: '姓名', name: 'realName', type: 'float', width: 60},
+                                    {display: '科室', name: 'deptName', type: 'float', width: 80},
+                                    {display: '事项', name: 'content', width: 200, align: 'left', type: 'float'},
+                                    {display: '分数', name: 'score', width: 60, type: 'float'},
+                                    {display: '证明人', name: 'certifyMan', type: 'float'},
+                                    {display: '审核状态', name: 'approveLevelName', type: 'float'},
+                                    {display: '备注', name: 'approveComment', type: 'float'}
+                                ],
+                                isScroll: false, showToggleColBtn: false, width: '95%',
+                                pageSize: 20, data: jsondata,
+                                showTitle: true, columnWidth: 100,
+                                onAfterShowData: callback, frozen: true
+                            });
+                        } else {
+                            $(grid_d).remove();
+                            $(detailPanel).append($("<div >此考评项目没有记事</div>").css('margin', 10));
+                        }
+                    }
+            );
+        }
+        //加分项目
+        function f_showNote_plus(row, detailPanel, callback) {
+            $(detailPanel).html('');
+            grid_d = document.createElement('div');
+            $(detailPanel).append(grid_d);
+            var checkYear = $("#checkYear").val();
+            $.getJSON('notes/checkjson?tag=' + tag,
+                    {
+                        id: row.id,
+                        userid: user,
+                        deptid: dept,
+                        checkYear: checkYear,
+                        category: 2,
+                        pagesize: 20
+                    },
+                    function (jsondata) {
+                        if (jsondata.Total > 0) {
+                            detailGrid = $(grid_d).css('margin', 6).ligerGrid({
+                                columns: [
+                                    {display: '发生日期', name: 'noteDate', type: 'float', width: 80},
+                                    {display: '姓名', name: 'realName', type: 'float', width: 60},
+                                    {display: '科室', name: 'deptName', type: 'float', width: 80},
+                                    {display: '事项', name: 'content', width: 200, align: 'left', type: 'float'},
+                                    {display: '物品', name: 'goods', width: 60, type: 'float'},
+                                    {display: '金额', name: 'money', width: 60, type: 'float'},
+                                    {display: '分数', name: 'score', width: 60, type: 'float'},
+                                    {display: '证明人', name: 'certifyMan', type: 'float'},
+                                    {display: '审核状态', name: 'approveLevelName', type: 'float'},
+                                    {display: '备注', name: 'approveComment', type: 'float'}
+                                ],
+                                isScroll: false, showToggleColBtn: false, width: '95%',
+                                pageSize: 20, data: jsondata,
+                                showTitle: true, columnWidth: 100,
+                                onAfterShowData: callback, frozen: false
+                            });
+                        } else {
+                            $(grid_d).remove();
+                            $(detailPanel).append($("<div >此考评项目没有记事</div>").css('margin', 10));
+                        }
+                    }
+            );
         }
         //一票否决显示
-        function f_showNote_vote(row, detailPanel, callback)
-        {            
+        function f_showNote_vote(row, detailPanel, callback) {
             $(detailPanel).html('');
-            grid_d = document.createElement('div');           
-            $(detailPanel).append(grid_d);   
-            var checkYear=$("#checkYear").val();     
-            $.getJSON('notes/checkjson?tag='+tag,
-            {id: row.id,              
-                userid:user,
-                deptid:dept,
-                checkYear:checkYear,
-                category:3,
-                pagesize:20
-            },
-            function(jsondata) {    
-                if (jsondata.Total>0) {        
-                    detailGrid = $(grid_d).css('margin',6).ligerGrid({                                 
-                        columns: [
-                            { display: '发生日期', name: 'noteDate',type:'float',width: 80 },
-                            { display: '姓名', name: 'realName', type:'float',width: 60 },
-                            { display: '科室', name: 'deptName', type:'float',width: 80 },
-                            { display: '事项', name: 'content', width: 200, align: 'left',type:'float' },
-                            { display: '物品', name: 'goods', type:'float' },
-                            { display: '经办人(证明人)', name: 'certifyMan', type:'float' },
-                            { display: '审核状态', name: 'approveLevelName', type:'float'},
-                            { display: '备注', name: 'approveComment', type:'float'}
-                        ],
-                        
-                        isScroll: false, showToggleColBtn: false, width: '95%',
-                        pageSize: 20, data: jsondata,
-                        showTitle: true, columnWidth: 100,
-                        onAfterShowData: callback,frozen:false                              
-                    });
-                } else {
-                    $(grid_d).remove();                                                     
-                    $(detailPanel).append($("<div >此考评项目没有记事</div>").css('margin', 10));
-                }
-            }
-        );
-        }  
-      
-      //人员树
-   /*     ********************************************异步加载人员树************************************************    */ 
-      var userTree = $("#userTree").ligerTree({
-            nodeWidth: 50,
-            //parentIcon: "folder",
-            //childIcon: "leaf",
-            onSelect:onSelect,
-            //url: "/usertree",   
-            idFieldName:'id',
-            checkbox: true,
-            parentIDFieldName :'pid'
-        }); 
-     managerTree = $("#userTree").ligerGetTreeManager();
-     function onSelect(node)
-         {    
-          if (node.data.id == "d-1")  
-                {                   
-                   if (node.data.children && node.data.children.length == 0)                   
-                        {
-                            managerTree.loadData(node.target, "/deptt");  //加载科室             
+            grid_d = document.createElement('div');
+            $(detailPanel).append(grid_d);
+            var checkYear = $("#checkYear").val();
+            $.getJSON('notes/checkjson?tag=' + tag,
+                    {
+                        id: row.id,
+                        userid: user,
+                        deptid: dept,
+                        checkYear: checkYear,
+                        category: 3,
+                        pagesize: 20
+                    },
+                    function (jsondata) {
+                        if (jsondata.Total > 0) {
+                            detailGrid = $(grid_d).css('margin', 6).ligerGrid({
+                                columns: [
+                                    {display: '发生日期', name: 'noteDate', type: 'float', width: 80},
+                                    {display: '姓名', name: 'realName', type: 'float', width: 60},
+                                    {display: '科室', name: 'deptName', type: 'float', width: 80},
+                                    {display: '事项', name: 'content', width: 200, align: 'left', type: 'float'},
+                                    {display: '物品', name: 'goods', type: 'float'},
+                                    {display: '金额', name: 'money', width: 60, type: 'float'},
+                                    {display: '证明人', name: 'certifyMan', type: 'float'},
+                                    {display: '审核状态', name: 'approveLevelName', type: 'float'},
+                                    {display: '备注', name: 'approveComment', type: 'float'}
+                                ],
+                                isScroll: false, showToggleColBtn: false, width: '95%',
+                                pageSize: 20, data: jsondata,
+                                showTitle: true, columnWidth: 100,
+                                onAfterShowData: callback, frozen: false
+                            });
+                        } else {
+                            $(grid_d).remove();
+                            $(detailPanel).append($("<div >此考评项目没有记事</div>").css('margin', 10));
                         }
-                  }else if(node.data.children == undefined  )
-                        {
-                           if(node.data.pid == "0")
-                               {
-                                   if(node.data.children == undefined)
-                                       {  
-                                             managerTree.loadData(node.target,"/usert?deptId="+node.data.id.replace("d",''));//加载人员 
-                                             
-                                       }
-                                    
-                               }
-                        }
-                         
-                            
-              
-         }
-       userTree.bind("click",
-        function(node){
-            //去掉id,pid前面的符号u或d
-            id= node.data.id;
-            var pid=-1;
-            if(typeof(node.data.pid)!="undefined"){         
-                pid= node.data.pid;                      
-                pid=pid.replace("d",''); 
-                statestr = "&nbsp;&nbsp;全院";
-            }
-            if (pid>0)
-            id=id.replace("u",'');
-            else
-            id=id.replace("d",'');                 
-           
-            if(id==-1){         //全院
-                user=-1;
-                dept=-1;
-            }else if( pid==0){   //某科室            
-                user=-1;
-                dept=id;
-            }else {               //人员
-                user=id;
-                dept=pid;          
-            } 
-            
-            var statestr = "";
-            if(id == -1)
-                {
-                    statestr = "&nbsp;&nbsp;全院";
-                }
-            else if(node.data.deptname == "") {
-                statestr="&nbsp;&nbsp;科室："+node.data.text;
-            } else{
-                statestr="&nbsp;&nbsp;科室："+node.data.deptname+"&nbsp;&nbsp;&nbsp;姓名："+node.data.text+"&nbsp;&nbsp;&nbsp;职称："+node.data.title;
-            }
-            
-            //document.getElementById("state").innerHTML=statestr;   
-            $("#state").html(statestr);
-            
-        });
-        
-            userTree.bind("click", function() { all_reload();  });
-  
-            $("#navtab1").ligerTab({   //查看全部
-            onAfterSelectTabItem: function(tabid){
-            if(tabid="alltab"){            
-                all_reload();          
-            }      
-        }    
-      });
-
-    })
-     /*function getSelected()
-        {   managerTree.selectNode ("u7") ;
-            var note = managerTree.getSelected(); 
-            alert('选择的是:' + note.data.text);
-        }*/
-    function EnterPress(event){             //IE8支持此方法
-        if(event.keyCode==13){              //回车键作为执行查询操作
-           var name=$("#queryByName").val();  
-             $.ajax({
-                        loading: '正在查询中...',
-                        type: 'POST',
-                        url: '/queryuser',                  
-                        data: {name:name},
-                        success: function (json)
-                        {
-                            if(json!=null){
-                                managerTree.selectNode ("u"+json.id) ;//让人员处于选中状态                          
-                                user=json.id;  //赋值姓名id
-                                dept=json.dept.id;   //赋值科室id
-                                showMessage(json)    //状态栏显示
-                                
-                            } else{
-                                LG.tip("查询无结果!");
-                            }                  
-                           // LG.tip('保存成功!');
-                        },
-                        error: function (message)
-                        {
-                            LG.tip(message);                 
-                        }
-                    });
+                    }
+            );
         }
-    }  
-      //显示选中的人员信息
-      function showMessage(json){
-           statestr="&nbsp;&nbsp;科室："+json.dept.name+"&nbsp;&nbsp;&nbsp;姓名："+json.realName+"&nbsp;&nbsp;&nbsp;职称："+json.title;
-           $("#state").html(statestr);
-      }
+        //人员树
+        var userTree = $("#userTree").ligerTree({
+            nodeWidth: 350,
+            onSelect: onSelect,
+            idFieldName: 'id',
+            checkbox: true,
+            parentIDFieldName: 'pid'
+        });
+        managerTree = $("#userTree").ligerGetTreeManager();
+        function onSelect(node) {
+            if (node.data.id == "d-1") {
+                if (node.data.children && node.data.children.length == 0) {
+                    managerTree.loadData(node.target, "/deptt");  //加载科室
+                }
+            } else if (node.data.children == undefined) {
+                if (node.data.pid == "0") {
+                    if (node.data.children == undefined) {
+                        managerTree.loadData(node.target, "/usert?deptId=" + node.data.id.replace("d", ''));//加载人员
+                    }
+                }
+            }
+        }
+
+        userTree.bind("click",
+                function (node) {
+                    //去掉id,pid前面的符号u或d
+                    id = node.data.id;
+                    var pid = -1;
+                    if (typeof(node.data.pid) != "undefined") {
+                        pid = node.data.pid;
+                        pid = pid.replace("d", '');
+                        statestr = "&nbsp;&nbsp;全院";
+                    }
+                    if (pid > 0) {
+                        id = id.replace("u", '');
+                    } else {
+                        id = id.replace("d", '');
+                    }
+                    if (id == -1) {         //全院
+                        user = -1;
+                        dept = -1;
+                    } else if (pid == 0) {   //某科室
+                        user = -1;
+                        dept = id;
+                    } else {               //人员
+                        user = id;
+                        dept = pid;
+                    }
+                    var statestr = "";
+                    if (id == -1) {
+                        statestr = "&nbsp;&nbsp;全院";
+                    }else if (node.data.deptname == "") {
+                        statestr = "&nbsp;&nbsp;科室：" + node.data.text;
+                    } else {
+                        statestr = "&nbsp;&nbsp;科室：" + node.data.deptname + "&nbsp;&nbsp;&nbsp;姓名：" + node.data.text + "&nbsp;&nbsp;&nbsp;职称：" + node.data.title;
+                    }
+                    $("#state").html(statestr);
+                }
+        );
+        userTree.bind("click",
+                function () {
+                    all_reload();
+                }
+        );
+
+        $("#navtab1").ligerTab({   //查看全部
+            onAfterSelectTabItem: function (tabid) {
+                if (tabid = "alltab") {
+                    all_reload();
+                }
+            }
+        });
+    })
+
+    function EnterPress(event) {             //IE8支持此方法
+        if (event.keyCode == 13) {              //回车键作为执行查询操作
+            var name = $("#queryByName").val();
+            $.ajax({
+                loading: '正在查询中...',
+                type: 'POST',
+                url: '/queryuser',
+                data: {name: name},
+                success: function (json) {
+                    if (json != null) {
+                        managerTree.selectNode("u" + json.id);//让人员处于选中状态
+                        user = json.id;  //赋值姓名id
+                        dept = json.dept.id;   //赋值科室id
+                        showMessage(json)    //状态栏显示
+                    } else {
+                        LG.tip("查询无结果!");
+                    }
+                },
+                error: function (message) {
+                    LG.tip(message);
+                }
+            });
+        }
+    }
+    //显示选中的人员信息
+    function showMessage(json) {
+        statestr = "&nbsp;&nbsp;科室：" + json.dept.name + "&nbsp;&nbsp;&nbsp;姓名：" + json.realName + "&nbsp;&nbsp;&nbsp;职称：" + json.title;
+        $("#state").html(statestr);
+    }
 
 </script>
 <div id="layout1" class="layout1">
-
-    <div position="left" title="条件选择"  >
-        #{include '/components/choose.html'/}
+    <div position="left" title="条件选择">
+    #{include '/components/choose.html'/}
     </div>
     <div position="center" title="记事">
-        <div  id="state"  style="background-color:#C4E1FF;height:20px;font-size:1; color:#003D79;text-align:center; width: 100%;font-weight: bolder" >选择: </div>     
+        <div id="state"
+             style="background-color:#C4E1FF;height:20px;font-size:1; color:#003D79;text-align:center; width: 100%;font-weight: bolder">
+            选择:
+        </div>
         <div id="navtab1" position="center" style="width: 100%;border:1px solid #A3C0E8; ">
-            <div tabid="base" title="减分项目" lselected="true">
-                <div id="maingrid" style="margin-top:1px"></div> <br />
+            <div  title="基础考评" lselected="true">
+                <div id="basegrid" style="margin-top:1px"></div>
+                <br/>
                 <div style="display:none;"></div>
-                <div id="detail"   style="display:none;">
-                    <form id="mainform" column="300" method="post"></form>
+                <div id="basedetail" style="display:none;">
+                    <form id="baseform" column="300" method="post"></form>
                 </div>
             </div>
 
             <div title="加分项目">
-                <div id="plusgrid" style="margin-top:1px"></div> <br />
+                <div id="plusgrid" style="margin-top:1px"></div>
+                <br/>
                 <div style="display:none;"></div>
                 <div id="plusdetail" style="display:none;">
                     <form id="plusform" column="300" method="post"></form>
                 </div>
             </div>
-
-            <div title="一票否决项目">
-                <div id="votegrid" style="margin-top:1px"></div> <br />
+            <div tabid="base" title="减分项目" lselected="true">
+                <div id="maingrid" style="margin-top:1px"></div>
+                <br/>
                 <div style="display:none;"></div>
-                <div id="votedetail"   style="display:none;">
+                <div id="detail" style="display:none;">
+                    <form id="mainform" column="300" method="post"></form>
+                </div>
+            </div>
+            <div title="一票否决项目">
+                <div id="votegrid" style="margin-top:1px"></div>
+                <br/>
+                <div style="display:none;"></div>
+                <div id="votedetail" style="display:none;">
                     <form id="voteform" column="300" method="post"></form>
                 </div>
             </div>
-             <div tabid="alltab" title="所有填报档案" >
-                <div id="allgrid" style="margin-top:1px"></div> <br />
+            <div tabid="alltab" title="所有填报档案">
+                <div id="allgrid" style="margin-top:1px"></div>
+                <br/>
                 <div style="display:none;"></div>
             </div>
-        </div>  
+        </div>
     </div>
 </div>
 
+*{
 <div id="noteupload">
-    <form method="POST" name="noteuploadform" enctype="multipart/form-data" action="@{Notes.fileUpload}?noteId=${retStatus}">  
-    </br>
-    </br>
-    选择需要上传的文件: <input type="file" id="attachment" name="attachment"/>
-    <br/>
-    <br/>
+    <form method="POST" name="noteuploadform" enctype="multipart/form-data"
+          action="@{Notes.fileUpload}?noteId=${retStatus}">
+        </br>
+        </br>
+        选择需要上传的文件: <input type="file" id="attachment" name="attachment"/>
+        <br/>
+        <br/>
     </form>
-</div>
+</div>}*
